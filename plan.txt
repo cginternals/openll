@@ -1,0 +1,8 @@
+some unsorted notes:
+
+- level of detail concept for adaptive/dynamic content reduction
+- sampling of glyph rendering (antialiasing), e.g., configurable subpixel sampling strategies and multi-sampling approaches
+- mulit-language kerning interferface
+- dynamic/custom glyphs with cached rendering
+- caching of glyphs (differentiation between static and dynamic glyphs)
+- 
