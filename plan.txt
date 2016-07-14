@@ -5,4 +5,8 @@ some unsorted notes:
 - mulit-language kerning interferface
 - dynamic/custom glyphs with cached rendering
 - caching of glyphs (differentiation between static and dynamic glyphs)
-- 
+- semantic labels in combination with lod
+- utilities such as line rendering
+- stylization such as color, background color, outline, glow, ...
+- imperative placement interface for 2d and 3d placement
+- describtive placement interface for automated, adaptive placement
