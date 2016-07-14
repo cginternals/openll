@@ -1,2 +1,3 @@
-# openll
-Open Label Library - API Specification and reference (webgl, vulkan, opengl) implementations for glyph/label/text rendering in 2D and 3D graphics environments.
+# OpenLL
+
+Open Label Library is an opensource, MIT licensed API specification for high performance label (glyphs, text, etc) rendering in 2D and 3D graphics environments. In addition there will be reference implementations for WebGL, Vulkan, and OpenGL.
