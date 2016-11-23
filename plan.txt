@@ -2,12 +2,97 @@ some unsorted notes:
 
 - level of detail concept for adaptive/dynamic content reduction
 - sampling of glyph rendering (antialiasing), e.g., configurable subpixel sampling strategies and multi-sampling approaches
-- mulit-language kerning interferface
+- multi-language kerning interface
 - dynamic/custom glyphs with cached rendering
 - caching of glyphs (differentiation between static and dynamic glyphs)
 - semantic labels in combination with lod
 - utilities such as line rendering
 - stylization such as color, background color, outline, glow, ...
 - imperative placement interface for 2d and 3d placement
-- describtive placement interface for automated, adaptive placement
+- descriptive placement interface for automated, adaptive placement
 - rendering technique should be configurable; alpha blending, alpha to coverage, distance transform, plain image based, stencil-then-cover, etc.
+
+
+
+
+~~~ Annotate a point ~~~
+
+0) Glyph Atlas
+
+input:
+	list of all supported symbols (ligatures!)
+	font
+		"form of symbol" for every supported symbol from above list
+		height, width of every symbol when written in given font
+
+process:
+	create font atlas image that contains rendered glyphs, e.g. Distance Field as image
+
+output:
+	font atlas (image)
+	mapping: symbol to glyph in font atlas, i.e. for every glyph:
+		position in atlas
+		width, height of bounding quad (or whatever bounding form is supported) in atlas units
+
+		
+1) Basic Glyphsequence
+
+input:
+	content (string)
+	font atlas
+	font related information
+		kerning information per glyph combination
+		offsets from baseline (compare 'a', 'g', 'k')
+	baseline
+		form (straight? spline?)
+		length (opt. for straight line, makes it a ray)
+		font size (required when length is defined)
+		orientation of glyphs along the line (horizontal / vertical)
+
+process:
+	place glyphs along the baseline
+
+output:
+	for every glyph:
+		position on baseline, includes
+			vertical offset
+			horizontal offset (kerning), depends on preceding letter
+	total length and height
+		(implicit: rendered length > baseline length?)
+		ll, ur in 2D
+		"basespline" could be in 3D! length, height, width of bounding box?
+	= transforms in model space
+
+
+2) Positioning
+
+input: 
+	placement point, i.e. the point which wants to be annotated by a Glyphsequence
+		position (point in world space)
+		direction (2D: vector in world space, 3D: 2 vectors in world space that span a plane)
+		offset (vector in world space, optional), i.e. the space between the placement point and the beginning of the Gylphsequence
+	size factor (optional)
+		
+process:
+	place a prepared Glyphsequence along a point
+
+output:
+	position of Glyphsequence in world space OR relative to placement point?
+	= transforms from model space in world space
+
+	
+~~~ UTILITIES ~~~
+
+baseline:
+	create spline based on constraints
+		around a point
+			offset radius
+			length of line, i.e. circumference
+			circle or spiral?
+
+stylization:
+	visualize offset between placement point and Glyphsequence
+		draw line
+		+ underline?
+	Glyphsequence
+		color, effects, ...
