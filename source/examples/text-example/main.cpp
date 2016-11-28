@@ -71,22 +71,22 @@ gloperate_text::GlyphVertexCloud prepareGlyphSequences(std::string string, glope
     std::vector<gloperate_text::GlyphSequence> sequences;
 
     // font->setLinespace(1.25f);
-    for (int i = 59; i < 60; ++i)
-    {
-        gloperate_text::GlyphSequence sequence;
-        std::u32string unicode_string(string.begin(), string.end());
-        sequence.setString(unicode_string);
+    gloperate_text::GlyphSequence sequence;
+    std::u32string unicode_string(string.begin(), string.end());
+    sequence.setString(unicode_string);
 
-        float fontSize = 35.f;
-        sequence.setWordWrap(true);
-        sequence.setLineWidth(500.f, fontSize, *font);
-        sequence.setAlignment(gloperate_text::Alignment::LeftAligned);
-        sequence.setLineAnchor(gloperate_text::LineAnchor::Baseline);
+    const auto fontSize = 16.f;
+    const auto pixelPerInch = 72.f;
+    const glm::vec2 origin {0.f, .5f};
+    const glm::vec4 margins {0.f, 0.f, 0.f, 0.f};
+    sequence.setWordWrap(true);
+    sequence.setLineWidth(500.f, fontSize, *font);
+    sequence.setAlignment(gloperate_text::Alignment::Centered);
+    sequence.setLineAnchor(gloperate_text::LineAnchor::Baseline);
 
-        sequence.setTransform({(i / 10 - 5.f) / 6, (i % 10 - 5.f) / 6}, fontSize, *font
-            , viewport, 72.f, {0.f, 0.f, 0.f, 0.f});
-        sequences.push_back(sequence);
-    }
+    sequence.setTransform(origin, fontSize, *font
+        , viewport, pixelPerInch, margins);
+    sequences.push_back(sequence);
 
     //sequences.data()[0].setTransform(origin.data(), fontSize.data(), *font.data()
     //    , { viewport.data()->width(), viewport.data()->height() });

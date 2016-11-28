@@ -1,4 +1,4 @@
 
 
-# Example plugins
+# Examples
 add_subdirectory(text-example)
