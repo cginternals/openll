@@ -92,7 +92,13 @@ baseline:
 
 stylization:
 	visualize offset between placement point and Glyphsequence
+		extra element
 		draw line
 		+ underline?
 	Glyphsequence
-		color, effects, ...
+		color, effects, backplane, etc...
+	render elements
+		point
+		line, spline
+			pointed lines
+		planes (backplane)
