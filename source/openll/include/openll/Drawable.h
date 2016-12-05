@@ -13,6 +13,8 @@
 #include <globjects/base/Referenced.h>
 #include <globjects/base/ref_ptr.h>
 
+#include <openll/openll_api.h>
+
 namespace gloperate_text
 {
 

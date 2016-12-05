@@ -21,22 +21,19 @@ const char32_t & Typesetter::lineFeed()
     return LF;
 }
 
-glm::vec2 Typesetter::extent(
-    const GlyphSequence & sequence
-,   const FontFace & fontFace
-,   const float fontSize)
+glm::vec2 Typesetter::extent(const GlyphSequence & sequence)
 {
-    return typeset(sequence, fontFace
-        , GlyphVertexCloud::Vertices::iterator(), true) * fontSize / fontFace.size();
+    const auto scale = sequence.fontSize() / sequence.fontFace()->size();
+    return typeset(sequence, GlyphVertexCloud::Vertices::iterator(), true);
 }
 
 glm::vec2 Typesetter::typeset(
     const GlyphSequence & sequence
-,   const FontFace & fontFace
 ,   const GlyphVertexCloud::Vertices::iterator & begin
 ,   bool dryrun)
 {
     //const auto & padding = fontFace.glyphTexturePadding();
+    auto & fontFace = *sequence.fontFace();
 
     auto pen = glm::vec2(0.f);
     auto vertex = begin;
@@ -58,7 +55,7 @@ glm::vec2 Typesetter::typeset(
         // handle line feeds as well as word wrap for next word (or
         // next glyph if word width exceeds the max line width)
         feedLine = *i == lineFeed() || (sequence.wordWrap() &&
-            typeset_wordwrap(sequence, fontFace, pen, glyph, i, safe_forward));
+            typeset_wordwrap(sequence, pen, glyph, i, safe_forward));
 
         if (feedLine)
         {
@@ -95,7 +92,7 @@ glm::vec2 Typesetter::typeset(
 
     if (!dryrun)
     {
-        anchor_transform(sequence, fontFace, begin, vertex);
+        anchor_transform(sequence, begin, vertex);
         vertex_transform(sequence.transform(), sequence.fontColor(), begin, vertex);
     }
 
@@ -104,7 +101,6 @@ glm::vec2 Typesetter::typeset(
 
 inline bool Typesetter::typeset_wordwrap(
     const GlyphSequence & sequence
-,   const FontFace & fontFace
 ,   const glm::vec2 & pen
 ,   const Glyph & glyph
 ,   const std::u32string::const_iterator & index
@@ -116,7 +112,7 @@ inline bool Typesetter::typeset_wordwrap(
     auto width_forward = 0.f;
 
     const auto pen_glyph = pen.x + glyph.advance()
-        + (index != sequence.string().cbegin() ? fontFace.kerning(*(index - 1), *index) : 0.f);
+        + (index != sequence.string().cbegin() ? sequence.fontFace()->kerning(*(index - 1), *index) : 0.f);
 
     const auto wrap_glyph = glyph.depictable() && pen_glyph > lineWidth
         && (glyph.advance() <= lineWidth || pen.x > 0.f);
@@ -124,7 +120,7 @@ inline bool Typesetter::typeset_wordwrap(
     auto wrap_forward = false;
     if (!wrap_glyph && index >= safe_forward)
     {
-        safe_forward = typeset_forward(sequence, fontFace, index, width_forward);
+        safe_forward = typeset_forward(sequence, index, width_forward);
         wrap_forward = width_forward <= lineWidth && (pen.x + width_forward) > lineWidth;
     }
 
@@ -133,7 +129,6 @@ inline bool Typesetter::typeset_wordwrap(
 
 inline std::u32string::const_iterator Typesetter::typeset_forward(
     const GlyphSequence & sequence
-,   const FontFace & fontFace
 ,   const std::u32string::const_iterator & begin
 ,   float & width)
 {
@@ -153,9 +148,9 @@ inline std::u32string::const_iterator Typesetter::typeset_forward(
     while (i != iEnd && delimiters.find(*i) == delimiters.npos)
     {
         if (i != iBegin)
-            width += fontFace.kerning(*(i - 1), *i);
+            width += sequence.fontFace()->kerning(*(i - 1), *i);
 
-        width += fontFace.glyph(*i++).advance();
+        width += sequence.fontFace()->glyph(*i++).advance();
     }
     return i;
 }
@@ -224,7 +219,6 @@ inline void Typesetter::typeset_align(
 
 inline void Typesetter::anchor_transform(
     const GlyphSequence & sequence
-,   const FontFace & fontFace
 ,   const GlyphVertexCloud::Vertices::iterator & begin
 ,   const GlyphVertexCloud::Vertices::iterator & end)
 {
@@ -233,13 +227,13 @@ inline void Typesetter::anchor_transform(
     switch (sequence.lineAnchor())
     {
     case LineAnchor::Ascent:
-        offset = fontFace.ascent();
+        offset = sequence.fontFace()->ascent();
         break;
     case LineAnchor::Center:
-        offset = fontFace.size() * 0.5f + fontFace.descent();
+        offset = sequence.fontFace()->size() * 0.5f + sequence.fontFace()->descent();
         break;
     case LineAnchor::Descent:
-        offset = fontFace.descent();
+        offset = sequence.fontFace()->descent();
         break;
     case LineAnchor::Baseline:
     default:
