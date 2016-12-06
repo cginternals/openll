@@ -27,6 +27,8 @@
 #include <cpplocate/cpplocate.h>
 #include <cpplocate/ModuleInfo.h>
 
+#include "PointDrawable.h"
+
 using namespace gl;
 
 const auto lorem =
@@ -85,7 +87,7 @@ std::string random_name(std::default_random_engine engine)
     return {characters.begin(), characters.end()};
 }
 
-gloperate_text::GlyphVertexCloud prepareGlyphSequences(gloperate_text::FontFace * font, glm::uvec2 viewport)
+std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font, glm::uvec2 viewport)
 {
     std::vector<gloperate_text::Label> labels;
 
@@ -100,8 +102,8 @@ gloperate_text::GlyphVertexCloud prepareGlyphSequences(gloperate_text::FontFace 
         sequence.setString(unicode_string);
         sequence.setWordWrap(true);
         sequence.setLineWidth(100.f);
-        sequence.setAlignment(gloperate_text::Alignment::Centered);
-        sequence.setLineAnchor(gloperate_text::LineAnchor::Baseline);
+        sequence.setAlignment(gloperate_text::Alignment::LeftAligned);
+        sequence.setLineAnchor(gloperate_text::LineAnchor::Ascent);
         sequence.setFontSize(16.f);
         sequence.setFontFace(font);
 
@@ -116,26 +118,32 @@ gloperate_text::GlyphVertexCloud prepareGlyphSequences(gloperate_text::FontFace 
         sequence.setAdditionalTransform(transform);
         labels.push_back({sequence, origin});
     }
-    gloperate_text::constantLayout(labels);
+    return labels;
+}
 
+gloperate_text::GlyphVertexCloud prepareCloud(const std::vector<gloperate_text::Label>& labels)
+{
     std::vector<gloperate_text::GlyphSequence> sequences;
     for (const auto & label : labels)
     {
         sequences.push_back(gloperate_text::applyPlacement(label));
     }
-
-    //sequences.data()[0].setTransform(origin.data(), fontSize.data(), *font.data()
-    //    , { viewport.data()->width(), viewport.data()->height() });
-
     return gloperate_text::prepareGlyphs(sequences, true);
 }
 
-
+void preparePointDrawable(const std::vector<gloperate_text::Label>& labels, PointDrawable& pointDrawable)
+{
+    std::vector<glm::vec2> points;
+    for (const auto & label : labels)
+    {
+        points.push_back(label.pointLocation);
+    }
+    pointDrawable.initialize(points);
+}
 
 int main()
 {
     glfwInit();
-    glfwWindowHint(GLFW_AUTO_ICONIFY, 0);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
@@ -161,7 +169,11 @@ int main()
     auto font = loader.load(dataPath + "/fonts/opensansr36.fnt");
     gloperate_text::GlyphRenderer renderer;
     gloperate_text::GlyphVertexCloud cloud;
+    std::vector<gloperate_text::Label> labels;
+    PointDrawable pointDrawable {dataPath};
     glClearColor(1.f, 1.f, 1.f, 1.f);
+    glEnable(GL_PROGRAM_POINT_SIZE);
+
 
     while (!glfwWindowShouldClose(window))
     {
@@ -169,7 +181,10 @@ int main()
         {
             std::cout << "updated viewport (" << g_viewport.x << ", " << g_viewport.y << ")" << std::endl;
             glViewport(0, 0, g_viewport.x, g_viewport.y);
-            cloud = prepareGlyphSequences(font, g_viewport);
+            labels = prepareLabels(font, g_viewport);
+            gloperate_text::randomLayout(labels);
+            cloud = prepareCloud(labels);
+            preparePointDrawable(labels, pointDrawable);
         }
 
         gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
@@ -180,6 +195,7 @@ int main()
         gl::glBlendFunc(gl::GL_SRC_ALPHA, gl::GL_ONE_MINUS_SRC_ALPHA);
 
         renderer.render(cloud);
+        pointDrawable.render();
 
         gl::glDepthMask(gl::GL_TRUE);
         gl::glDisable(gl::GL_CULL_FACE);

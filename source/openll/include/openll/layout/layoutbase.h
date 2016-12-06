@@ -15,7 +15,7 @@ class GlyphSequence;
 
 struct OPENLL_API LabelPlacement
 {
-    glm::vec2 location;
+    glm::vec2 offset;
     gloperate_text::Alignment alignment;
     gloperate_text::LineAnchor lineAnchor;
 };
