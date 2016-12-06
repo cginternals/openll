@@ -22,7 +22,7 @@
 #include <openll/Alignment.h>
 #include <openll/LineAnchor.h>
 #include <openll/layout/layoutbase.h>
-#include <openll/layout/constantalgorithm.h>
+#include <openll/layout/algorithm.h>
 
 #include <cpplocate/cpplocate.h>
 #include <cpplocate/ModuleInfo.h>
