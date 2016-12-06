@@ -30,7 +30,7 @@ OPENLL_API GlyphVertexCloud prepareGlyphs(const std::vector<GlyphSequence>& sequ
     auto index = vertexCloud.vertices().begin();
     for (const auto & sequence : sequences)
     {
-        auto extent = Typesetter::typeset(sequence, index);
+        Typesetter::typeset(sequence, index);
         index += sequence.depictableSize();
     }
 

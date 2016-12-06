@@ -29,8 +29,6 @@ public:
     GlyphSequence();
     virtual ~GlyphSequence();
 
-    static const char32_t & lineFeed();
-
     size_t size() const;
     size_t depictableSize() const;
 

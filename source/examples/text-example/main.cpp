@@ -32,7 +32,7 @@ R"(Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirm
 glm::uvec2 g_viewport{640, 480};
 bool g_viewport_changed = true;
 
-void onResize(GLFWwindow* window, int width, int height)
+void onResize(GLFWwindow*, int width, int height)
 {
     g_viewport = {width, height};
     g_viewport_changed = true;

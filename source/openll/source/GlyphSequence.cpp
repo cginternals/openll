@@ -160,12 +160,6 @@ void GlyphSequence::setFontSize(float fontSize)
     m_fontSize = fontSize;
 }
 
-const char32_t & GlyphSequence::lineFeed()
-{
-    static const auto LF = static_cast<char32_t>('\x0A');
-    return LF;
-}
-
 const glm::mat4 & GlyphSequence::additionalTransform() const
 {
     return m_additionalTransform;

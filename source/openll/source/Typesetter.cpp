@@ -23,7 +23,6 @@ const char32_t & Typesetter::lineFeed()
 
 glm::vec2 Typesetter::extent(const GlyphSequence & sequence)
 {
-    const auto scale = sequence.fontSize() / sequence.fontFace()->size();
     return typeset(sequence, GlyphVertexCloud::Vertices::iterator(), true);
 }
 
