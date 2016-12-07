@@ -148,9 +148,10 @@ void prepareRectangleDrawable(const std::vector<gloperate_text::Label>& labels, 
     std::vector<glm::vec2> rectangles;
     for (const auto & label : labels)
     {
-        rectangles.push_back(label.pointLocation);
-        auto extent = gloperate_text::Typesetter::extent(label.sequence);
-        rectangles.push_back(label.pointLocation + extent);
+        auto sequence = gloperate_text::applyPlacement(label);
+        auto extent = gloperate_text::Typesetter::rectangle(sequence, glm::vec3(label.pointLocation, 0.f));
+        rectangles.push_back(extent.first);
+        rectangles.push_back(extent.first + extent.second);
     }
     rectangleDrawable.initialize(rectangles);
 }
@@ -196,7 +197,7 @@ int main()
             std::cout << "updated viewport (" << g_viewport.x << ", " << g_viewport.y << ")" << std::endl;
             glViewport(0, 0, g_viewport.x, g_viewport.y);
             labels = prepareLabels(font, g_viewport);
-            gloperate_text::constantLayout(labels);
+            gloperate_text::randomLayout(labels);
             cloud = prepareCloud(labels);
             preparePointDrawable(labels, pointDrawable);
             prepareRectangleDrawable(labels, rectangleDrawable);

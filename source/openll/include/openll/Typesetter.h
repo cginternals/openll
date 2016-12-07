@@ -26,6 +26,8 @@ public:
     static const char32_t & lineFeed();
 
     static glm::vec2 extent(const GlyphSequence & sequence);
+    static std::pair<glm::vec2, glm::vec2> rectangle(
+        const GlyphSequence & sequence, glm::vec3 origin);
 
     static glm::vec2 typeset(
         const GlyphSequence & sequence

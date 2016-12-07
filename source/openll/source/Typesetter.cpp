@@ -26,6 +26,51 @@ glm::vec2 Typesetter::extent(const GlyphSequence & sequence)
     return typeset(sequence, GlyphVertexCloud::Vertices::iterator(), true);
 }
 
+std::pair<glm::vec2, glm::vec2> Typesetter::rectangle(
+    const GlyphSequence & sequence,
+    glm::vec3 origin)
+{
+    auto extent = Typesetter::extent(sequence);
+    auto offset = 0.f;
+
+    switch (sequence.lineAnchor())
+    {
+    case LineAnchor::Ascent:
+        offset = sequence.fontFace()->ascent();
+        break;
+    case LineAnchor::Center:
+        offset = sequence.fontFace()->size() * 0.5f + sequence.fontFace()->descent();
+        break;
+    case LineAnchor::Descent:
+        offset = sequence.fontFace()->descent();
+        break;
+    case LineAnchor::Baseline:
+    default:
+        break;
+    }
+    origin.y -= offset;
+
+    auto transformedOrigin = sequence.transform() * glm::vec4(origin, 1.f);
+
+    switch (sequence.alignment())
+    {
+    case Alignment::LeftAligned:
+    offset = 0.f;
+        break;
+    case Alignment::Centered:
+        offset = .5f * extent.x;
+        break;
+    case Alignment::RightAligned:
+        offset = extent.x;
+        break;
+    default:
+        break;
+    }
+
+    transformedOrigin.x -= offset;
+    return {glm::vec2(transformedOrigin), extent};
+}
+
 glm::vec2 Typesetter::typeset(
     const GlyphSequence & sequence
 ,   const GlyphVertexCloud::Vertices::iterator & begin
