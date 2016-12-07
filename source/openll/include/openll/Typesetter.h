@@ -25,14 +25,12 @@ public:
 
     static const char32_t & lineFeed();
 
-    static glm::vec2 extent(
-        const GlyphSequence & sequence
-    ,   const FontFace & fontFace
-    ,   float fontSize);
+    static glm::vec2 extent(const GlyphSequence & sequence);
+    static std::pair<glm::vec2, glm::vec2> rectangle(
+        const GlyphSequence & sequence, glm::vec3 origin);
 
     static glm::vec2 typeset(
         const GlyphSequence & sequence
-    ,   const FontFace & fontFace
     ,   const GlyphVertexCloud::Vertices::iterator & begin
     ,   bool dryrun = false);
 
@@ -40,7 +38,6 @@ private:
 
     static bool typeset_wordwrap(
         const GlyphSequence & sequence
-    ,   const FontFace & fontFace
     ,   const glm::vec2 & pen
     ,   const Glyph & glyph
     ,   const std::u32string::const_iterator & index
@@ -48,7 +45,6 @@ private:
 
     static std::u32string::const_iterator typeset_forward(
         const GlyphSequence & sequence
-    ,   const FontFace & fontFace
     ,   const std::u32string::const_iterator & begin
     ,   float & width);
 
@@ -73,7 +69,6 @@ private:
 
     static void anchor_transform(
         const GlyphSequence & sequence
-    ,   const FontFace & fontFace
     ,   const GlyphVertexCloud::Vertices::iterator & begin
     ,   const GlyphVertexCloud::Vertices::iterator & end);
 

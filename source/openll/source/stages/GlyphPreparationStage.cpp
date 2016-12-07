@@ -11,33 +11,37 @@
 namespace gloperate_text
 {
 
-OPENLL_API GlyphVertexCloud prepareGlyphs(FontFace * font, const std::vector<GlyphSequence>& sequences, bool optimized)
+OPENLL_API GlyphVertexCloud prepareGlyphs(const std::vector<GlyphSequence>& sequences, bool optimized)
 {
+    if (sequences.empty())
+    {
+        return {};
+    }
+
     // get total number of glyphs
     auto numGlyphs = size_t(0u);
     for (const auto & sequence : sequences)
-        numGlyphs += sequence.size(*font);
+        numGlyphs += sequence.depictableSize();
 
     // prepare vertex cloud storage
     GlyphVertexCloud vertexCloud;
     vertexCloud.vertices().resize(numGlyphs);
 
-    // typeset and transform all sequences
-    assert(font);
-
     auto index = vertexCloud.vertices().begin();
     for (const auto & sequence : sequences)
     {
-        auto extent = Typesetter::typeset(sequence, *font, index);
-        index += sequence.size(*font);
+        Typesetter::typeset(sequence, index);
+        index += sequence.depictableSize();
     }
 
+    FontFace * face = sequences[0].fontFace();
+
     if(optimized)
-        vertexCloud.optimize(sequences, *font); // optimize and update drawable
+        vertexCloud.optimize(sequences); // optimize and update drawable
     else
         vertexCloud.update(); // update drawable
 
-    vertexCloud.setTexture(font->glyphTexture());
+    vertexCloud.setTexture(face->glyphTexture());
 
     return vertexCloud;
 }

@@ -10,6 +10,8 @@
 #include <glbinding/gl/gl.h>
 #include <globjects/globjects.h>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <openll/GlyphRenderer.h>
 #include <openll/FontLoader.h>
 #include <openll/stages/GlyphPreparationStage.h>
@@ -30,7 +32,7 @@ using namespace gl;
 glm::uvec2 g_viewport{640, 480};
 bool g_viewport_changed = true;
 
-void onResize(GLFWwindow* window, int width, int height)
+void onResize(GLFWwindow*, int width, int height)
 {
     g_viewport = {width, height};
     g_viewport_changed = true;
@@ -75,21 +77,37 @@ gloperate_text::GlyphVertexCloud preparePoint(const glm::vec2 origin, gloperate_
 	std::u32string unicode_string(pointText.begin(), pointText.end());
 	sequence.setString(unicode_string);
 
-	const auto fontSize = 64.f;
-	const auto pixelPerInch = 72.f;
-
-	const glm::vec4 margins{ 0.f, 0.f, 0.f, 0.f };
 	sequence.setWordWrap(true);
-	sequence.setLineWidth(500.f, fontSize, *font);
+	sequence.setLineWidth(500.f);
 	sequence.setAlignment(gloperate_text::Alignment::Centered);
 	sequence.setLineAnchor(gloperate_text::LineAnchor::Baseline);
+	sequence.setFontFace(font);
+	sequence.setFontSize(64.f);
 
-	sequence.setTransform(origin, fontSize, *font, viewport, pixelPerInch, margins);
+	const glm::vec4 margins{ 0.f, 0.f, 0.f, 0.f };
+	const float ppiScale = 1.f;
+
+	// compute  transform matrix
+	glm::mat4 transform;
+	// translate to lower left in NDC
+	transform = glm::translate(transform, glm::vec3(-1.f, -1.f, 0.f));
+	// scale glyphs to NDC size
+	transform = glm::scale(transform, 2.f / glm::vec3(viewport.x, viewport.y, 1.f));
+	// scale glyphs to pixel size with respect to the displays ppi
+	transform = glm::scale(transform, glm::vec3(ppiScale));
+	// translate to origin in point space - scale origin within
+	// margined extend (i.e., viewport with margined areas removed)
+	const auto marginedExtent = glm::vec2(viewport.x, viewport.y) / ppiScale
+		- glm::vec2(margins[3] + margins[1], margins[2] + margins[0]);
+	transform = glm::translate(transform
+		, glm::vec3((0.5f * origin + 0.5f) * marginedExtent, 0.f) + glm::vec3(margins[3], margins[2], 0.f));
+
+	sequence.setAdditionalTransform(transform);
+
 	sequences.push_back(sequence);
 
-	return gloperate_text::prepareGlyphs(font, sequences, true);
+	return gloperate_text::prepareGlyphs(sequences, true);
 }
-
 
 gloperate_text::GlyphVertexCloud prepareGlyphSequences(const glm::vec2 origin, std::string string, gloperate_text::FontFace * font, const float fontSize, glm::uvec2 viewport)
 {
@@ -100,22 +118,37 @@ gloperate_text::GlyphVertexCloud prepareGlyphSequences(const glm::vec2 origin, s
 	std::u32string unicode_string(string.begin(), string.end());
 	sequence.setString(unicode_string);
 
-	//const auto fontSize = 32.f;
-	const auto pixelPerInch = 72.f;
-	//const glm::vec2 origin{ 0.f, .5f };
-	const glm::vec4 margins{ 0.f, 0.f, 0.f, 0.f };
-	sequence.setWordWrap(true);
-	sequence.setLineWidth(500.f, fontSize, *font);
-	sequence.setAlignment(gloperate_text::Alignment::Centered);
+    sequence.setWordWrap(true);
+    sequence.setLineWidth(500.f);
+    sequence.setAlignment(gloperate_text::Alignment::Centered);
 	sequence.setLineAnchor(gloperate_text::LineAnchor::Baseline);
+	sequence.setFontFace(font);
+    sequence.setFontSize(fontSize);
 
-	sequence.setTransform(origin, fontSize, *font, viewport, pixelPerInch, margins);
-	sequences.push_back(sequence);
+    const glm::vec4 margins {0.f, 0.f, 0.f, 0.f};
+    const float ppiScale = 1.f;
 
+    // compute  transform matrix
+    glm::mat4 transform;
+    // translate to lower left in NDC
+    transform = glm::translate(transform, glm::vec3(-1.f, -1.f, 0.f));
+    // scale glyphs to NDC size
+    transform = glm::scale(transform, 2.f / glm::vec3(viewport.x, viewport.y, 1.f));
+    // scale glyphs to pixel size with respect to the displays ppi
+    transform = glm::scale(transform, glm::vec3(ppiScale));
+    // translate to origin in point space - scale origin within
+    // margined extend (i.e., viewport with margined areas removed)
+    const auto marginedExtent = glm::vec2(viewport.x, viewport.y) / ppiScale
+       - glm::vec2(margins[3] + margins[1], margins[2] + margins[0]);
+    transform = glm::translate(transform
+       , glm::vec3((0.5f * origin + 0.5f) * marginedExtent, 0.f) + glm::vec3(margins[3], margins[2], 0.f));
+
+    sequence.setAdditionalTransform(transform);
+    sequences.push_back(sequence);
 	//sequences.data()[0].setTransform(origin.data(), fontSize.data(), *font.data()
 	//    , { viewport.data()->width(), viewport.data()->height() });
 
-	return gloperate_text::prepareGlyphs(font, sequences, true);
+    return gloperate_text::prepareGlyphs(sequences, true);
 }
 
 void annotatePoint(std::vector<gloperate_text::GlyphVertexCloud> & vertexClouds, const glm::vec2 origin, const glm::vec2 offset, std::string string, gloperate_text::FontFace * font, const float fontSize, glm::uvec2 viewport)

@@ -1,6 +1,7 @@
 #include <cassert>
 #include <iostream>
 #include <map>
+#include <random>
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -14,15 +15,21 @@
 
 #include <openll/GlyphRenderer.h>
 #include <openll/FontLoader.h>
+#include <openll/Typesetter.h>
 #include <openll/stages/GlyphPreparationStage.h>
 
 #include <openll/FontFace.h>
 #include <openll/GlyphSequence.h>
 #include <openll/Alignment.h>
 #include <openll/LineAnchor.h>
+#include <openll/layout/layoutbase.h>
+#include <openll/layout/algorithm.h>
 
 #include <cpplocate/cpplocate.h>
 #include <cpplocate/ModuleInfo.h>
+
+#include "PointDrawable.h"
+#include "RectangleDrawable.h"
 
 using namespace gl;
 
@@ -68,52 +75,90 @@ void glInitialize()
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 }
 
-gloperate_text::GlyphVertexCloud prepareGlyphSequences(std::string string, gloperate_text::FontFace * font, glm::uvec2 viewport)
+
+std::string random_name(std::default_random_engine engine)
+{
+    std::uniform_int_distribution<char> charDistribution(32, 126);
+    std::uniform_int_distribution<int> lengthDistribution(3, 15);
+    const auto length = lengthDistribution(engine);
+    std::vector<char> characters;
+    for (int i = 0; i < length; ++i)
+    {
+        characters.push_back(charDistribution(engine));
+    }
+    return {characters.begin(), characters.end()};
+}
+
+std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font, glm::uvec2 viewport)
+{
+    std::vector<gloperate_text::Label> labels;
+
+    std::default_random_engine generator;
+    std::uniform_real_distribution<float> distribution(-1.f, 1.f);
+
+    for (int i = 0; i < 10; ++i)
+    {
+        auto string = random_name(generator);
+        gloperate_text::GlyphSequence sequence;
+        std::u32string unicode_string(string.begin(), string.end());
+        sequence.setString(unicode_string);
+        sequence.setWordWrap(true);
+        sequence.setLineWidth(200.f);
+        sequence.setAlignment(gloperate_text::Alignment::LeftAligned);
+        sequence.setLineAnchor(gloperate_text::LineAnchor::Ascent);
+        sequence.setFontSize(16.f);
+        sequence.setFontFace(font);
+
+        const glm::vec2 origin {distribution(generator), distribution(generator)};
+        // compute  transform matrix
+        glm::mat4 transform;
+        transform = glm::translate(transform, glm::vec3(origin, 0.f));
+        transform = glm::scale(transform, glm::vec3(1.f,
+            static_cast<float>(viewport.x) / viewport.y, 1.f));
+        transform = glm::scale(transform, glm::vec3(1/300.f));
+
+        sequence.setAdditionalTransform(transform);
+        labels.push_back({sequence, origin});
+    }
+    return labels;
+}
+
+gloperate_text::GlyphVertexCloud prepareCloud(const std::vector<gloperate_text::Label>& labels)
 {
     std::vector<gloperate_text::GlyphSequence> sequences;
-
-    // font->setLinespace(1.25f);
-    gloperate_text::GlyphSequence sequence;
-    std::u32string unicode_string(string.begin(), string.end());
-    sequence.setString(unicode_string);
-    sequence.setWordWrap(true);
-    sequence.setLineWidth(500.f);
-    sequence.setAlignment(gloperate_text::Alignment::Centered);
-    sequence.setLineAnchor(gloperate_text::LineAnchor::Baseline);
-    sequence.setFontSize(16.f);
-    sequence.setFontFace(font);
-
-    const glm::vec4 margins {0.f, 0.f, 0.f, 0.f};
-    const float ppiScale = 1.f;
-    const glm::vec2 origin {0.f, .5f};
-
-    // compute  transform matrix
-    glm::mat4 transform;
-    // translate to lower left in NDC
-    transform = glm::translate(transform, glm::vec3(-1.f, -1.f, 0.f));
-    // scale glyphs to NDC size
-    transform = glm::scale(transform, 2.f / glm::vec3(viewport.x, viewport.y, 1.f));
-    // scale glyphs to pixel size with respect to the displays ppi
-    transform = glm::scale(transform, glm::vec3(ppiScale));
-    // translate to origin in point space - scale origin within
-    // margined extend (i.e., viewport with margined areas removed)
-    const auto marginedExtent = glm::vec2(viewport.x, viewport.y) / ppiScale
-       - glm::vec2(margins[3] + margins[1], margins[2] + margins[0]);
-    transform = glm::translate(transform
-       , glm::vec3((0.5f * origin + 0.5f) * marginedExtent, 0.f) + glm::vec3(margins[3], margins[2], 0.f));
-
-    sequence.setAdditionalTransform(transform);
-    sequences.push_back(sequence);
-
+    for (const auto & label : labels)
+    {
+        sequences.push_back(gloperate_text::applyPlacement(label));
+    }
     return gloperate_text::prepareGlyphs(sequences, true);
 }
 
+void preparePointDrawable(const std::vector<gloperate_text::Label>& labels, PointDrawable& pointDrawable)
+{
+    std::vector<glm::vec2> points;
+    for (const auto & label : labels)
+    {
+        points.push_back(label.pointLocation);
+    }
+    pointDrawable.initialize(points);
+}
 
+void prepareRectangleDrawable(const std::vector<gloperate_text::Label>& labels, RectangleDrawable& rectangleDrawable)
+{
+    std::vector<glm::vec2> rectangles;
+    for (const auto & label : labels)
+    {
+        auto sequence = gloperate_text::applyPlacement(label);
+        auto extent = gloperate_text::Typesetter::rectangle(sequence, glm::vec3(label.pointLocation, 0.f));
+        rectangles.push_back(extent.first);
+        rectangles.push_back(extent.first + extent.second);
+    }
+    rectangleDrawable.initialize(rectangles);
+}
 
 int main()
 {
     glfwInit();
-    glfwWindowHint(GLFW_AUTO_ICONIFY, 0);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
@@ -139,7 +184,11 @@ int main()
     auto font = loader.load(dataPath + "/fonts/opensansr36.fnt");
     gloperate_text::GlyphRenderer renderer;
     gloperate_text::GlyphVertexCloud cloud;
+    std::vector<gloperate_text::Label> labels;
+    PointDrawable pointDrawable {dataPath};
+    RectangleDrawable rectangleDrawable {dataPath};
     glClearColor(1.f, 1.f, 1.f, 1.f);
+
 
     while (!glfwWindowShouldClose(window))
     {
@@ -147,7 +196,11 @@ int main()
         {
             std::cout << "updated viewport (" << g_viewport.x << ", " << g_viewport.y << ")" << std::endl;
             glViewport(0, 0, g_viewport.x, g_viewport.y);
-            cloud = prepareGlyphSequences(lorem, font, g_viewport);
+            labels = prepareLabels(font, g_viewport);
+            gloperate_text::randomLayout(labels);
+            cloud = prepareCloud(labels);
+            preparePointDrawable(labels, pointDrawable);
+            prepareRectangleDrawable(labels, rectangleDrawable);
         }
 
         gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
@@ -158,6 +211,8 @@ int main()
         gl::glBlendFunc(gl::GL_SRC_ALPHA, gl::GL_ONE_MINUS_SRC_ALPHA);
 
         renderer.render(cloud);
+        pointDrawable.render();
+        rectangleDrawable.render();
 
         gl::glDepthMask(gl::GL_TRUE);
         gl::glDisable(gl::GL_CULL_FACE);

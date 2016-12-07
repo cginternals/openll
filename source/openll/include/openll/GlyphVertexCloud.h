@@ -53,9 +53,7 @@ public:
     // allows for volatile optimizations
     void update(const Vertices & vertices);
 
-    void optimize(
-        const std::vector<GlyphSequence> & sequences
-    ,   const FontFace & fontFace);
+    void optimize(const std::vector<GlyphSequence> & sequences);
 
 protected:
     static gloperate_text::Drawable * createDrawable();

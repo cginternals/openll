@@ -20,6 +20,10 @@ GlyphSequence::GlyphSequence()
 , m_alignment(Alignment::LeftAligned)
 , m_anchor(LineAnchor::Baseline)
 , m_fontColor(glm::vec4(0.f, 0.f, 0.f, 1.0))
+, m_fontFace(nullptr)
+, m_fontSize(12.f)
+, m_transformValid(false)
+
 {
 }
 
@@ -32,12 +36,12 @@ size_t GlyphSequence::size() const
     return m_string.size();
 }
 
-size_t GlyphSequence::size(const FontFace & fontFace) const
+size_t GlyphSequence::depictableSize() const
 {
     auto count = size_t(0);
     for (const auto & c : m_string)
     {
-        if (fontFace.depictable(c))
+        if (m_fontFace->depictable(c))
             ++count;
     }
     return count;
@@ -67,15 +71,14 @@ const std::vector<char32_t> & GlyphSequence::chars(
     return allChars;
 }
 
-const std::vector<char32_t> & GlyphSequence::chars(
-    std::vector<char32_t> & depictableChars
-,   const FontFace & fontFace) const
+const std::vector<char32_t> & GlyphSequence::depictableChars(
+    std::vector<char32_t> & depictableChars) const
 {
-    depictableChars.reserve(depictableChars.size() + size(fontFace));
+    depictableChars.reserve(depictableChars.size() + depictableSize());
 
     for (const auto & c : m_string)
     {
-        if(fontFace.depictable(c))
+        if(m_fontFace->depictable(c))
             depictableChars.push_back(c);
     }
     return depictableChars;
@@ -93,18 +96,17 @@ void GlyphSequence::setWordWrap(bool enable)
 
 float GlyphSequence::lineWidth() const
 {
-    return m_lineWidth;
-}
-
-void GlyphSequence::setLineWidth(
-    float lineWidth
-,   float fontSize
-,   const FontFace & fontFace)
-{
+    assert(m_fontFace);
     // since typesetting is done in the font faces font size, the
     // given linewidth has to be scaled to the font faces font size
-    m_lineWidth = glm::max(lineWidth * fontFace.size() / fontSize, 0.f);
+    return glm::max(m_lineWidth * m_fontFace->size() / m_fontSize, 0.f);
 }
+
+void GlyphSequence::setLineWidth(float lineWidth)
+{
+    m_lineWidth = lineWidth;
+}
+
 
 Alignment GlyphSequence::alignment() const
 {
@@ -136,81 +138,58 @@ void GlyphSequence::setFontColor(glm::vec4 fontColor)
     m_fontColor = fontColor;
 }
 
-const char32_t & GlyphSequence::lineFeed()
+FontFace * GlyphSequence::fontFace() const
 {
-    static const auto LF = static_cast<char32_t>('\x0A');
-    return LF;
+    return m_fontFace;
+}
+
+void GlyphSequence::setFontFace(FontFace * fontFace)
+{
+    m_transformValid = false;
+    m_fontFace = fontFace;
+}
+
+float GlyphSequence::fontSize() const
+{
+    return m_fontSize;
+}
+
+void GlyphSequence::setFontSize(float fontSize)
+{
+    m_transformValid = false;
+    m_fontSize = fontSize;
+}
+
+const glm::mat4 & GlyphSequence::additionalTransform() const
+{
+    return m_additionalTransform;
+}
+
+void GlyphSequence::setAdditionalTransform(const glm::mat4 & additionalTransform)
+{
+    m_transformValid = false;
+    m_additionalTransform = additionalTransform;
 }
 
 const glm::mat4 & GlyphSequence::transform() const
 {
+    if (!m_transformValid)
+    {
+        computeTransform();
+        m_transformValid = true;
+    }
     return m_transform;
 }
 
-void GlyphSequence::setTransform(const glm::mat4 & transform)
+void GlyphSequence::computeTransform() const
 {
-    m_transform = transform;
-}
+    assert(m_fontFace);
 
-void GlyphSequence::setTransform(
-    const glm::vec2 & origin
-,   const float fontSize
-,   const FontFace & fontFace
-,   const glm::uvec2 & viewportExtent)
-{
     m_transform = glm::mat4();
 
-    // translate to lower left in NDC
-    m_transform = glm::translate(m_transform, glm::vec3(-1.f, -1.f, 0.f));
-    // translate to origin in screen space
-    m_transform = glm::translate(m_transform, glm::vec3(origin, 0.f));
-    // scale glyphs of font face to target normalized size
-    m_transform = glm::scale(m_transform, glm::vec3(viewportExtent.y * fontSize / fontFace.size()));
-    // scale glyphs to NDC size
-    m_transform = glm::scale(m_transform, 2.f / glm::vec3(viewportExtent.x, viewportExtent.y, 1.f));
+    m_transform = m_transform * m_additionalTransform;
+
+    m_transform = glm::scale(m_transform, glm::vec3(m_fontSize / m_fontFace->size()));
 }
-
-void GlyphSequence::setTransform(
-    const glm::vec3 & origin
-,   const float fontSizeInWorld
-,   const FontFace& fontFace
-,   const glm::mat4 rotation)
-{
-    m_transform = glm::mat4();
-    m_transform = glm::translate(m_transform, origin);
-    m_transform = glm::scale(m_transform, glm::vec3(fontSizeInWorld / fontFace.size()));
-
-    m_transform = m_transform * rotation;
-}
-
-void GlyphSequence::setTransform(
-    const glm::vec2 & origin
-,   const float fontSize
-,   const FontFace & fontFace
-,   const glm::uvec2 & viewportExtent
-,   const float pixelPerInch
-,   const glm::vec4 & margins)
-{
-    m_transform = glm::mat4();
-
-    const auto pointsPerInch = 72.f;
-    const auto ppiScale = pixelPerInch / pointsPerInch;
-
-    // translate to lower left in NDC
-    m_transform = glm::translate(m_transform, glm::vec3(-1.f, -1.f, 0.f));
-    // scale glyphs to NDC size
-    m_transform = glm::scale(m_transform, 2.f / glm::vec3(viewportExtent.x, viewportExtent.y, 1.f));
-    // scale glyphs to pixel size with respect to the displays ppi
-    m_transform = glm::scale(m_transform, glm::vec3(ppiScale));
-    // translate to origin in point space - scale origin within
-    // margined extend (i.e., viewport with margined areas removed)
-    const auto marginedExtent = glm::vec2(viewportExtent.x, viewportExtent.y) / ppiScale
-        - glm::vec2(margins[3] + margins[1], margins[2] + margins[0]);
-    m_transform = glm::translate(m_transform
-        , glm::vec3((0.5f * origin + 0.5f) * marginedExtent, 0.f) + glm::vec3(margins[3], margins[2], 0.f));
-    // scale glyphs of font face to target font size
-    m_transform = glm::scale(m_transform, glm::vec3(fontSize / fontFace.size()));
-}
-
 
 } // namespace gloperate_text

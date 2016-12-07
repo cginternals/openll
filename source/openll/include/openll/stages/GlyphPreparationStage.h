@@ -16,7 +16,7 @@ namespace gloperate_text
 class FontFace;
 class GlyphSequence;
 
-OPENLL_API GlyphVertexCloud prepareGlyphs(FontFace * font, const std::vector<GlyphSequence>& sequences, bool optimized);
+OPENLL_API GlyphVertexCloud prepareGlyphs(const std::vector<GlyphSequence>& sequences, bool optimized);
 
 
 } // namespace gloperate_text

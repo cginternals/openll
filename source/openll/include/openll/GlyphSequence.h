@@ -6,7 +6,7 @@
 
 #include <glm/fwd.hpp>
 #include <glm/mat4x4.hpp>
-#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 #include <globjects/base/ref_ptr.h>
 
@@ -29,60 +29,46 @@ public:
     GlyphSequence();
     virtual ~GlyphSequence();
 
-    static const char32_t & lineFeed();
-
     size_t size() const;
-    size_t size(const FontFace & fontFace) const;
+    size_t depictableSize() const;
 
     const std::u32string & string() const;
     void setString(const std::u32string & string);
 
     const std::vector<char32_t> & chars(
         std::vector<char32_t> & allChars) const;
-    const std::vector<char32_t> & chars(
-        std::vector<char32_t> & allChars
-    ,   const FontFace & fontFace) const;
+    const std::vector<char32_t> & depictableChars(
+        std::vector<char32_t> & allChars) const;
 
     bool wordWrap() const;
     void setWordWrap(bool enable);
 
     float lineWidth() const;
     void setLineWidth(
-        float lineWidth
-    ,   float fontSize
-    ,   const FontFace & fontFace);
+        float lineWidth);
 
     Alignment alignment() const;
-    void setAlignment(Alignment alginment);
+    void setAlignment(Alignment alignment);
 
     LineAnchor lineAnchor() const;
     void setLineAnchor(const LineAnchor anchor);
 
+    float fontSize() const;
+    void setFontSize(float fontSize);
+
+    FontFace * fontFace() const;
+    void setFontFace(FontFace * fontFace);
+
     const glm::vec4 & fontColor() const;
     void setFontColor(glm::vec4 fontColor);
 
+    const glm::mat4 & additionalTransform() const;
+    void setAdditionalTransform(const glm::mat4 & additionalTransform);
+
     const glm::mat4 & transform() const;
-    void setTransform(const glm::mat4 & transform);
 
-    void setTransform(
-        const glm::vec2 & origin
-    ,   float fontSize
-    ,   const FontFace & fontFace
-    ,   const glm::uvec2 & viewportExtent);
-
-    void setTransform(
-        const glm::vec3 & origin
-    ,   const float fontSize
-    ,   const FontFace& fontFace
-    ,   const glm::mat4 rotation);
-
-    void setTransform(
-        const glm::vec2 & origin
-    ,   float fontSizeInWorld
-    ,   const FontFace & fontFace
-    ,   const glm::uvec2 & viewportExtent
-    ,   float pixelPerInch
-    ,   const glm::vec4 & margins = glm::vec4(0.f, 0.f, 0.f, 0.f));
+protected:
+    void computeTransform() const;
 
 protected:
     std::u32string m_string;
@@ -93,8 +79,13 @@ protected:
     Alignment m_alignment;
     LineAnchor m_anchor;
 
-    glm::mat4 m_transform;
     glm::vec4 m_fontColor;
+    FontFace * m_fontFace;
+    float m_fontSize;
+
+    glm::mat4 m_additionalTransform;
+    mutable bool m_transformValid;
+    mutable glm::mat4 m_transform;
 };
 
 

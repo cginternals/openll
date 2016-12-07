@@ -8,7 +8,6 @@
 #include <glbinding/gl/boolean.h>
 
 #include <openll/GlyphSequence.h>
-#include <openll/FontFace.h>
 
 
 namespace
@@ -138,9 +137,7 @@ void GlyphVertexCloud::update(const Vertices & vertices)
     m_drawable->setSize(vertices.size());
 }
 
-void GlyphVertexCloud::optimize(
-    const std::vector<GlyphSequence> & sequences
-,   const FontFace & fontFace)
+void GlyphVertexCloud::optimize(const std::vector<GlyphSequence> & sequences)
 {
     // L1/texture-cache optimization: sort vertex cloud by glyphs
 
@@ -149,7 +146,7 @@ void GlyphVertexCloud::optimize(
     auto vertices = m_vertices;
 
     for (const auto & sequence : sequences)
-        sequence.chars(depictableChars, fontFace);
+        sequence.depictableChars(depictableChars);
 
     assert(vertices.size() == depictableChars.size());
 
