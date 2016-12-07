@@ -109,7 +109,7 @@ gloperate_text::GlyphVertexCloud preparePoint(const glm::vec2 origin, gloperate_
 	return gloperate_text::prepareGlyphs(sequences, true);
 }
 
-gloperate_text::GlyphVertexCloud prepareGlyphSequences(const glm::vec2 origin, std::string string, gloperate_text::FontFace * font, const float fontSize, glm::uvec2 viewport)
+gloperate_text::GlyphVertexCloud prepareGlyphSequences(const glm::vec2 origin, std::string string, gloperate_text::FontFace * font, const float fontSize, const gloperate_text::Alignment alignment, glm::uvec2 viewport)
 {
 	std::vector<gloperate_text::GlyphSequence> sequences;
 
@@ -120,7 +120,7 @@ gloperate_text::GlyphVertexCloud prepareGlyphSequences(const glm::vec2 origin, s
 
     sequence.setWordWrap(true);
     sequence.setLineWidth(500.f);
-    sequence.setAlignment(gloperate_text::Alignment::Centered);
+	sequence.setAlignment(alignment);
 	sequence.setLineAnchor(gloperate_text::LineAnchor::Baseline);
 	sequence.setFontFace(font);
     sequence.setFontSize(fontSize);
@@ -151,9 +151,9 @@ gloperate_text::GlyphVertexCloud prepareGlyphSequences(const glm::vec2 origin, s
     return gloperate_text::prepareGlyphs(sequences, true);
 }
 
-void annotatePoint(std::vector<gloperate_text::GlyphVertexCloud> & vertexClouds, const glm::vec2 origin, const glm::vec2 offset, std::string string, gloperate_text::FontFace * font, const float fontSize, glm::uvec2 viewport)
+void annotatePoint(std::vector<gloperate_text::GlyphVertexCloud> & vertexClouds, const glm::vec2 origin, const glm::vec2 offset, std::string string, gloperate_text::FontFace * font, const float fontSize, gloperate_text::Alignment alignment, glm::uvec2 viewport)
 {
-	vertexClouds.push_back(prepareGlyphSequences(origin+offset, string, font, fontSize, viewport));
+	vertexClouds.push_back(prepareGlyphSequences(origin+offset, string, font, fontSize, alignment, viewport));
 	vertexClouds.push_back(preparePoint(origin, font, viewport));
 }
 
@@ -200,8 +200,10 @@ int main()
 
 			vertexClouds.clear();
 
-			annotatePoint(vertexClouds, glm::vec2(-0.2f, 0), glm::vec2(0, 0.2f), "big Annotation for Point below", font, 32.f, g_viewport);
-			annotatePoint(vertexClouds, glm::vec2(0.2f, -0.2), glm::vec2(0, -0.2), "small Annotation for Point above", font, 16.f, g_viewport);
+			annotatePoint(vertexClouds, glm::vec2(-0.2f, 0), glm::vec2(0, 0.1f), "big, centered, for point below", font, 32.f, gloperate_text::Alignment::Centered, g_viewport);
+			annotatePoint(vertexClouds, glm::vec2(0.2f, -0.2), glm::vec2(0, -0.1), "small, centered Annotation for point above", font, 16.f, gloperate_text::Alignment::Centered, g_viewport);
+
+			annotatePoint(vertexClouds, glm::vec2(-0.2f, -0.6f), glm::vec2(0.1, 0), "smaller, left aligned Annotation for point on the left", font, 8.f, gloperate_text::Alignment::LeftAligned, g_viewport);
         }
 
         gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
