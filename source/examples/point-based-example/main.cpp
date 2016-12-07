@@ -24,8 +24,7 @@
 
 using namespace gl;
 
-const auto lorem =
-R"(Point)";
+//const auto lorem =
 //R"(Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.)";
 
 glm::uvec2 g_viewport{640, 480};
@@ -67,36 +66,63 @@ void glInitialize()
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 }
 
-gloperate_text::GlyphVertexCloud prepareGlyphSequences(std::string string, gloperate_text::FontFace * font, glm::uvec2 viewport)
-{
-    std::vector<gloperate_text::GlyphSequence> sequences;
+gloperate_text::GlyphVertexCloud preparePoint(const glm::vec2 origin, gloperate_text::FontFace * font, glm::uvec2 viewport) {
+	const std::string pointText = R"(.)";
 
-    // font->setLinespace(1.25f);
-    gloperate_text::GlyphSequence sequence;
-    std::u32string unicode_string(string.begin(), string.end());
-    sequence.setString(unicode_string);
+	std::vector<gloperate_text::GlyphSequence> sequences;
 
-    const auto fontSize = 16.f;
-    const auto pixelPerInch = 72.f;
-    //const glm::vec2 origin {0.f, .5f};
-	const glm::vec2 origin{ 0.f, 0.f };
-    const glm::vec4 margins {0.f, 0.f, 0.f, 0.f};
-    sequence.setWordWrap(true);
-    sequence.setLineWidth(500.f, fontSize, *font);
-    sequence.setAlignment(gloperate_text::Alignment::Centered);
-    sequence.setLineAnchor(gloperate_text::LineAnchor::Baseline);
+	gloperate_text::GlyphSequence sequence;
+	std::u32string unicode_string(pointText.begin(), pointText.end());
+	sequence.setString(unicode_string);
 
-    sequence.setTransform(origin, fontSize, *font
-        , viewport, pixelPerInch, margins);
-    sequences.push_back(sequence);
+	const auto fontSize = 64.f;
+	const auto pixelPerInch = 72.f;
 
-    //sequences.data()[0].setTransform(origin.data(), fontSize.data(), *font.data()
-    //    , { viewport.data()->width(), viewport.data()->height() });
+	const glm::vec4 margins{ 0.f, 0.f, 0.f, 0.f };
+	sequence.setWordWrap(true);
+	sequence.setLineWidth(500.f, fontSize, *font);
+	sequence.setAlignment(gloperate_text::Alignment::Centered);
+	sequence.setLineAnchor(gloperate_text::LineAnchor::Baseline);
 
-    return gloperate_text::prepareGlyphs(font, sequences, true);
+	sequence.setTransform(origin, fontSize, *font, viewport, pixelPerInch, margins);
+	sequences.push_back(sequence);
+
+	return gloperate_text::prepareGlyphs(font, sequences, true);
 }
 
 
+gloperate_text::GlyphVertexCloud prepareGlyphSequences(const glm::vec2 origin, std::string string, gloperate_text::FontFace * font, const float fontSize, glm::uvec2 viewport)
+{
+	std::vector<gloperate_text::GlyphSequence> sequences;
+
+	// font->setLinespace(1.25f);
+	gloperate_text::GlyphSequence sequence;
+	std::u32string unicode_string(string.begin(), string.end());
+	sequence.setString(unicode_string);
+
+	//const auto fontSize = 32.f;
+	const auto pixelPerInch = 72.f;
+	//const glm::vec2 origin{ 0.f, .5f };
+	const glm::vec4 margins{ 0.f, 0.f, 0.f, 0.f };
+	sequence.setWordWrap(true);
+	sequence.setLineWidth(500.f, fontSize, *font);
+	sequence.setAlignment(gloperate_text::Alignment::Centered);
+	sequence.setLineAnchor(gloperate_text::LineAnchor::Baseline);
+
+	sequence.setTransform(origin, fontSize, *font, viewport, pixelPerInch, margins);
+	sequences.push_back(sequence);
+
+	//sequences.data()[0].setTransform(origin.data(), fontSize.data(), *font.data()
+	//    , { viewport.data()->width(), viewport.data()->height() });
+
+	return gloperate_text::prepareGlyphs(font, sequences, true);
+}
+
+void annotatePoint(std::vector<gloperate_text::GlyphVertexCloud> & vertexClouds, const glm::vec2 origin, const glm::vec2 offset, std::string string, gloperate_text::FontFace * font, const float fontSize, glm::uvec2 viewport)
+{
+	vertexClouds.push_back(prepareGlyphSequences(origin+offset, string, font, fontSize, viewport));
+	vertexClouds.push_back(preparePoint(origin, font, viewport));
+}
 
 int main()
 {
@@ -126,7 +152,10 @@ int main()
     gloperate_text::FontLoader loader;
     auto font = loader.load(dataPath + "/fonts/opensansr36.fnt");
     gloperate_text::GlyphRenderer renderer;
-    gloperate_text::GlyphVertexCloud cloud;
+
+	std::vector<gloperate_text::GlyphVertexCloud> vertexClouds;
+    gloperate_text::GlyphVertexCloud cloud, cloud2;
+	gloperate_text::GlyphVertexCloud point, point2;
     glClearColor(1.f, 1.f, 1.f, 1.f);
 
     while (!glfwWindowShouldClose(window))
@@ -135,7 +164,11 @@ int main()
         {
             std::cout << "updated viewport (" << g_viewport.x << ", " << g_viewport.y << ")" << std::endl;
             glViewport(0, 0, g_viewport.x, g_viewport.y);
-            cloud = prepareGlyphSequences(lorem, font, g_viewport);
+
+			vertexClouds.clear();
+
+			annotatePoint(vertexClouds, glm::vec2(-0.2f, 0), glm::vec2(0, 0.2f), "big Annotation for Point below", font, 32.f, g_viewport);
+			annotatePoint(vertexClouds, glm::vec2(0.2f, -0.2), glm::vec2(0, -0.2), "small Annotation for Point above", font, 16.f, g_viewport);
         }
 
         gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
@@ -145,7 +178,9 @@ int main()
         gl::glEnable(gl::GL_BLEND);
         gl::glBlendFunc(gl::GL_SRC_ALPHA, gl::GL_ONE_MINUS_SRC_ALPHA);
 
-        renderer.render(cloud);
+		for (int i = 0; i < vertexClouds.size(); i++) {
+			renderer.render(vertexClouds[i]);
+		}
 
         gl::glDepthMask(gl::GL_TRUE);
         gl::glDisable(gl::GL_CULL_FACE);
