@@ -3,7 +3,6 @@
 #include <map>
 #include <random>
 
-#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 #include <glbinding/Binding.h>
@@ -78,7 +77,7 @@ void glInitialize()
 
 std::string random_name(std::default_random_engine engine)
 {
-    std::uniform_int_distribution<char> charDistribution(32, 126);
+    std::uniform_int_distribution<int> charDistribution(32, 126);
     std::uniform_int_distribution<int> lengthDistribution(3, 15);
     const auto length = lengthDistribution(engine);
     std::vector<char> characters;
