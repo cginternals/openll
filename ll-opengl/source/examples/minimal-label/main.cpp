@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <memory>
 
 #include <cpplocate/cpplocate.h>
 #include <cpplocate/ModuleInfo.h>
@@ -20,13 +21,9 @@
 #include <globjects/logging.h>
 #include <globjects/base/File.h>
 
-#include <globjects/Uniform.h>
 #include <globjects/Program.h>
 #include <globjects/Shader.h>
-#include <globjects/Buffer.h>
-#include <globjects/VertexArray.h>
-#include <globjects/VertexAttributeBinding.h>
-#include <globjects/Texture.h>
+
 
 #include "datapath.inl"
 
@@ -38,12 +35,19 @@ namespace
 {
     auto g_frame = 0u;
     auto g_size = glm::ivec2{ };
+
+    globjects::Program * g_computeProgram = nullptr;
 }
 
 
 void initialize()
 {
-    const auto dataPath = common::retrieveDataPath("ll-opengl", "dataPath");
+    const auto dataPath = common::retrieveDataPath("openll", "dataPath");
+
+    g_computeProgram = new globjects::Program();
+    g_computeProgram->attach(globjects::Shader::fromFile(GL_COMPUTE_SHADER, dataPath + "shaders/glyph.geom"));
+    g_computeProgram->setUniform("destTex", 0);
+    g_computeProgram->ref();
 
     // ToDo
 }
@@ -51,6 +55,7 @@ void initialize()
 void deinitialize()
 {
     // ToDo
+    g_computeProgram->unref();
 
     globjects::detachAllObjects();
 }

@@ -63,7 +63,6 @@ target_include_directories(${target}
     PRIVATE
     ${DEFAULT_INCLUDE_DIRECTORIES}
     ${PROJECT_BINARY_DIR}/source/include
-    SYSTEM
     ${GLM_INCLUDE_DIR}
     ${GLFW_INCLUDE_DIR}
 )

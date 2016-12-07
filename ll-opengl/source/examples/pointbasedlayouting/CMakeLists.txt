@@ -35,11 +35,11 @@ set(sources
 )
 
 
-#
+# 
 # Create executable
-#
+# 
 
-# Build library
+# Build executable
 add_executable(${target}
     ${sources}
 )
@@ -47,9 +47,10 @@ add_executable(${target}
 # Create namespaced alias
 add_executable(${META_PROJECT_NAME}::${target} ALIAS ${target})
 
-#
+
+# 
 # Project options
-#
+# 
 
 set_target_properties(${target}
     PROPERTIES
@@ -58,24 +59,22 @@ set_target_properties(${target}
 )
 
 
-#
+# 
 # Include directories
-#
+# 
 
 target_include_directories(${target}
     PRIVATE
     ${DEFAULT_INCLUDE_DIRECTORIES}
     ${PROJECT_BINARY_DIR}/source/include
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    SYSTEM
     ${GLM_INCLUDE_DIR}
     ${GLFW_INCLUDE_DIR}
 )
 
 
-#
+# 
 # Libraries
-#
+# 
 
 target_link_libraries(${target}
     PRIVATE
@@ -88,9 +87,9 @@ target_link_libraries(${target}
 )
 
 
-#
+# 
 # Compile definitions
-#
+# 
 
 target_compile_definitions(${target}
     PRIVATE
@@ -100,9 +99,9 @@ target_compile_definitions(${target}
 )
 
 
-#
+# 
 # Compile options
-#
+# 
 
 target_compile_options(${target}
     PRIVATE
@@ -110,9 +109,9 @@ target_compile_options(${target}
 )
 
 
-#
+# 
 # Linker options
-#
+# 
 
 target_link_libraries(${target}
     PRIVATE
@@ -120,12 +119,12 @@ target_link_libraries(${target}
 )
 
 
-#
+# 
 # Deployment
-#
+# 
 
-# Plugin library
+# Executable
 install(TARGETS ${target}
     RUNTIME DESTINATION ${INSTALL_EXAMPLES} COMPONENT examples
-    LIBRARY DESTINATION ${INSTALL_EXAMPLES} COMPONENT examples
+    BUNDLE  DESTINATION ${INSTALL_EXAMPLES} COMPONENT examples
 )
