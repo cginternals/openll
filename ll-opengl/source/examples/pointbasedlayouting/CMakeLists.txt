@@ -3,15 +3,16 @@
 # External dependencies
 #
 
-find_package(GLM REQUIRED)
+find_package(cpplocate REQUIRED)
+find_package(glm REQUIRED)
 find_package(glbinding REQUIRED)
 find_package(globjects REQUIRED)
-find_package(glfw3 REQUIRED)
-find_package(cpplocate REQUIRED)
+find_package(glfw REQUIRED)
 
-#
-# Library name and options
-#
+
+# 
+# Executable name and options
+# 
 
 # Target name
 set(target pointbasedlayouting)
@@ -24,38 +25,23 @@ message(STATUS "Plugin ${target}")
 # Sources
 #
 
-set(include_path "${CMAKE_CURRENT_SOURCE_DIR}")
-set(source_path  "${CMAKE_CURRENT_SOURCE_DIR}")
-
-set(headers
-    ${include_path}/PointDrawable.h
-    ${include_path}/RectangleDrawable.h
-)
-
 set(sources
 
-    ${source_path}/main.cpp
-    ${source_path}/PointDrawable.cpp
-    ${source_path}/RectangleDrawable.cpp
+    main.cpp
+    PointDrawable.cpp
+    PointDrawable.h
+    RectangleDrawable.cpp
+    RectangleDrawable.h
 )
-
-# Group source files
-set(header_group "Header Files (API)")
-set(source_group "Source Files")
-source_group_by_path(${include_path} "\\\\.h$|\\\\.hpp$"
-    ${header_group} ${headers})
-source_group_by_path(${source_path}  "\\\\.cpp$|\\\\.c$|\\\\.h$|\\\\.hpp$"
-    ${source_group} ${sources})
 
 
 #
-# Create library
+# Create executable
 #
 
 # Build library
 add_executable(${target}
     ${sources}
-    ${headers}
 )
 
 # Create namespaced alias
@@ -81,11 +67,9 @@ target_include_directories(${target}
     ${DEFAULT_INCLUDE_DIRECTORIES}
     ${PROJECT_BINARY_DIR}/source/include
     ${CMAKE_CURRENT_SOURCE_DIR}
+    SYSTEM
     ${GLM_INCLUDE_DIR}
-
-    PUBLIC
-
-    INTERFACE
+    ${GLFW_INCLUDE_DIR}
 )
 
 
@@ -95,16 +79,12 @@ target_include_directories(${target}
 
 target_link_libraries(${target}
     PRIVATE
+    ${DEFAULT_LIBRARIES}
+    ${META_PROJECT_NAME}::openll
     cpplocate::cpplocate
     glbinding::glbinding
     globjects::globjects
-    ${META_PROJECT_NAME}::openll
-    glfw
-
-    PUBLIC
-    ${DEFAULT_LIBRARIES}
-
-    INTERFACE
+    ${GLFW_LIBRARIES}
 )
 
 
@@ -114,13 +94,9 @@ target_link_libraries(${target}
 
 target_compile_definitions(${target}
     PRIVATE
-
-    PUBLIC
-    $<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:${target_upper}_STATIC_DEFINE>
     ${DEFAULT_COMPILE_DEFINITIONS}
+    GLFW_INCLUDE_NONE
     GLM_FORCE_RADIANS
-
-    INTERFACE
 )
 
 
@@ -130,11 +106,7 @@ target_compile_definitions(${target}
 
 target_compile_options(${target}
     PRIVATE
-
-    PUBLIC
     ${DEFAULT_COMPILE_OPTIONS}
-
-    INTERFACE
 )
 
 
@@ -144,42 +116,7 @@ target_compile_options(${target}
 
 target_link_libraries(${target}
     PRIVATE
-
-    PUBLIC
     ${DEFAULT_LINKER_OPTIONS}
-
-    INTERFACE
-)
-
-
-#
-# Module information file
-#
-
-generate_module_info(${target}
-    VALUES
-    name        "${target}"
-    version     "${META_VERSION}"
-    description "${META_PROJECT_DESCRIPTION}"
-    author      "${META_AUTHOR_ORGANIZATION}"
-
-    BUILD_VALUES
-    dataPath    "${PROJECT_SOURCE_DIR}/data"
-
-    INSTALL_VALUES
-    dataPath    "\${ModulePath}/../data"
-)
-
-export_module_info(${target}
-    TARGET ${target}
-    FOLDER "ModuleInfo"
-    RENAME "$<TARGET_FILE_NAME:${target}>.modinfo"
-)
-
-install_module_info(${target}
-    DESTINATION ${INSTALL_PLUGINS}
-    RENAME "$<TARGET_FILE_NAME:${target}>.modinfo"
-    COMPONENT runtime
 )
 
 
@@ -189,6 +126,6 @@ install_module_info(${target}
 
 # Plugin library
 install(TARGETS ${target}
-    RUNTIME DESTINATION ${INSTALL_PLUGINS} COMPONENT runtime
-    LIBRARY DESTINATION ${INSTALL_PLUGINS} COMPONENT runtime
+    RUNTIME DESTINATION ${INSTALL_EXAMPLES} COMPONENT examples
+    LIBRARY DESTINATION ${INSTALL_EXAMPLES} COMPONENT examples
 )

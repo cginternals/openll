@@ -15,7 +15,7 @@ find_package(glfw REQUIRED)
 # 
 
 # Target name
-set(target labeling-at-point)
+set(target minimal-label)
 
 # Exit here if required dependencies are not met
 message(STATUS "Example ${target}")
@@ -92,6 +92,7 @@ target_compile_definitions(${target}
     PRIVATE
     ${DEFAULT_COMPILE_DEFINITIONS}
     GLFW_INCLUDE_NONE
+    GLM_FORCE_RADIANS
 )
 
 

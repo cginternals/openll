@@ -92,6 +92,7 @@ target_compile_definitions(${target}
     PRIVATE
     ${DEFAULT_COMPILE_DEFINITIONS}
     GLFW_INCLUDE_NONE
+    GLM_FORCE_RADIANS
 )
 
 
