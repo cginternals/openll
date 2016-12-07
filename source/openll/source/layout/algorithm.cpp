@@ -14,7 +14,7 @@ void constantLayout(std::vector<Label> & labels)
 {
     for (auto & label : labels)
     {
-        label.placement = {{0.f, 0.f}, Alignment::LeftAligned, LineAnchor::Ascent};
+        label.placement = {{0.f, 0.f}, Alignment::LeftAligned, LineAnchor::Descent};
     }
 }
 

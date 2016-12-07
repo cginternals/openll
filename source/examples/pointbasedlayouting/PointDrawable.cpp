@@ -3,6 +3,7 @@
 #include <glm/vec2.hpp>
 
 #include <glbinding/gl/enum.h>
+#include <glbinding/gl/functions.h>
 
 #include <globjects/Program.h>
 #include <globjects/VertexArray.h>
@@ -46,6 +47,7 @@ void PointDrawable::initialize(const std::vector<glm::vec2>& points)
 
 void PointDrawable::render()
 {
+    glEnable(GL_PROGRAM_POINT_SIZE);
     m_program->use();
     m_vao->drawArrays(GL_POINTS, 0, m_count);
     m_program->release();

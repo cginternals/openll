@@ -29,12 +29,14 @@ set(source_path  "${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(headers
     ${include_path}/PointDrawable.h
+    ${include_path}/RectangleDrawable.h
 )
 
 set(sources
 
     ${source_path}/main.cpp
     ${source_path}/PointDrawable.cpp
+    ${source_path}/RectangleDrawable.cpp
 )
 
 # Group source files

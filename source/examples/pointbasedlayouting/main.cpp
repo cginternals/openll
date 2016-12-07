@@ -15,6 +15,7 @@
 
 #include <openll/GlyphRenderer.h>
 #include <openll/FontLoader.h>
+#include <openll/Typesetter.h>
 #include <openll/stages/GlyphPreparationStage.h>
 
 #include <openll/FontFace.h>
@@ -28,6 +29,7 @@
 #include <cpplocate/ModuleInfo.h>
 
 #include "PointDrawable.h"
+#include "RectangleDrawable.h"
 
 using namespace gl;
 
@@ -77,7 +79,7 @@ void glInitialize()
 std::string random_name(std::default_random_engine engine)
 {
     std::uniform_int_distribution<char> charDistribution(32, 126);
-    std::uniform_int_distribution<int> lengthDistribution(3, 25);
+    std::uniform_int_distribution<int> lengthDistribution(3, 15);
     const auto length = lengthDistribution(engine);
     std::vector<char> characters;
     for (int i = 0; i < length; ++i)
@@ -94,14 +96,14 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
     std::default_random_engine generator;
     std::uniform_real_distribution<float> distribution(-1.f, 1.f);
 
-    for (int i = 0; i < 60; ++i)
+    for (int i = 0; i < 10; ++i)
     {
         auto string = random_name(generator);
         gloperate_text::GlyphSequence sequence;
         std::u32string unicode_string(string.begin(), string.end());
         sequence.setString(unicode_string);
         sequence.setWordWrap(true);
-        sequence.setLineWidth(100.f);
+        sequence.setLineWidth(200.f);
         sequence.setAlignment(gloperate_text::Alignment::LeftAligned);
         sequence.setLineAnchor(gloperate_text::LineAnchor::Ascent);
         sequence.setFontSize(16.f);
@@ -141,6 +143,18 @@ void preparePointDrawable(const std::vector<gloperate_text::Label>& labels, Poin
     pointDrawable.initialize(points);
 }
 
+void prepareRectangleDrawable(const std::vector<gloperate_text::Label>& labels, RectangleDrawable& rectangleDrawable)
+{
+    std::vector<glm::vec2> rectangles;
+    for (const auto & label : labels)
+    {
+        rectangles.push_back(label.pointLocation);
+        auto extent = gloperate_text::Typesetter::extent(label.sequence);
+        rectangles.push_back(label.pointLocation + extent);
+    }
+    rectangleDrawable.initialize(rectangles);
+}
+
 int main()
 {
     glfwInit();
@@ -171,8 +185,8 @@ int main()
     gloperate_text::GlyphVertexCloud cloud;
     std::vector<gloperate_text::Label> labels;
     PointDrawable pointDrawable {dataPath};
+    RectangleDrawable rectangleDrawable {dataPath};
     glClearColor(1.f, 1.f, 1.f, 1.f);
-    glEnable(GL_PROGRAM_POINT_SIZE);
 
 
     while (!glfwWindowShouldClose(window))
@@ -182,9 +196,10 @@ int main()
             std::cout << "updated viewport (" << g_viewport.x << ", " << g_viewport.y << ")" << std::endl;
             glViewport(0, 0, g_viewport.x, g_viewport.y);
             labels = prepareLabels(font, g_viewport);
-            gloperate_text::randomLayout(labels);
+            gloperate_text::constantLayout(labels);
             cloud = prepareCloud(labels);
             preparePointDrawable(labels, pointDrawable);
+            prepareRectangleDrawable(labels, rectangleDrawable);
         }
 
         gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
@@ -196,6 +211,7 @@ int main()
 
         renderer.render(cloud);
         pointDrawable.render();
+        rectangleDrawable.render();
 
         gl::glDepthMask(gl::GL_TRUE);
         gl::glDisable(gl::GL_CULL_FACE);
