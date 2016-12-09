@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry>
+
+    <comment type="description">Open Label Library is an opensource, MIT licensed API specification for high performance label (glyphs, text, etc) rendering in 2D and 3D graphics environments. In addition there will be reference implementations for WebGL, Vulkan, and OpenGL.</comment>
+
+    <comment type="todo">Since OpenLL is targeting high performance display of glyphs for GPU-accelerated systems, texture-based glyph rendering is favored over other approaches such as path rendering.</comment>
+
+    <comment type="license">Copyright (c) 2016 CG Internals. 
+
+        Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: 
+
+        The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+    </comment>
+
+
+    <!-- SECTION: OpenLL type definitions -->
+    <types>
+
+        <!-- SECTION: OpenLL fundamental definitions. -->
+        <!--<fundamental name="llFloat" size="32" base="floating-point"/>-->
+        <!--<fundamental name="llUInt"  size="32" base="unsigned integral"/>-->
+        <!--<fundamental name="llInt"   size="32" base="signed integral"/>-->
+        <!--<fundamental name="llBool"  size="8"  base="boolean"/>-->
+        <!--<fundamental name="llUTF32" size="32" base="unsigned integral"/>-->
+        <!--<fundamental name="llUTF32" size="32" base="unsigned integral"/>-->
+        <fundamental name="llSize"      min-size="16" base="unsigned integral"/>
+        <fundamental name="llPointSize" min-size="16" base="floating-point"/>
+
+        <!-- SECTION: OpenLL enumeration definitions. -->
+        <enumeration name="llResult">
+            <description>Error and return codes</description>
+            <!-- Return codes for successful operation execution (positive values) -->
+            <enumerator value="+0"   name="LL_SUCCESS" 
+                comment="Command completed successfully"/>
+            <!-- Error codes (negative values) -->
+            <enumerator value="-1"   name="LL_ERROR_OUT_OF_HOST_MEMORY" 
+                comment="A host memory allocation has failed"/>
+            <enumerator value="-2"   name="LL_ERROR_OUT_OF_DEVICE_MEMORY" 
+                comment="A device memory allocation has failed"/>
+            <enumerator value="-3"   name="LL_ERROR_TOO_MANY_OBJECTS" 
+                comment="Too many objects of the type have already been created"/>
+            <enumerator value="-4"   name="LL_ERROR_EXTENSION_NOT_PRESENT" 
+                comment="Extension specified does not exist"/>
+            <enumerator value="-5"   name="LL_ERROR_FEATURE_NOT_PRESENT" 
+                comment="Requested feature is not available on this device"/>
+
+            <!-- Object specific error codes -->
+            <enumerator value="-6"   name="LL_OBJECT_DOES_NOT_EXISTS" 
+                comment="No object exists for the given handle"/>
+
+        </enumeration>
+
+        <handle name="llFontFace" min-size="16" base="unsigned integral"/>
+
+    </types>
+
+
+    <!-- SECTION: OpenLL command definitions -->
+    <commands>
+
+        <!-- SECTION: font face command definitions -->
+        <command successcodes="LL_SUCCESS" errorcodes="LL_ERROR_OUT_OF_MEMORY, LL_ERROR_TOO_MANY_OBJECTS">
+            <description>Create an unconfigured (default is undefined) font face.<description>
+            <proto><type>llResult</type> <name>llCreateFontFace</name></proto>
+            <param qualifier="out"><type>llFontFace</type><name>fontFace</name></param>
+            <validity>
+                 <usage>if the return value is successcode, pname:llFontFace must: be greater than 0</usage>
+            </validity>
+        </command>
+
+        <command>
+            <description>Get the maximum number of supported font face objects.<description>
+            <proto><type>llSize</type> <name>llGetMaxFontFaceObjects</name></proto>
+            <validity>
+                <usage>pname:llSize must: be less than llFontFace:min-size</usage>
+            </validity>
+        </command>
+
+        <command successcodes="LL_SUCCESS" errorcodes="LL_OBJECT_DOES_NOT_EXISTS">
+            <description>Destroy an existing font face.<description>
+            <proto><type>llResult</type> <name>llDestroyFontFace</name></proto>
+            <param qualifier="in"><type>llFontFace</type><name>fontFace</name></param>
+        </command>
+
+    </commands>
+
+</registry>
