@@ -183,8 +183,9 @@ void FontLoader::handlePage(std::stringstream & stream, FontFace & fontFace, con
         return;
     }
 
-    texture->image2D(0, gl::GL_R8, fontFace.glyphTextureExtent(), 0
-        , gl::GL_RED, gl::GL_UNSIGNED_BYTE, raw.data());
+    const auto extent = glm::ivec2{ fontFace.glyphTextureExtent() };
+    texture->image2D(0, gl::GL_R8, extent, 0
+        , gl::GL_RED, gl::GL_UNSIGNED_BYTE, static_cast<const gl::GLvoid *>(raw.data()));
 
     fontFace.setGlyphTexture(texture);
 
