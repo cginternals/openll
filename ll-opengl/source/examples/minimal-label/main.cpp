@@ -33,7 +33,6 @@ using namespace gl;
 
 namespace
 {
-    auto g_frame = 0u;
     auto g_size = glm::ivec2{ };
 
     globjects::Program * g_computeProgram = nullptr;
@@ -113,7 +112,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // Create a context and, if valid, make it current
-    GLFWwindow * window = glfwCreateWindow(640, 480, "ll-opengl | labeling-at-point", nullptr, nullptr);
+    GLFWwindow * window = glfwCreateWindow(640, 480, "ll-opengl | minimal-label", nullptr, nullptr);
     if (!window)
     {
         globjects::critical() << "Context creation failed. Terminate execution.";
