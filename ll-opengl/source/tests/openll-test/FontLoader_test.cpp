@@ -11,5 +11,5 @@ public:
 
 TEST_F(FontLoader_test, CheckSomeResults)
 {
-    // ...
+    EXPECT_EQ(true, true);
 }
