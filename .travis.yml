@@ -8,12 +8,12 @@ compiler:
   - clang
 
 before_install:
+  - cd ll-opengl
   - sudo apt-add-repository ppa:cginternals/backports-ppa -y
   - sudo apt-get update -qq
   - sudo apt-get install -qq cmake libgl1-mesa-dev mesa-common-dev libglm-dev libglfw3-dev libcpplocate-dev libglbinding-dev libglobjects-dev
 
 before_script:
-  - cd ll-opengl
   - mkdir build
   - cd build
   - cmake -DOPTION_BUILD_EXAMPLES=On -DOPTION_BUILD_TESTS=On ..
