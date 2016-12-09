@@ -83,7 +83,7 @@ std::string random_name(std::default_random_engine engine)
     std::vector<char> characters;
     for (int i = 0; i < length; ++i)
     {
-        characters.push_back(charDistribution(engine));
+        characters.push_back(static_cast<char>(charDistribution(engine)));
     }
     return {characters.begin(), characters.end()};
 }
@@ -108,7 +108,7 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
         sequence.setFontSize(16.f);
         sequence.setFontFace(font);
 
-        const glm::vec2 origin {distribution(generator), distribution(generator)};
+        const auto origin = glm::vec2{distribution(generator), distribution(generator)};
         // compute  transform matrix
         glm::mat4 transform;
         transform = glm::translate(transform, glm::vec3(origin, 0.f));
@@ -116,8 +116,11 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
             static_cast<float>(viewport.x) / viewport.y, 1.f));
         transform = glm::scale(transform, glm::vec3(1/300.f));
 
+        const auto placement = gloperate_text::LabelPlacement{ glm::vec2{ 0.f, 0.f }
+            , gloperate_text::Alignment::LeftAligned, gloperate_text::LineAnchor::Baseline };
+
         sequence.setAdditionalTransform(transform);
-        labels.push_back({sequence, origin});
+        labels.push_back({sequence, origin, placement });
     }
     return labels;
 }
