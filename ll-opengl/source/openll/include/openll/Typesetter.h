@@ -20,8 +20,8 @@ class Glyph;
 class OPENLL_API Typesetter
 {
 public:
-    Typesetter() = delete;
-    virtual ~Typesetter() = delete;
+    //Typesetter() = delete;
+    //virtual ~Typesetter() = delete;
 
     static const char32_t & lineFeed();
 
