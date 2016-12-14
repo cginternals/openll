@@ -157,6 +157,13 @@ void annotatePoint(std::vector<gloperate_text::GlyphVertexCloud> & vertexClouds,
 	vertexClouds.push_back(preparePoint(origin, font, viewport));
 }
 
+void annotatePointConfig(std::vector<gloperate_text::GlyphVertexCloud> & vertexClouds, const glm::vec2 origin, const glm::vec2 offset, std::string string, gloperate_text::GlyphSequenceConfig config, glm::uvec2 viewport)
+{
+	//TODO some config settings are still ignored! (e.g. color)
+	vertexClouds.push_back(prepareGlyphSequences(origin + offset, string, config.fontFace(), config.fontSize(), config.alignment(), viewport));
+	vertexClouds.push_back(preparePoint(origin, config.fontFace(), viewport));
+}
+
 int main()
 {
     glfwInit();
@@ -187,6 +194,9 @@ int main()
     gloperate_text::GlyphRenderer renderer;
 
 	auto config = gloperate_text::GlyphSequenceConfig(font);
+	auto configBigRed = gloperate_text::GlyphSequenceConfig(font);
+	configBigRed.setFontColor(glm::vec4(1.f, 0.f, 0.f, 1.f));
+	configBigRed.setFontSize(32.f);
 
 	std::vector<gloperate_text::GlyphVertexCloud> vertexClouds;
     gloperate_text::GlyphVertexCloud cloud, cloud2;
@@ -202,10 +212,16 @@ int main()
 
 			vertexClouds.clear();
 
-			annotatePoint(vertexClouds, glm::vec2(-0.2f, 0), glm::vec2(0, 0.1f), "big, centered, for point below", font, 32.f, gloperate_text::Alignment::Centered, g_viewport);
-			annotatePoint(vertexClouds, glm::vec2(0.2f, -0.2), glm::vec2(0, -0.1), "small, centered Annotation for point above", font, 16.f, gloperate_text::Alignment::Centered, g_viewport);
+			//annotatePoint(vertexClouds, glm::vec2(-0.2f, 0), glm::vec2(0, 0.1f), "big, centered, for point below", font, 32.f, gloperate_text::Alignment::Centered, g_viewport);
+			//annotatePoint(vertexClouds, glm::vec2(0.2f, -0.2f), glm::vec2(0, -0.1f), "small, centered Annotation for point above", font, 16.f, gloperate_text::Alignment::Centered, g_viewport);
 
-			annotatePoint(vertexClouds, glm::vec2(-0.2f, -0.6f), glm::vec2(0.1, 0), "smaller, left aligned Annotation for point on the left", font, 8.f, gloperate_text::Alignment::LeftAligned, g_viewport);
+			//annotatePoint(vertexClouds, glm::vec2(-0.2f, -0.6f), glm::vec2(0.1f, 0), "smaller, left aligned Annotation for point on the left", font, 8.f, gloperate_text::Alignment::LeftAligned, g_viewport);
+
+			annotatePointConfig(vertexClouds, glm::vec2(-0.2f, 0), glm::vec2(0, 0.1), "annotated with default config", config, g_viewport);
+			annotatePointConfig(vertexClouds, glm::vec2(0.2f, -0.2f), glm::vec2(0, -0.1f), "annotated with default config", config, g_viewport);
+			annotatePointConfig(vertexClouds, glm::vec2(-0.2f, -0.6f), glm::vec2(0.1, 0), "annotated with default config", config, g_viewport);
+
+			annotatePointConfig(vertexClouds, glm::vec2(-0.8f, 0.8f), glm::vec2(0.1, -0.1f), "annotated with big config", configBigRed, g_viewport);
         }
 
         gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
