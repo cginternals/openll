@@ -28,13 +28,6 @@ GlyphSequenceConfig::~GlyphSequenceConfig()
 {
 }
 
-void GlyphSequenceConfig::addOnConfigChanged(std::function<void()> callback)
-{
-	m_registeredOnConfigChanged.push_back(callback);
-}
-
-//TODO unregister callbacks?
-
 bool GlyphSequenceConfig::wordWrap() const
 {
 	return m_wordWrap;

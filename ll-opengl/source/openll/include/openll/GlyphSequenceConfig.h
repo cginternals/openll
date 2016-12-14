@@ -1,8 +1,5 @@
 #pragma once
 
-#include <vector>
-#include <functional>
-
 #include <openll/Alignment.h>
 #include <openll/FontFace.h>
 #include <openll/LineAnchor.h>
@@ -17,12 +14,6 @@ class OPENLL_API GlyphSequenceConfig
 public:
 	explicit GlyphSequenceConfig(gloperate_text::FontFace * font);
 	~GlyphSequenceConfig();
-
-	//TODO register callbacks from every GlyphSequence to notify the sequence when config has changed
-	//how to get the function's origin glyhsequence? Say seq1 and seq2 both register a callback?
-	//or should it be only for GlyphSequence, i.e. we don't register callbacks but objects?
-	//TODO unregister callbacks?
-	void addOnConfigChanged(std::function<void()>);
 
 	bool wordWrap() const;
 	void setWordWrap(bool enable);
@@ -52,10 +43,6 @@ public:
 	void setPpiScale(float ppiScale);
 
 protected:
-
-	//maybe define a special callback type?
-	//using callback_t = std::function<void()>;
-	std::vector<std::function<void()>> m_registeredOnConfigChanged;
 
 	bool m_wordWrap;
 	float m_lineWidth;
