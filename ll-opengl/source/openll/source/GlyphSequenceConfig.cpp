@@ -68,12 +68,12 @@ void GlyphSequenceConfig::setAlignment(const gloperate_text::Alignment alignment
 	m_alignment = alignment;
 }
 
-gloperate_text::LineAnchor GlyphSequenceConfig::lineAnchor() const
+gloperate_text::LineAnchor GlyphSequenceConfig::anchor() const
 {
 	return m_anchor;
 }
 
-void GlyphSequenceConfig::setLineAnchor(const gloperate_text::LineAnchor anchor)
+void GlyphSequenceConfig::setAnchor(const gloperate_text::LineAnchor anchor)
 {
 	m_anchor = anchor;
 }
@@ -106,6 +106,26 @@ float GlyphSequenceConfig::fontSize() const
 void GlyphSequenceConfig::setFontSize(float fontSize)
 {
 	m_fontSize = fontSize;
+}
+
+
+glm::vec4 GlyphSequenceConfig::margins() const
+{
+	return m_margins;
+}
+
+void GlyphSequenceConfig::setMargins(glm::vec4 margins)
+{
+	m_margins = margins;
+}
+
+float GlyphSequenceConfig::ppiScale() const
+{
+	return m_ppiScale;
+}
+void GlyphSequenceConfig::setPpiScale(float ppiScale)
+{
+	m_ppiScale = ppiScale;
 }
 
 } // namespace gloperate_text

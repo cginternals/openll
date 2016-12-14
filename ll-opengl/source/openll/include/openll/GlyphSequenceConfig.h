@@ -33,8 +33,8 @@ public:
 	gloperate_text::Alignment alignment() const;
 	void setAlignment(gloperate_text::Alignment alignment);
 
-	gloperate_text::LineAnchor lineAnchor() const;
-	void setLineAnchor(const gloperate_text::LineAnchor anchor);
+	gloperate_text::LineAnchor anchor() const;
+	void setAnchor(const gloperate_text::LineAnchor anchor);
 
 	float fontSize() const;
 	void setFontSize(float fontSize);
@@ -45,6 +45,11 @@ public:
 	const glm::vec4 & fontColor() const;
 	void setFontColor(glm::vec4 fontColor);
 
+	glm::vec4 margins() const;
+	void setMargins(glm::vec4 margins);
+
+	float ppiScale() const;
+	void setPpiScale(float ppiScale);
 
 protected:
 
