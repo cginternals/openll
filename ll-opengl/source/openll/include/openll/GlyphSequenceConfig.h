@@ -4,7 +4,7 @@
 #include <openll/FontFace.h>
 #include <openll/LineAnchor.h>
 
-#include <openll/openll_api.h> //TODO: Are all includes needed?
+#include <openll/openll_api.h>
 
 namespace gloperate_text
 {
