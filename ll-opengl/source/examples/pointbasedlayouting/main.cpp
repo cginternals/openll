@@ -32,16 +32,14 @@
 
 using namespace gl;
 
-const auto lorem =
-R"(Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.)";
-
 glm::uvec2 g_viewport{640, 480};
-bool g_viewport_changed = true;
+bool g_config_changed = true;
+int g_algorithmID = 0;
 
 void onResize(GLFWwindow*, int width, int height)
 {
     g_viewport = {width, height};
-    g_viewport_changed = true;
+    g_config_changed = true;
 }
 
 void onKeyPress(GLFWwindow* window, int key, int, int action, int mods)
@@ -49,6 +47,11 @@ void onKeyPress(GLFWwindow* window, int key, int, int action, int mods)
     if (key == 'Q' && action == GLFW_PRESS && mods == GLFW_MOD_CONTROL)
     {
         glfwSetWindowShouldClose(window, 1);
+    }
+    else if ('1' <= key && key <= '9' && action == GLFW_PRESS)
+    {
+        g_algorithmID = key - '1' + 1;
+        g_config_changed = true;
     }
 }
 
@@ -95,7 +98,7 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
     std::default_random_engine generator;
     std::uniform_real_distribution<float> distribution(-1.f, 1.f);
 
-    for (int i = 0; i < 40; ++i)
+    for (int i = 0; i < 50; ++i)
     {
         auto string = random_name(generator);
         gloperate_text::GlyphSequence sequence;
@@ -194,12 +197,17 @@ int main()
 
     while (!glfwWindowShouldClose(window))
     {
-        if (g_viewport_changed)
+        if (g_config_changed)
         {
-            std::cout << "updated viewport (" << g_viewport.x << ", " << g_viewport.y << ")" << std::endl;
             glViewport(0, 0, g_viewport.x, g_viewport.y);
             labels = prepareLabels(font, g_viewport);
-            gloperate_text::greedyLayout(labels);
+            switch (g_algorithmID)
+            {
+                case 1:  gloperate_text::constantLayout(labels); break;
+                case 2:  gloperate_text::randomLayout(labels);   break;
+                case 3:  gloperate_text::greedyLayout(labels);   break;
+                default: gloperate_text::constantLayout(labels); break;
+            }
             cloud = prepareCloud(labels);
             preparePointDrawable(labels, pointDrawable);
             prepareRectangleDrawable(labels, rectangleDrawable);
@@ -220,7 +228,7 @@ int main()
         gl::glDisable(gl::GL_CULL_FACE);
         gl::glDisable(gl::GL_BLEND);
 
-        g_viewport_changed = false;
+        g_config_changed = false;
 
         glfwSwapBuffers(window);
         glfwPollEvents();
