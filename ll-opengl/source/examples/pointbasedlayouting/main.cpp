@@ -95,7 +95,7 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
     std::default_random_engine generator;
     std::uniform_real_distribution<float> distribution(-1.f, 1.f);
 
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < 40; ++i)
     {
         auto string = random_name(generator);
         gloperate_text::GlyphSequence sequence;
@@ -199,7 +199,7 @@ int main()
             std::cout << "updated viewport (" << g_viewport.x << ", " << g_viewport.y << ")" << std::endl;
             glViewport(0, 0, g_viewport.x, g_viewport.y);
             labels = prepareLabels(font, g_viewport);
-            gloperate_text::randomLayout(labels);
+            gloperate_text::greedyLayout(labels);
             cloud = prepareCloud(labels);
             preparePointDrawable(labels, pointDrawable);
             prepareRectangleDrawable(labels, rectangleDrawable);
