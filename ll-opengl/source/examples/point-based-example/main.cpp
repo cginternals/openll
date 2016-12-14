@@ -17,6 +17,7 @@
 
 #include <openll/FontFace.h>
 #include <openll/GlyphSequence.h>
+#include <openll/GlyphSequenceConfig.h>
 #include <openll/Alignment.h>
 #include <openll/LineAnchor.h>
 
@@ -184,6 +185,8 @@ int main()
     gloperate_text::FontLoader loader;
     auto font = loader.load(dataPath + "/fonts/opensansr36.fnt");
     gloperate_text::GlyphRenderer renderer;
+
+	auto config = gloperate_text::GlyphSequenceConfig(font);
 
 	std::vector<gloperate_text::GlyphVertexCloud> vertexClouds;
     gloperate_text::GlyphVertexCloud cloud, cloud2;

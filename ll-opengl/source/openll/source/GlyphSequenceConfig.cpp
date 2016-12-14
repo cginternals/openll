@@ -1,4 +1,14 @@
-#include "GlyphSequenceConfig.h"
+#include "openll/GlyphSequenceConfig.h"
+
+//#include <glm/vec2.hpp>
+
+//#include <glm/vec3.hpp>
+//#include <glm/vec4.hpp>
+//#include <glm/mat4x4.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+namespace gloperate_text
+{
 
 //default values taken from GlyphSequence.cpp
 GlyphSequenceConfig::GlyphSequenceConfig(gloperate_text::FontFace * font)
@@ -37,7 +47,6 @@ void GlyphSequenceConfig::setWordWrap(bool enable)
 
 float GlyphSequenceConfig::lineWidth() const
 {
-	assert(m_fontFace);
 	// since typesetting is done in the font faces font size, the
 	// given linewidth has to be scaled to the font faces font size
 	return glm::max(m_lineWidth * m_fontFace->size() / m_fontSize, 0.f);
@@ -98,3 +107,5 @@ void GlyphSequenceConfig::setFontSize(float fontSize)
 {
 	m_fontSize = fontSize;
 }
+
+} // namespace gloperate_text

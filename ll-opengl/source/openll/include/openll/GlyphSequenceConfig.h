@@ -9,7 +9,10 @@
 
 #include <openll/openll_api.h> //TODO: Are all includes needed?
 
-class GlyphSequenceConfig
+namespace gloperate_text
+{
+
+class OPENLL_API GlyphSequenceConfig
 {
 public:
 	explicit GlyphSequenceConfig(gloperate_text::FontFace * font);
@@ -66,4 +69,6 @@ protected:
 	//glm::mat4 m_additionalTransform;
 	//std::u32string m_string;
 };
+
+}// namespace gloperate_text
 
