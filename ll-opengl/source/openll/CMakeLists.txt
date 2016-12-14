@@ -41,6 +41,7 @@ set(headers
     ${include_path}/Glyph.h
     ${include_path}/GlyphRenderer.h
     ${include_path}/GlyphSequence.h
+	${include_path}/GlyphSequenceConfig.h
     ${include_path}/GlyphVertexCloud.h
     ${include_path}/Typesetter.h
 
@@ -59,6 +60,7 @@ set(sources
     ${source_path}/Glyph.cpp
     ${source_path}/GlyphRenderer.cpp
     ${source_path}/GlyphSequence.cpp
+	${source_path}/GlyphSequenceConfig.cpp
     ${source_path}/GlyphVertexCloud.cpp
     ${source_path}/Typesetter.cpp
 

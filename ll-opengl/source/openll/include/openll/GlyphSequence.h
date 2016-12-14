@@ -12,6 +12,7 @@
 
 #include <openll/Alignment.h>
 #include <openll/LineAnchor.h>
+#include <openll/GlyphSequenceConfig.h>
 
 #include <openll/openll_api.h>
 
@@ -66,6 +67,8 @@ public:
     void setAdditionalTransform(const glm::mat4 & additionalTransform);
 
     const glm::mat4 & transform() const;
+
+	void setFromConfig(const GlyphSequenceConfig config);
 
 protected:
     void computeTransform() const;

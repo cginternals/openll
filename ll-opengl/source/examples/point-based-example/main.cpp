@@ -17,6 +17,7 @@
 
 #include <openll/FontFace.h>
 #include <openll/GlyphSequence.h>
+#include <openll/GlyphSequenceConfig.h>
 #include <openll/Alignment.h>
 #include <openll/LineAnchor.h>
 
@@ -24,9 +25,6 @@
 #include <cpplocate/ModuleInfo.h>
 
 using namespace gl;
-
-//const auto lorem =
-//R"(Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.)";
 
 glm::uvec2 g_viewport{640, 480};
 bool g_viewport_changed = true;
@@ -108,52 +106,44 @@ gloperate_text::GlyphVertexCloud preparePoint(const glm::vec2 origin, gloperate_
 	return gloperate_text::prepareGlyphs(sequences, true);
 }
 
-gloperate_text::GlyphVertexCloud prepareGlyphSequences(const glm::vec2 origin, std::string string, gloperate_text::FontFace * font, const float fontSize, const gloperate_text::Alignment alignment, glm::uvec2 viewport)
+gloperate_text::GlyphVertexCloud prepareGlyphSequences(const glm::vec2 origin, std::string string, gloperate_text::GlyphSequenceConfig config, glm::uvec2 viewport)
 {
 	std::vector<gloperate_text::GlyphSequence> sequences;
 
-	// font->setLinespace(1.25f);
 	gloperate_text::GlyphSequence sequence;
 	std::u32string unicode_string(string.begin(), string.end());
 	sequence.setString(unicode_string);
 
-    sequence.setWordWrap(true);
-    sequence.setLineWidth(500.f);
-	sequence.setAlignment(alignment);
-	sequence.setLineAnchor(gloperate_text::LineAnchor::Baseline);
-	sequence.setFontFace(font);
-    sequence.setFontSize(fontSize);
+	// set wordWrap, lineWidth, alignment, lineAnchor, fontFace, fontSize, fontColor
+	sequence.setFromConfig(config);
 
-    const glm::vec4 margins {0.f, 0.f, 0.f, 0.f};
-    const float ppiScale = 1.f;
+	const glm::vec4 margins = config.margins();
 
-    // compute  transform matrix
-    glm::mat4 transform;
-    // translate to lower left in NDC
-    transform = glm::translate(transform, glm::vec3(-1.f, -1.f, 0.f));
-    // scale glyphs to NDC size
-    transform = glm::scale(transform, 2.f / glm::vec3(viewport.x, viewport.y, 1.f));
-    // scale glyphs to pixel size with respect to the displays ppi
-    transform = glm::scale(transform, glm::vec3(ppiScale));
-    // translate to origin in point space - scale origin within
-    // margined extend (i.e., viewport with margined areas removed)
-    const auto marginedExtent = glm::vec2(viewport.x, viewport.y) / ppiScale
-       - glm::vec2(margins[3] + margins[1], margins[2] + margins[0]);
-    transform = glm::translate(transform
-       , glm::vec3((0.5f * origin + 0.5f) * marginedExtent, 0.f) + glm::vec3(margins[3], margins[2], 0.f));
+	// compute  transform matrix
+	glm::mat4 transform;
+	// translate to lower left in NDC
+	transform = glm::translate(transform, glm::vec3(-1.f, -1.f, 0.f));
+	// scale glyphs to NDC size
+	transform = glm::scale(transform, 2.f / glm::vec3(viewport.x, viewport.y, 1.f));
+	// scale glyphs to pixel size with respect to the displays ppi
+	transform = glm::scale(transform, glm::vec3(config.ppiScale()));
+	// translate to origin in point space - scale origin within
+	// margined extend (i.e., viewport with margined areas removed)
+	const auto marginedExtent = glm::vec2(viewport.x, viewport.y) / config.ppiScale()
+		- glm::vec2(margins[3] + margins[1], margins[2] + margins[0]);
+	transform = glm::translate(transform
+		, glm::vec3((0.5f * origin + 0.5f) * marginedExtent, 0.f) + glm::vec3(margins[3], margins[2], 0.f));
 
-    sequence.setAdditionalTransform(transform);
-    sequences.push_back(sequence);
-	//sequences.data()[0].setTransform(origin.data(), fontSize.data(), *font.data()
-	//    , { viewport.data()->width(), viewport.data()->height() });
+	sequence.setAdditionalTransform(transform);
+	sequences.push_back(sequence);
 
-    return gloperate_text::prepareGlyphs(sequences, true);
+	return gloperate_text::prepareGlyphs(sequences, true);
 }
 
-void annotatePoint(std::vector<gloperate_text::GlyphVertexCloud> & vertexClouds, const glm::vec2 origin, const glm::vec2 offset, std::string string, gloperate_text::FontFace * font, const float fontSize, gloperate_text::Alignment alignment, glm::uvec2 viewport)
+void annotatePoint(std::vector<gloperate_text::GlyphVertexCloud> & vertexClouds, const glm::vec2 origin, const glm::vec2 offset, std::string string, gloperate_text::GlyphSequenceConfig config, glm::uvec2 viewport)
 {
-	vertexClouds.push_back(prepareGlyphSequences(origin+offset, string, font, fontSize, alignment, viewport));
-	vertexClouds.push_back(preparePoint(origin, font, viewport));
+	vertexClouds.push_back(prepareGlyphSequences(origin + offset, string, config, viewport));
+	vertexClouds.push_back(preparePoint(origin, config.fontFace(), viewport));
 }
 
 int main()
@@ -185,6 +175,18 @@ int main()
     auto font = loader.load(dataPath + "/fonts/opensansr36.fnt");
     gloperate_text::GlyphRenderer renderer;
 
+	auto config = gloperate_text::GlyphSequenceConfig(font);
+	
+	auto configBigRed = gloperate_text::GlyphSequenceConfig(font);
+	configBigRed.setFontColor(glm::vec4(1.f, 0.f, 0.f, 1.f));
+	configBigRed.setFontSize(32.f);
+
+	auto configVertical = gloperate_text::GlyphSequenceConfig(font);
+	configVertical.setAlignment(gloperate_text::Alignment::Centered);
+	configVertical.setAnchor(gloperate_text::LineAnchor::Center);
+	configVertical.setWordWrap(true);
+	configVertical.setLineWidth(0);
+
 	std::vector<gloperate_text::GlyphVertexCloud> vertexClouds;
     gloperate_text::GlyphVertexCloud cloud, cloud2;
 	gloperate_text::GlyphVertexCloud point, point2;
@@ -199,10 +201,14 @@ int main()
 
 			vertexClouds.clear();
 
-			annotatePoint(vertexClouds, glm::vec2(-0.2f, 0), glm::vec2(0, 0.1f), "big, centered, for point below", font, 32.f, gloperate_text::Alignment::Centered, g_viewport);
-			annotatePoint(vertexClouds, glm::vec2(0.2f, -0.2), glm::vec2(0, -0.1), "small, centered Annotation for point above", font, 16.f, gloperate_text::Alignment::Centered, g_viewport);
-
-			annotatePoint(vertexClouds, glm::vec2(-0.2f, -0.6f), glm::vec2(0.1, 0), "smaller, left aligned Annotation for point on the left", font, 8.f, gloperate_text::Alignment::LeftAligned, g_viewport);
+			annotatePoint(vertexClouds, glm::vec2(-0.2f, 0.f), glm::vec2(0.f, 0.1f), "annotated with default config", config, g_viewport);
+			annotatePoint(vertexClouds, glm::vec2(0.2f, -0.2f), glm::vec2(0.f, -0.1f), "this one also with default config", config, g_viewport);
+			annotatePoint(vertexClouds, glm::vec2(-0.2f, -0.6f), glm::vec2(0.1, 0.f), "is that point clear? hehe point.", config, g_viewport);
+			
+			annotatePoint(vertexClouds, glm::vec2(-0.8f, 0.8f), glm::vec2(0.1, -0.05f), "annotated with big red config", configBigRed, g_viewport);
+			annotatePoint(vertexClouds, glm::vec2(-0.7f, 0.4f), glm::vec2(0.1, -0.05f), "still big and red!", configBigRed, g_viewport);
+			
+			annotatePoint(vertexClouds, glm::vec2(0.8f, 0.8f), glm::vec2(0.05f, 0.f), "one line vertical", configVertical, g_viewport);
         }
 
         gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);

@@ -160,6 +160,17 @@ void GlyphSequence::setFontSize(float fontSize)
     m_fontSize = fontSize;
 }
 
+void GlyphSequence::setFromConfig(const GlyphSequenceConfig config)
+{
+	setWordWrap(config.wordWrap());
+	setLineWidth(config.lineWidth());
+	setAlignment(config.alignment());
+	setLineAnchor(config.anchor());
+	setFontColor(config.fontColor());
+	setFontFace(config.fontFace());
+	setFontSize(config.fontSize());
+}
+
 const glm::mat4 & GlyphSequence::additionalTransform() const
 {
     return m_additionalTransform;
