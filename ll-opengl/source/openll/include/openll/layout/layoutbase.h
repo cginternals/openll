@@ -18,6 +18,7 @@ struct OPENLL_API LabelPlacement
     glm::vec2 offset;
     gloperate_text::Alignment alignment;
     gloperate_text::LineAnchor lineAnchor;
+    bool display;
 };
 
 struct OPENLL_API Label
@@ -29,4 +30,4 @@ struct OPENLL_API Label
 
 GlyphSequence OPENLL_API applyPlacement(const Label & label);
 
-}
+} // namespace gloperate_text

@@ -32,6 +32,8 @@ set(sources
     PointDrawable.h
     RectangleDrawable.cpp
     RectangleDrawable.h
+    benchmark.cpp
+    benchmark.h
 )
 
 

@@ -6,26 +6,9 @@
 #include <openll/GlyphSequence.h>
 #include <openll/FontFace.h>
 #include <openll/layout/layoutbase.h>
+#include <openll/layout/LabelArea.h>
 #include <openll/Typesetter.h>
 
-namespace
-{
-
-struct LabelArea
-{
-    glm::vec2 origin;
-    glm::vec2 extent;
-
-    bool overlaps(const LabelArea& other) const
-    {
-        return
-            origin.x < other.origin.x + other.extent.x &&
-            origin.x + extent.x > other.origin.x &&
-            origin.y < other.origin.y + other.extent.y &&
-            extent.y + origin.y > other.origin.y;
-    }
-};
-}
 
 namespace gloperate_text
 {
@@ -35,7 +18,7 @@ void constantLayout(std::vector<Label> & labels)
 {
     for (auto & label : labels)
     {
-        label.placement = {{0.f, 0.f}, Alignment::LeftAligned, LineAnchor::Descent};
+        label.placement = {{0.f, 0.f}, Alignment::LeftAligned, LineAnchor::Descent, true};
     }
 }
 
@@ -46,9 +29,11 @@ void randomLayout(std::vector<Label> & labels)
     std::bernoulli_distribution bool_distribution;
     for (auto & label : labels)
     {
-        auto alignment = bool_distribution(generator) ? Alignment::LeftAligned : Alignment::RightAligned;
-        auto lineAnchor = bool_distribution(generator) ? LineAnchor::Ascent : LineAnchor::Descent;
-        label.placement = {{0.f, 0.f}, alignment, lineAnchor};
+        const auto extent = Typesetter::extent(label.sequence);
+        glm::vec2 offset;
+        offset.x = bool_distribution(generator) ? -extent.x : 0.f;
+        offset.y = bool_distribution(generator) ? -extent.y : 0.f;
+        label.placement = {offset, Alignment::LeftAligned, LineAnchor::Descent, true};
     }
 }
 
@@ -57,8 +42,8 @@ void greedyLayout(std::vector<Label> & labels)
     std::vector<LabelArea> labelAreas;
     for (auto & label : labels)
     {
-        auto extent = Typesetter::extent(label.sequence);
-        std::vector<glm::vec2> possibleOrigins {
+        const auto extent = Typesetter::extent(label.sequence);
+        const std::vector<glm::vec2> possibleOrigins {
             label.pointLocation, label.pointLocation - glm::vec2(extent.x, 0),
             label.pointLocation - glm::vec2(0, extent.y), label.pointLocation - extent
         };
@@ -66,8 +51,8 @@ void greedyLayout(std::vector<Label> & labels)
         glm::vec2 bestOrigin;
         for (const auto& origin : possibleOrigins)
         {
-            LabelArea newLabelArea {origin, extent};
-            auto count = std::count_if(labelAreas.begin(), labelAreas.end(),
+            const LabelArea newLabelArea {origin, extent};
+            const auto count = std::count_if(labelAreas.begin(), labelAreas.end(),
                 [&](const LabelArea& other) { return newLabelArea.overlaps(other); });
             if (count < bestCount)
             {
@@ -75,7 +60,7 @@ void greedyLayout(std::vector<Label> & labels)
                 bestOrigin = origin;
             }
         }
-        label.placement = {bestOrigin - label.pointLocation, Alignment::LeftAligned, LineAnchor::Descent};
+        label.placement = {bestOrigin - label.pointLocation, Alignment::LeftAligned, LineAnchor::Descent, true};
         labelAreas.push_back({bestOrigin, extent});
     }
 }

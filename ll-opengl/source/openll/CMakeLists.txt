@@ -52,6 +52,7 @@ set(headers
 
     ${include_path}/layout/layoutbase.h
     ${include_path}/layout/algorithm.h
+    ${include_path}/layout/LabelArea.h
 )
 
 set(sources
@@ -71,6 +72,7 @@ set(sources
 
     ${source_path}/layout/layoutbase.cpp
     ${source_path}/layout/algorithm.cpp
+    ${source_path}/layout/LabelArea.cpp
 )
 
 # Group source files

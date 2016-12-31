@@ -29,12 +29,13 @@
 
 #include "PointDrawable.h"
 #include "RectangleDrawable.h"
+#include "benchmark.h"
 
 using namespace gl;
 
 glm::uvec2 g_viewport{640, 480};
 bool g_config_changed = true;
-int g_algorithmID = 0;
+int g_algorithmID = 1;
 
 void onResize(GLFWwindow*, int width, int height)
 {
@@ -120,7 +121,7 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
         transform = glm::scale(transform, glm::vec3(1/300.f));
 
         const auto placement = gloperate_text::LabelPlacement{ glm::vec2{ 0.f, 0.f }
-            , gloperate_text::Alignment::LeftAligned, gloperate_text::LineAnchor::Baseline };
+            , gloperate_text::Alignment::LeftAligned, gloperate_text::LineAnchor::Baseline, true };
 
         sequence.setAdditionalTransform(transform);
         labels.push_back({sequence, origin, placement });
@@ -133,7 +134,10 @@ gloperate_text::GlyphVertexCloud prepareCloud(const std::vector<gloperate_text::
     std::vector<gloperate_text::GlyphSequence> sequences;
     for (const auto & label : labels)
     {
-        sequences.push_back(gloperate_text::applyPlacement(label));
+        if (label.placement.display)
+        {
+            sequences.push_back(gloperate_text::applyPlacement(label));
+        }
     }
     return gloperate_text::prepareGlyphs(sequences, true);
 }
@@ -160,6 +164,16 @@ void prepareRectangleDrawable(const std::vector<gloperate_text::Label>& labels, 
     }
     rectangleDrawable.initialize(rectangles);
 }
+
+void benchmark(const std::vector<gloperate_text::Label> & labels, std::string algorithmName)
+{
+    std::cout << "Benchmark results for " << algorithmName << ":" << std::endl
+        << labelsHidden(labels) << " labels hidden out of " << labels.size() << std::endl
+        << labelOverlaps(labels) << " overlaps" << std::endl
+        << "with an area of " << labelOverlapArea(labels) << std::endl
+        << std::endl;
+}
+
 
 int main()
 {
@@ -201,13 +215,24 @@ int main()
         {
             glViewport(0, 0, g_viewport.x, g_viewport.y);
             labels = prepareLabels(font, g_viewport);
+            std::string algorithmName;
             switch (g_algorithmID)
             {
-                case 1:  gloperate_text::constantLayout(labels); break;
-                case 2:  gloperate_text::randomLayout(labels);   break;
-                case 3:  gloperate_text::greedyLayout(labels);   break;
-                default: gloperate_text::constantLayout(labels); break;
+                case 1:
+                    gloperate_text::constantLayout(labels);
+                    algorithmName = "constantLayout";
+                    break;
+                case 2:
+                    gloperate_text::randomLayout(labels);
+                    algorithmName = "randomLayout";
+                    break;
+                case 3:
+                default:
+                    gloperate_text::greedyLayout(labels);
+                    algorithmName = "greedyLayout";
+                    break;
             }
+            benchmark(labels, algorithmName);
             cloud = prepareCloud(labels);
             preparePointDrawable(labels, pointDrawable);
             prepareRectangleDrawable(labels, rectangleDrawable);
