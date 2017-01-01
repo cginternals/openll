@@ -17,10 +17,10 @@ namespace globjects
 class PointDrawable
 {
 public:
-    PointDrawable(const std::string& dataPath);
+    PointDrawable(const std::string & dataPath);
     ~PointDrawable();
 
-    void initialize(const std::vector<glm::vec2>& points);
+    void initialize(const std::vector<glm::vec2> & points);
     void render();
 
 private:

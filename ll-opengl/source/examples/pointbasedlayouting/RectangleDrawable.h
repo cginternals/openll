@@ -17,10 +17,10 @@ namespace globjects
 class RectangleDrawable
 {
 public:
-    RectangleDrawable(const std::string& dataPath);
+    RectangleDrawable(const std::string & dataPath);
     ~RectangleDrawable();
 
-    void initialize(const std::vector<glm::vec2>& rectangles);
+    void initialize(const std::vector<glm::vec2> & rectangles);
     void render();
 
 private:

@@ -29,7 +29,7 @@ PointDrawable::~PointDrawable()
 {
 }
 
-void PointDrawable::initialize(const std::vector<glm::vec2>& points)
+void PointDrawable::initialize(const std::vector<glm::vec2> & points)
 {
     m_count = points.size();
 

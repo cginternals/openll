@@ -43,7 +43,7 @@ void onResize(GLFWwindow*, int width, int height)
     g_config_changed = true;
 }
 
-void onKeyPress(GLFWwindow* window, int key, int, int action, int mods)
+void onKeyPress(GLFWwindow * window, int key, int, int action, int mods)
 {
     if (key == 'Q' && action == GLFW_PRESS && mods == GLFW_MOD_CONTROL)
     {
@@ -118,7 +118,7 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
         transform = glm::translate(transform, glm::vec3(origin, 0.f));
         transform = glm::scale(transform, glm::vec3(1.f,
             static_cast<float>(viewport.x) / viewport.y, 1.f));
-        transform = glm::scale(transform, glm::vec3(1/300.f));
+        transform = glm::scale(transform, glm::vec3(1 / 300.f));
 
         const auto placement = gloperate_text::LabelPlacement{ glm::vec2{ 0.f, 0.f }
             , gloperate_text::Alignment::LeftAligned, gloperate_text::LineAnchor::Baseline, true };
@@ -129,7 +129,7 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
     return labels;
 }
 
-gloperate_text::GlyphVertexCloud prepareCloud(const std::vector<gloperate_text::Label>& labels)
+gloperate_text::GlyphVertexCloud prepareCloud(const std::vector<gloperate_text::Label> & labels)
 {
     std::vector<gloperate_text::GlyphSequence> sequences;
     for (const auto & label : labels)
@@ -142,7 +142,7 @@ gloperate_text::GlyphVertexCloud prepareCloud(const std::vector<gloperate_text::
     return gloperate_text::prepareGlyphs(sequences, true);
 }
 
-void preparePointDrawable(const std::vector<gloperate_text::Label>& labels, PointDrawable& pointDrawable)
+void preparePointDrawable(const std::vector<gloperate_text::Label> & labels, PointDrawable& pointDrawable)
 {
     std::vector<glm::vec2> points;
     for (const auto & label : labels)
@@ -152,7 +152,7 @@ void preparePointDrawable(const std::vector<gloperate_text::Label>& labels, Poin
     pointDrawable.initialize(points);
 }
 
-void prepareRectangleDrawable(const std::vector<gloperate_text::Label>& labels, RectangleDrawable& rectangleDrawable)
+void prepareRectangleDrawable(const std::vector<gloperate_text::Label> & labels, RectangleDrawable& rectangleDrawable)
 {
     std::vector<glm::vec2> rectangles;
     for (const auto & label : labels)
@@ -165,7 +165,7 @@ void prepareRectangleDrawable(const std::vector<gloperate_text::Label>& labels, 
     rectangleDrawable.initialize(rectangles);
 }
 
-void benchmark(const std::vector<gloperate_text::Label> & labels, std::string algorithmName)
+void benchmark(const std::vector<gloperate_text::Label> & labels, const std::string & algorithmName)
 {
     std::cout << "Benchmark results for " << algorithmName << ":" << std::endl
         << labelsHidden(labels) << " labels hidden out of " << labels.size() << std::endl

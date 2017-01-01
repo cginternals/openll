@@ -8,7 +8,7 @@
 namespace gloperate_text
 {
 
-bool LabelArea::overlaps(const LabelArea& other) const
+bool LabelArea::overlaps(const LabelArea & other) const
 {
     return
         origin.x < other.origin.x + other.extent.x &&
@@ -17,7 +17,7 @@ bool LabelArea::overlaps(const LabelArea& other) const
         extent.y + origin.y > other.origin.y;
 }
 
-float LabelArea::overlapArea(const LabelArea& other) const
+float LabelArea::overlapArea(const LabelArea & other) const
 {
     const auto lower_left = glm::max(origin, other.origin);
     const auto upper_right = glm::min(origin + extent, other.origin + other.extent);

@@ -29,7 +29,7 @@ RectangleDrawable::~RectangleDrawable()
 {
 }
 
-void RectangleDrawable::initialize(const std::vector<glm::vec2>& rectangles)
+void RectangleDrawable::initialize(const std::vector<glm::vec2> & rectangles)
 {
 
     m_vao = new globjects::VertexArray;
