@@ -24,7 +24,6 @@ void constantLayout(std::vector<Label> & labels)
 
 void randomLayout(std::vector<Label> & labels)
 {
-
     std::default_random_engine generator;
     std::bernoulli_distribution bool_distribution;
     for (auto & label : labels)
