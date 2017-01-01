@@ -117,7 +117,7 @@ public:
     * @return
     *   The distance from the baseline to the lowest descenders in pt.
     *   Note: this value is usually negative (if the fonts lowest
-    *   descenders are below the basline).
+    *   descenders are below the baseline).
     */
     float descent() const;
 
@@ -131,7 +131,7 @@ public:
     * @param[in] descent
     *   The distance from the baseline to the lowest descenders in pt.
     *   Note: this value is usually negative (if the fonts lowest
-    *   descenders are below the basline).
+    *   descenders are below the baseline).
     */
     void setDescent(float descent);
 
@@ -161,7 +161,7 @@ public:
 
     /**
     * @brief
-    *   The relative baseline-to-basline distance w.r.t. the font's size.
+    *   The relative baseline-to-baseline distance w.r.t. the font's size.
     *
     *   The linespace relative linespace is derived as follows:
     *       linespace = size / lineHeight;
@@ -201,10 +201,10 @@ public:
 
     /**
     * @brief
-    *   Set the baseline-to-basline distance in pt.
+    *   Set the baseline-to-baseline distance in pt.
     *
     * @param[in] lineHeight
-    *   The line height (baseline-to-basline distance) in pt.
+    *   The line height (baseline-to-baseline distance) in pt.
     *   Note: negative values will result in negative linegap.
     */
     void setLineHeight(float lineHeight);
@@ -352,11 +352,11 @@ public:
     *   Kerning for a glyph and a subsequent glyph in pt.
     *
     *   If the glyph or the subsequent glyph are unknown to this font
-    *   face (assertion), 0.f will be returned. For more detais on
+    *   face (assertion), 0.f will be returned. For more details on
     *   kerning, refer to the Glyph class.
     *
     * @param[in] index
-    *   The current glyph index (e.g., of the curren pen-position).
+    *   The current glyph index (e.g., of the current pen-position).
     * @param[in] subsequentIndex
     *   The glyph index of the subsequent/next glyph.
     *
@@ -373,7 +373,7 @@ public:
     *   Set the kerning for a glyph w.r.t. to a subsequent glyph in pt.
     *
     *   If the glyph is known to this font face, the values are
-    *   forwared to the glyphs kerning setter (see Glyph for more information).
+    *   forwarded to the glyphs kerning setter (see Glyph for more information).
     *
     * @param[in] index
     *   The target glyph index.

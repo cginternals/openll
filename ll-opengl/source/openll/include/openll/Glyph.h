@@ -39,7 +39,7 @@ public:
     *
     *   The upper left position refers to the glyph-texture that is
     *   specified by a font face (see FontFace). It is the u and v
-    *   coordinates poiting to the glyphs sub-texture within the
+    *   coordinates pointing to the glyphs sub-texture within the
     *   texture atlas. The coordinates are normalized in [0;1].
     *
     * @return
@@ -55,7 +55,7 @@ public:
     * @param[in] origin
     *   The origin denotes the upper left position that refers to
     *   the glyph-texture that is specified by a font face (see
-    *   FontFace). It is the u and v coordinates poiting to the
+    *   FontFace). It is the u and v coordinates pointing to the
     *   glyphs sub-texture within the texture atlas. The
     *   coordinates are normalized in [0;1].
     */
@@ -66,7 +66,7 @@ public:
     *   Width and height of the glyph's sub-texture.
     *
     *   In combination with the sub-texture offset (subTextureOffset)
-    *   the sub-texture rectangle is implictily fully specified in
+    *   the sub-texture rectangle is implicitly fully specified in
     *   normalized texture coordinates.
     *
     *   Note: the extent comprises the font face's padding.
@@ -82,7 +82,7 @@ public:
     *
     * @param[in] extent
     *   The extent, in combination with the sub-texture offset
-    *   (subTextureOffset), implictily specifies the sub-texture
+    *   (subTextureOffset), implicitly specifies the sub-texture
     *   rectangle in normalized texture coordinates.
     *
     *   Note: the extent comprises the font face's padding.
@@ -150,7 +150,7 @@ public:
     * @param[in] fontAscent
     *   The font face's (FontFace) ascent in pt.
     * @param[in] xOffset
-    *   The glyphs horizotnal offset without left padding.
+    *   The glyphs horizontal offset without left padding.
     * @param[in] yOffset
     *   The glyphs vertical offset w.r.t. the font's topmost
     *   descendends, without the font's top padding in pt.
