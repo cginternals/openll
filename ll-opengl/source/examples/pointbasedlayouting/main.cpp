@@ -227,13 +227,21 @@ int main()
                     algorithmName = "random";
                     break;
                 case 3:
-                    gloperate_text::layout::greedy(labels);
+                    gloperate_text::layout::greedy(labels, gloperate_text::layout::overlapCount);
                     algorithmName = "greedy";
                     break;
                 case 4:
-                default:
-                    gloperate_text::layout::discreteGradientDescent(labels);
+                    gloperate_text::layout::greedy(labels, gloperate_text::layout::overlapArea);
+                    algorithmName = "greedy with area";
+                    break;
+                case 5:
+                    gloperate_text::layout::discreteGradientDescent(labels, gloperate_text::layout::overlapCount);
                     algorithmName = "discreteGradientDescent";
+                    break;
+                case 6:
+                default:
+                    gloperate_text::layout::discreteGradientDescent(labels, gloperate_text::layout::overlapArea);
+                    algorithmName = "discreteGradientDescent with area";
                     break;
             }
             benchmark(labels, algorithmName);

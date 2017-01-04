@@ -2,6 +2,7 @@
 
 #include <random>
 #include <algorithm>
+#include <limits>
 
 #include <openll/GlyphSequence.h>
 #include <openll/FontFace.h>
@@ -40,7 +41,16 @@ void random(std::vector<Label> & labels)
     }
 }
 
-void greedy(std::vector<Label> & labels)
+float overlapArea(const LabelArea & target, const LabelArea & other)
+{
+    return target.overlapArea(other);
+}
+float overlapCount(const LabelArea & target, const LabelArea & other)
+{
+    return target.overlaps(other) ? 1.f : 0.f;
+}
+
+void greedy(std::vector<Label> & labels, ScoringFunction scoringFunction)
 {
     std::vector<LabelArea> labelAreas;
     for (auto & label : labels)
@@ -50,16 +60,19 @@ void greedy(std::vector<Label> & labels)
             label.pointLocation, label.pointLocation - glm::vec2(extent.x, 0),
             label.pointLocation - glm::vec2(0, extent.y), label.pointLocation - extent
         };
-        int bestCount = labelAreas.size() + 1;
+        float bestScore = std::numeric_limits<float>::max();
         glm::vec2 bestOrigin;
         for (const auto& origin : possibleOrigins)
         {
             const LabelArea newLabelArea {origin, extent};
-            const auto count = std::count_if(labelAreas.begin(), labelAreas.end(),
-                [&](const LabelArea& other) { return newLabelArea.overlaps(other); });
-            if (count < bestCount)
+            float score = 0.f;
+            for (const auto& other : labelAreas)
             {
-                bestCount = count;
+                score += scoringFunction(newLabelArea, other);
+            }
+            if (score < bestScore)
+            {
+                bestScore = score;
                 bestOrigin = origin;
             }
         }
@@ -68,7 +81,7 @@ void greedy(std::vector<Label> & labels)
     }
 }
 
-void discreteGradientDescent(std::vector<Label> & labels)
+void discreteGradientDescent(std::vector<Label> & labels, ScoringFunction scoringFunction)
 {
     std::vector<std::vector<LabelArea>> labelAreas;
     std::vector<int> chosenLabels;
@@ -98,32 +111,29 @@ void discreteGradientDescent(std::vector<Label> & labels)
     // upper limit to iterations
     for (int iteration = 0; iteration < 1000; ++iteration)
     {
-        int bestImprovement = 0;
+        float bestImprovement = 0.f;
         int bestLabelIndex = -1;
         int bestLabelPositionIndex = -1;
         size_t labelIndex = 0;
         for (auto & singleLabelAreas : labelAreas)
         {
-            std::vector<int> collisions;
+            std::vector<float> scores;
             int bestIndex = 0;
             for (auto & labelArea : singleLabelAreas)
             {
-                int count = 0;
+                float score = 0.f;
                 for (size_t i = 0; i < labels.size(); ++i)
                 {
                     if (i == labelIndex) continue;
-                    if (labelArea.overlaps(chosenLabel(i)))
-                    {
-                        ++count;
-                    }
+                    score += scoringFunction(labelArea, chosenLabel(i));
                 }
-                collisions.push_back(count);
-                if (count < collisions[bestIndex])
+                scores.push_back(score);
+                if (score < scores[bestIndex])
                 {
-                    bestIndex = collisions.size() - 1;
+                    bestIndex = scores.size() - 1;
                 }
             }
-            int improvement = collisions[chosenLabels[labelIndex]] - collisions[bestIndex];
+            float improvement = scores[chosenLabels[labelIndex]] - scores[bestIndex];
             if (improvement > bestImprovement)
             {
                 bestImprovement = improvement;
