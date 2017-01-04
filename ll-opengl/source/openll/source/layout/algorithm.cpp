@@ -13,16 +13,18 @@
 namespace gloperate_text
 {
 
+namespace layout
+{
 
-void constantLayout(std::vector<Label> & labels)
+void constant(std::vector<Label> & labels)
 {
     for (auto & label : labels)
     {
-        label.placement = {{0.f, 0.f}, Alignment::LeftAligned, LineAnchor::Bottom, true};
+        label.placement = {{0.f, 0.f}, Alignment::LeftAligned, LineAnchor::Baseline, true};
     }
 }
 
-void randomLayout(std::vector<Label> & labels)
+void random(std::vector<Label> & labels)
 {
     std::default_random_engine generator;
     std::bernoulli_distribution bool_distribution;
@@ -32,11 +34,11 @@ void randomLayout(std::vector<Label> & labels)
         glm::vec2 offset;
         offset.x = bool_distribution(generator) ? -extent.x : 0.f;
         offset.y = bool_distribution(generator) ? -extent.y : 0.f;
-        label.placement = {offset, Alignment::LeftAligned, LineAnchor::Bottom, true};
+        label.placement = {offset, Alignment::LeftAligned, LineAnchor::Baseline, true};
     }
 }
 
-void greedyLayout(std::vector<Label> & labels)
+void greedy(std::vector<Label> & labels)
 {
     std::vector<LabelArea> labelAreas;
     for (auto & label : labels)
@@ -59,9 +61,16 @@ void greedyLayout(std::vector<Label> & labels)
                 bestOrigin = origin;
             }
         }
-        label.placement = {bestOrigin - label.pointLocation, Alignment::LeftAligned, LineAnchor::Bottom, true};
+        label.placement = {bestOrigin - label.pointLocation, Alignment::LeftAligned, LineAnchor::Baseline, true};
         labelAreas.push_back({bestOrigin, extent});
     }
 }
 
+void OPENLL_API discreteGradientDescent(std::vector<Label> & labels)
+{
+
 }
+
+} // namespace layout
+
+} // namespace gloperate_text

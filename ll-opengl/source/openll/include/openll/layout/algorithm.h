@@ -7,13 +7,16 @@
 namespace gloperate_text
 {
 
-class FontFace;
-
 struct Label;
-struct LabelPlacement;
 
-void OPENLL_API constantLayout(std::vector<Label> & labels);
-void OPENLL_API randomLayout(std::vector<Label> & labels);
-void OPENLL_API greedyLayout(std::vector<Label> & labels);
+namespace layout
+{
+
+void OPENLL_API constant(std::vector<Label> & labels);
+void OPENLL_API random(std::vector<Label> & labels);
+void OPENLL_API greedy(std::vector<Label> & labels);
+void OPENLL_API discreteGradientDescent(std::vector<Label> & labels);
+
+}
 
 }

@@ -219,16 +219,16 @@ int main()
             switch (g_algorithmID)
             {
                 case 1:
-                    gloperate_text::constantLayout(labels);
+                    gloperate_text::layout::constant(labels);
                     algorithmName = "constantLayout";
                     break;
                 case 2:
-                    gloperate_text::randomLayout(labels);
+                    gloperate_text::layout::random(labels);
                     algorithmName = "randomLayout";
                     break;
                 case 3:
                 default:
-                    gloperate_text::greedyLayout(labels);
+                    gloperate_text::layout::greedy(labels);
                     algorithmName = "greedyLayout";
                     break;
             }
