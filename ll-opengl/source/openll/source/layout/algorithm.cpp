@@ -76,6 +76,8 @@ void discreteGradientDescent(std::vector<Label> & labels)
 
     std::default_random_engine generator;
 
+    // generate LabelArea objects for all possible label placements
+    // generate random start layout
     for (auto & label : labels)
     {
         labelAreas.push_back({});
@@ -93,12 +95,13 @@ void discreteGradientDescent(std::vector<Label> & labels)
         chosenLabels.push_back(value);
     }
 
-    for (int i = 0; i < 100; ++i)
+    // upper limit to iterations
+    for (int iteration = 0; iteration < 1000; ++iteration)
     {
         int bestImprovement = 0;
         int bestLabelIndex = -1;
         int bestLabelPositionIndex = -1;
-        int index = 0;
+        size_t labelIndex = 0;
         for (auto & singleLabelAreas : labelAreas)
         {
             std::vector<int> collisions;
@@ -108,6 +111,7 @@ void discreteGradientDescent(std::vector<Label> & labels)
                 int count = 0;
                 for (size_t i = 0; i < labels.size(); ++i)
                 {
+                    if (i == labelIndex) continue;
                     if (labelArea.overlaps(chosenLabel(i)))
                     {
                         ++count;
@@ -119,15 +123,16 @@ void discreteGradientDescent(std::vector<Label> & labels)
                     bestIndex = collisions.size() - 1;
                 }
             }
-            int improvement = collisions[chosenLabels[index]] - collisions[bestIndex];
+            int improvement = collisions[chosenLabels[labelIndex]] - collisions[bestIndex];
             if (improvement > bestImprovement)
             {
                 bestImprovement = improvement;
-                bestLabelIndex = index;
+                bestLabelIndex = labelIndex;
                 bestLabelPositionIndex = bestIndex;
             }
-            ++index;
+            ++labelIndex;
         }
+        // local minimum found
         if (bestImprovement == 0) break;
         chosenLabels[bestLabelIndex] = bestLabelPositionIndex;
     }
