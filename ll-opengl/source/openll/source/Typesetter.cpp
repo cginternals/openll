@@ -31,18 +31,24 @@ std::pair<glm::vec2, glm::vec2> Typesetter::rectangle(
     glm::vec3 origin)
 {
     auto extent = Typesetter::extent(sequence);
-    auto offset = 0.f;
+    auto offset = sequence.fontFace()->lineHeight() - sequence.fontFace()->base();
 
     switch (sequence.lineAnchor())
     {
     case LineAnchor::Ascent:
-        offset = sequence.fontFace()->ascent();
+        offset += sequence.fontFace()->ascent();
         break;
     case LineAnchor::Center:
-        offset = sequence.fontFace()->size() * 0.5f + sequence.fontFace()->descent();
+        offset += sequence.fontFace()->size() * 0.5f + sequence.fontFace()->descent();
         break;
     case LineAnchor::Descent:
-        offset = sequence.fontFace()->descent();
+        offset += sequence.fontFace()->descent();
+        break;
+    case LineAnchor::Top:
+        offset += sequence.fontFace()->base();
+        break;
+    case LineAnchor::Bottom:
+        offset += sequence.fontFace()->base() - sequence.fontFace()->lineHeight();
         break;
     case LineAnchor::Baseline:
     default:
@@ -55,7 +61,7 @@ std::pair<glm::vec2, glm::vec2> Typesetter::rectangle(
     switch (sequence.alignment())
     {
     case Alignment::LeftAligned:
-    offset = 0.f;
+        offset = 0.f;
         break;
     case Alignment::Centered:
         offset = .5f * extent.x;
@@ -208,16 +214,13 @@ inline void Typesetter::typeset_glyph(
     const auto & padding = fontFace.glyphTexturePadding();
     vertex->origin    = glm::vec3(pen, 0.f);
     vertex->origin.x += glyph.bearing().x - padding[3];
-    vertex->origin.y += glyph.bearing().y - glyph.extent().y - padding[2];
+    vertex->origin.y += glyph.bearing().y - glyph.extent().y + padding[0];
 
-    vertex->vtan   = glm::vec3(glyph.extent().x + padding[1] + padding[3], 0.f, 0.f);
-    vertex->vbitan = glm::vec3(0.f, glyph.extent().y + padding[0] + padding[2], 0.f);
+    vertex->vtan   = glm::vec3(glyph.extent().x, 0.f, 0.f);
+    vertex->vbitan = glm::vec3(0.f, glyph.extent().y, 0.f);
 
-    const auto extentScale = 1.f / glm::vec2(fontFace.glyphTextureExtent());
-    const auto ll = glyph.subTextureOrigin()
-        - glm::vec2(padding[3], padding[2]) * extentScale;
-    const auto ur = glyph.subTextureOrigin() + glyph.subTextureExtent()
-        + glm::vec2(padding[1], padding[0]) * extentScale;
+    const auto ll = glyph.subTextureOrigin();
+    const auto ur = glyph.subTextureOrigin() + glyph.subTextureExtent();
     vertex->uvRect = glm::vec4(ll, ur);
 }
 
@@ -278,6 +281,12 @@ inline void Typesetter::anchor_transform(
         break;
     case LineAnchor::Descent:
         offset = sequence.fontFace()->descent();
+        break;
+    case LineAnchor::Top:
+        offset = sequence.fontFace()->base();
+        break;
+    case LineAnchor::Bottom:
+        offset = sequence.fontFace()->base() - sequence.fontFace()->lineHeight();
         break;
     case LineAnchor::Baseline:
     default:

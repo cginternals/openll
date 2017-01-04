@@ -143,19 +143,19 @@ public:
     *   texture's padding and is the measured w.r.t. baseline.
     *
     *   The vertical bearing is computed as follows:
-    *       bearingY = fontAscent - (yOffset - top padding)
+    *       bearingY = fontBase - (yOffset - top padding)
     *   The horizontal bearing equals the xOffset:
     *       bearingX = xOffset - left padding:
     *
-    * @param[in] fontAscent
-    *   The font face's (FontFace) ascent in pt.
+    * @param[in] fontBase
+    *   The font face's (FontFace) base-to-top distance in pt.
     * @param[in] xOffset
     *   The glyphs horizontal offset without left padding.
     * @param[in] yOffset
     *   The glyphs vertical offset w.r.t. the font's topmost
     *   descendends, without the font's top padding in pt.
     */
-    void setBearing(float fontAscent, float xOffset, float yOffset);
+    void setBearing(float fontBase, float xOffset, float yOffset);
 
     /**
     * @brief

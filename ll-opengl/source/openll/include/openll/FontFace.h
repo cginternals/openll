@@ -85,6 +85,30 @@ public:
 
     /**
     * @brief
+    *   The font's base in pt.
+    *
+    *   The base is the distance from the baseline to the top of
+    *   the line in pt.
+    *
+    * @return
+    *   The distance from the baseline to the top of the line in pt.
+    */
+    float base() const;
+
+    /**
+    * @brief
+    *   Set the font's base in pt.
+    *
+    *   The base is the distance from the baseline to the top of
+    *   the line in pt.
+    *
+    * @oaram[in] base
+    *   The distance from the baseline to the top of the line in pt.
+    */
+    void setBase(float base);
+
+    /**
+    * @brief
     *   The font's ascent in pt.
     *
     *   The ascent is the distance from the baseline to the tops of
@@ -387,6 +411,7 @@ public:
 
 protected:
 
+    float m_base;
     float m_ascent;
     float m_descent;
     float m_linegap;

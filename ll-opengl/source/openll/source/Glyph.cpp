@@ -69,10 +69,10 @@ void Glyph::setBearing(const glm::vec2 & bearing)
     m_bearing = bearing;
 }
 
-void Glyph::setBearing(const float fontAscent, const float xOffset, const float yOffset)
+void Glyph::setBearing(const float fontBase, const float xOffset, const float yOffset)
 {
     m_bearing.x = xOffset;
-    m_bearing.y = fontAscent - yOffset;
+    m_bearing.y = fontBase - yOffset;
 }
 
 const glm::vec2 & Glyph::extent() const

@@ -18,7 +18,7 @@ void constantLayout(std::vector<Label> & labels)
 {
     for (auto & label : labels)
     {
-        label.placement = {{0.f, 0.f}, Alignment::LeftAligned, LineAnchor::Descent, true};
+        label.placement = {{0.f, 0.f}, Alignment::LeftAligned, LineAnchor::Bottom, true};
     }
 }
 
@@ -32,7 +32,7 @@ void randomLayout(std::vector<Label> & labels)
         glm::vec2 offset;
         offset.x = bool_distribution(generator) ? -extent.x : 0.f;
         offset.y = bool_distribution(generator) ? -extent.y : 0.f;
-        label.placement = {offset, Alignment::LeftAligned, LineAnchor::Descent, true};
+        label.placement = {offset, Alignment::LeftAligned, LineAnchor::Bottom, true};
     }
 }
 
@@ -59,7 +59,7 @@ void greedyLayout(std::vector<Label> & labels)
                 bestOrigin = origin;
             }
         }
-        label.placement = {bestOrigin - label.pointLocation, Alignment::LeftAligned, LineAnchor::Descent, true};
+        label.placement = {bestOrigin - label.pointLocation, Alignment::LeftAligned, LineAnchor::Bottom, true};
         labelAreas.push_back({bestOrigin, extent});
     }
 }

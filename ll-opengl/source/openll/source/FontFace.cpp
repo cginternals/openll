@@ -23,6 +23,17 @@ float FontFace::size() const
     return m_ascent - m_descent;
 }
 
+float FontFace::base() const
+{
+    return m_base;
+}
+
+void FontFace::setBase(const float base)
+{
+    assert(base > 0.f);
+    m_base = base;
+}
+
 float FontFace::ascent() const
 {
     return m_ascent;

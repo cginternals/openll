@@ -152,10 +152,11 @@ void FontLoader::handleInfo(std::stringstream & stream, FontFace & fontFace, flo
 
 void FontLoader::handleCommon(std::stringstream & stream, FontFace & fontFace, const float fontSize) const
 {
-    auto pairs = readKeyValuePairs(stream, { "lineHeight", "base", "scaleW", "scaleH" });
+    auto pairs = readKeyValuePairs(stream, { "lineHeight", "base", "ascent", "descent", "scaleW", "scaleH" });
 
-    fontFace.setAscent(fromString<float>(pairs.at("base")));
-    fontFace.setDescent(fontFace.ascent() - fontSize);
+    fontFace.setBase(fromString<float>(pairs.at("base")));
+    fontFace.setAscent(fromString<float>(pairs.at("ascent")));
+    fontFace.setDescent(fromString<float>(pairs.at("descent")));
 
     assert(fontFace.size() > 0.f);
     fontFace.setLineHeight(fromString<float>(pairs.at("lineHeight")));
@@ -218,7 +219,7 @@ void FontLoader::handleChar(std::stringstream & stream, FontFace & fontFace) con
     glyph.setExtent(extent);
     glyph.setSubTextureExtent(extent * extentScale);
 
-    glyph.setBearing(fontFace.ascent(),
+    glyph.setBearing(fontFace.base(),
         fromString<float>(pairs.at("xoffset")),
         fromString<float>(pairs.at("yoffset")));
 
