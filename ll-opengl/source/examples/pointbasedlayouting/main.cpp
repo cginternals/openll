@@ -220,16 +220,20 @@ int main()
             {
                 case 1:
                     gloperate_text::layout::constant(labels);
-                    algorithmName = "constantLayout";
+                    algorithmName = "constant";
                     break;
                 case 2:
                     gloperate_text::layout::random(labels);
-                    algorithmName = "randomLayout";
+                    algorithmName = "random";
                     break;
                 case 3:
-                default:
                     gloperate_text::layout::greedy(labels);
-                    algorithmName = "greedyLayout";
+                    algorithmName = "greedy";
+                    break;
+                case 4:
+                default:
+                    gloperate_text::layout::discreteGradientDescent(labels);
+                    algorithmName = "discreteGradientDescent";
                     break;
             }
             benchmark(labels, algorithmName);

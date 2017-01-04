@@ -10,6 +10,8 @@
 #include <openll/Typesetter.h>
 
 
+
+
 namespace gloperate_text
 {
 
@@ -20,7 +22,7 @@ void constant(std::vector<Label> & labels)
 {
     for (auto & label : labels)
     {
-        label.placement = {{0.f, 0.f}, Alignment::LeftAligned, LineAnchor::Baseline, true};
+        label.placement = {{0.f, 0.f}, Alignment::LeftAligned, LineAnchor::Bottom, true};
     }
 }
 
@@ -34,7 +36,7 @@ void random(std::vector<Label> & labels)
         glm::vec2 offset;
         offset.x = bool_distribution(generator) ? -extent.x : 0.f;
         offset.y = bool_distribution(generator) ? -extent.y : 0.f;
-        label.placement = {offset, Alignment::LeftAligned, LineAnchor::Baseline, true};
+        label.placement = {offset, Alignment::LeftAligned, LineAnchor::Bottom, true};
     }
 }
 
@@ -61,14 +63,79 @@ void greedy(std::vector<Label> & labels)
                 bestOrigin = origin;
             }
         }
-        label.placement = {bestOrigin - label.pointLocation, Alignment::LeftAligned, LineAnchor::Baseline, true};
+        label.placement = {bestOrigin - label.pointLocation, Alignment::LeftAligned, LineAnchor::Bottom, true};
         labelAreas.push_back({bestOrigin, extent});
     }
 }
 
-void OPENLL_API discreteGradientDescent(std::vector<Label> & labels)
+void discreteGradientDescent(std::vector<Label> & labels)
 {
+    std::vector<std::vector<LabelArea>> labelAreas;
+    std::vector<int> chosenLabels;
+    auto chosenLabel = [&](int i) { return labelAreas[i][chosenLabels[i]]; };
 
+    std::default_random_engine generator;
+
+    for (auto & label : labels)
+    {
+        labelAreas.push_back({});
+        const auto extent = Typesetter::extent(label.sequence);
+        const std::vector<glm::vec2> possibleOrigins {
+            label.pointLocation, label.pointLocation - glm::vec2(extent.x, 0),
+            label.pointLocation - glm::vec2(0, extent.y), label.pointLocation - extent
+        };
+        for (const auto& origin : possibleOrigins)
+        {
+            labelAreas.back().push_back({origin, extent});
+        }
+        std::uniform_int_distribution<int> distribution(0, labelAreas.back().size() - 1);
+        const auto value = distribution(generator);
+        chosenLabels.push_back(value);
+    }
+
+    for (int i = 0; i < 100; ++i)
+    {
+        int bestImprovement = 0;
+        int bestLabelIndex = -1;
+        int bestLabelPositionIndex = -1;
+        int index = 0;
+        for (auto & singleLabelAreas : labelAreas)
+        {
+            std::vector<int> collisions;
+            int bestIndex = 0;
+            for (auto & labelArea : singleLabelAreas)
+            {
+                int count = 0;
+                for (size_t i = 0; i < labels.size(); ++i)
+                {
+                    if (labelArea.overlaps(chosenLabel(i)))
+                    {
+                        ++count;
+                    }
+                }
+                collisions.push_back(count);
+                if (count < collisions[bestIndex])
+                {
+                    bestIndex = collisions.size() - 1;
+                }
+            }
+            int improvement = collisions[chosenLabels[index]] - collisions[bestIndex];
+            if (improvement > bestImprovement)
+            {
+                bestImprovement = improvement;
+                bestLabelIndex = index;
+                bestLabelPositionIndex = bestIndex;
+            }
+            ++index;
+        }
+        if (bestImprovement == 0) break;
+        chosenLabels[bestLabelIndex] = bestLabelPositionIndex;
+    }
+
+    for (size_t i = 0; i < labels.size(); ++i)
+    {
+        labels[i].placement = {chosenLabel(i).origin - labels[i].pointLocation, Alignment::LeftAligned, LineAnchor::Bottom, true};
+    }
 }
 
 } // namespace layout
