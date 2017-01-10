@@ -1,7 +1,7 @@
 
-# 
+#
 # External dependencies
-# 
+#
 
 find_package(cpplocate REQUIRED)
 find_package(GLM REQUIRED)
@@ -18,16 +18,16 @@ find_package(GLFW REQUIRED)
 set(target labeling-at-point)
 
 # Exit here if required dependencies are not met
-message(STATUS "Example ${target}")
+message(STATUS "Plugin ${target}")
 
 
-# 
+#
 # Sources
-# 
+#
 
 set(sources
     main.cpp
-    datapath.inl
+	datapath.inl
 )
 
 
