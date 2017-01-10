@@ -1,0 +1,53 @@
+---
+layout: compress
+---
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>{{ site.title }}</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/bootstrap/4.0.0-alpha.5/css/bootstrap-flex.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+
+  <noscript><style>.js-only { display: none; }</style></noscript>
+
+</head>
+
+
+<body onload="">
+
+<section id="header" class="container mt-3 mb-3">
+    <header>
+      <div class="row">
+        <div class="col-md-8">
+          <h1>{{ site.title }}</h1>
+        </div>
+      </div>
+    </header>
+</section>
+
+{{ page.content }}
+
+<footer>
+  <div class="container">
+    <div class="row flex-items-xs-center">
+      <div class="col-xs-12">
+        <small>This website was created by <a href="https://github.com/cginternals/openll/tree/master/fontface-generator">CG Internals</a> and is hosted via <a href="https://pages.github.com/">GitHub Pages</a> for free. Last updated on <a href="">{{ site.time | date: "%x" }}</a>.</small>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/g/tether@1.4.0,jquery@3.1.1(jquery.slim.min.js),bootstrap@4.0.0-alpha.5"></script>
+
+<script src="js/opentype.min.js"></script>
+<script src="js/fontface.js"></script>
+
+</body>
+
+</html>
