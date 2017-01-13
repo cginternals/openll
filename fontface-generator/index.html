@@ -2,6 +2,12 @@
 layout: default
 ---
 
+<head>
+
+  <link rel="stylesheet" type="text/css" href="css/styles.css">
+
+</head>
+
 <section id="requirements" class="container mt-3">
 
   <div class="row">
@@ -9,8 +15,8 @@ layout: default
       <h5>Plan | Requirements</h5>
 
       <ol>
-        <li><a href="#load-font">A font can be loaded from file. </a></li>
-        <li><a href="#display-font-information">Information of the loaded font is displayed.</a></li>
+        <li><del><a href="#load-font">A font can be loaded from file. </a></d></li>
+        <li><del><a href="#display-font-information">Information of the loaded font is displayed.</a></del></li>
         <li><a href="#todo">ToDo</a></li>
       </ol>
 
@@ -31,8 +37,9 @@ layout: default
           <label class="col-xs-4 custom-file">
             <input type="file" id="file" class="custom-file-input">
             <span class="custom-file-control"></span>
-            <small class="form-text text-muted mt-1">Supported file formats: ToDo .</small>
+            <small class="form-text text-muted mt-1">Supported file formats: ttf, ...  ToDo </small>
           </label>
+          <div class="form-text" id="message"></div>
         </div>
       </form>
 
@@ -48,27 +55,57 @@ layout: default
     <div class="col-xs">
       <h5>Font Information</h5>
 
-<pre>
-ToDo
-...
-</pre>
+      <div id="font-info"> </div>
 
     </div>
   </div>
 
 </section>
 
+<section id="display-detailed-font-information" class="container mt-3">
+  <div class="row">
+    <div class="col-xs">
+      <h3>Detailed font information</h3>
+      
+      <div id="font-data">
+        <h3 class="collapsed">Font Header table <a href="https://www.microsoft.com/typography/OTSPEC/head.htm" target="_blank">head</a></h3>
+        <dl id="head-table"><dt>Undefined</dt></dl>
+        <h3 class="collapsed">Horizontal Header table <a href="https://www.microsoft.com/typography/OTSPEC/hhea.htm" target="_blank">hhea</a></h3>
+        <dl id="hhea-table"><dt>Undefined</dt></dl>
+        <h3 class="collapsed">Maximum Profile table <a href="https://www.microsoft.com/typography/OTSPEC/maxp.htm" target="_blank">maxp</a></h3>
+        <dl id="maxp-table"><dt>Undefined</dt></dl>
+        <h3 class="collapsed">Naming table <a href="https://www.microsoft.com/typography/OTSPEC/name.htm" target="_blank">name</a></h3>
+        <dl id="name-table"><dt>Undefined</dt></dl>
+        <h3 class="collapsed">OS/2 and Windows Metrics table <a href="https://www.microsoft.com/typography/OTSPEC/os2.htm" target="_blank">OS/2</a></h3>
+        <dl id="os2-table"><dt>Undefined</dt></dl>
+        <h3 class="collapsed">PostScript table <a href="https://www.microsoft.com/typography/OTSPEC/post.htm" target="_blank">post</a></h3>
+        <dl id="post-table"><dt>Undefined</dt></dl>
+        <h3 class="collapsed">Character To Glyph Index Mapping Table <a href="https://www.microsoft.com/typography/OTSPEC/cmap.htm" target="_blank">cmap</a></h3>
+        <dl id="cmap-table"><dt>Undefined</dt></dl>
+        <h3 class="collapsed">Font Variations table <a href="https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6fvar.html" target="_blank">fvar</a></h3>
+        <dl id="fvar-table"><dt>Undefined</dt></dl>
+        <h3 class="collapsed">Metadata table <a href="https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6meta.html" target="_blank">meta</a></h3>
+        <dl id="meta-table"><dt>Undefined</dt></dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
 
 <!-- continue here with section scheme used above -->
 
 <section id="todo" class="container mt-3">
-
   <div class="row">
     <div class="col-xs">
       <h5>ToDo</h5>
       <p>...</p>
     </div>
   </div>
-
+  <script src="js/opentype.min.js"></script>
+  <script src="js/fontface.js"></script>
 </section>
 
