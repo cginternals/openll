@@ -200,7 +200,7 @@ int main()
     std::string dataPath = moduleInfo.value("dataPath");
 
     gloperate_text::FontLoader loader;
-    auto font = loader.load(dataPath + "/fonts/opensansr36.fnt");
+    auto font = loader.load(dataPath + "/fonts/opensansr36/opensansr36.fnt");
     gloperate_text::GlyphRenderer renderer;
     gloperate_text::GlyphVertexCloud cloud;
     std::vector<gloperate_text::Label> labels;

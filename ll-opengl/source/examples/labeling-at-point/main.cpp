@@ -140,8 +140,8 @@ void initialize()
 	const auto dataPath = common::retrieveDataPath("ll-opengl", "dataPath");
 
 	gloperate_text::FontLoader loader;
-	g_font = loader.load(dataPath + "/fonts/opensansr36.fnt");
-	
+	g_font = loader.load(dataPath + "/fonts/opensansr36/opensansr36.fnt");
+
 	//initialize all used configs. There is no need to initialize them and never change them. It's just this example.
 	auto defaultConfig = gloperate_text::GlyphSequenceConfig(g_font);
 	g_configs.push_back(defaultConfig);
