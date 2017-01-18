@@ -11,8 +11,6 @@
 #include <openll/Typesetter.h>
 
 
-
-
 namespace gloperate_text
 {
 
@@ -159,8 +157,8 @@ void simulatedAnnealing(std::vector<Label> & labels, ScoringFunction scoringFunc
     // based on https://www.eecs.harvard.edu/shieber/Biblio/Papers/tog-final.pdf
 
     std::vector<std::vector<LabelArea>> labelAreas;
-    std::vector<int> chosenLabels;
-    auto chosenLabel = [&](int i) { return labelAreas[i][chosenLabels[i]]; };
+    std::vector<unsigned int> chosenLabels;
+    auto chosenLabel = [&](unsigned int i) { return labelAreas[i][chosenLabels[i]]; };
 
     std::default_random_engine generator;
 
@@ -183,18 +181,18 @@ void simulatedAnnealing(std::vector<Label> & labels, ScoringFunction scoringFunc
         chosenLabels.push_back(value);
     }
 
-    std::uniform_int_distribution<int> labelDistribution(0, labels.size() - 1);
+    std::uniform_int_distribution<unsigned int> labelDistribution(0, labels.size() - 1);
 
     float temperature = 0.91023922662f;
-    int temperatureChanges = 0;
-    int changesAtTemperature = 0;
-    int stepsAtTemperature = 0;
+    unsigned int temperatureChanges = 0;
+    unsigned int changesAtTemperature = 0;
+    unsigned int stepsAtTemperature = 0;
 
     while (true)
     {
         const auto labelIndex = labelDistribution(generator);
-        std::uniform_int_distribution<int> positionDistribution(0, labelAreas[labelIndex].size() - 1);
-        int newPosition = 0;
+        std::uniform_int_distribution<unsigned int> positionDistribution(0, labelAreas[labelIndex].size() - 1);
+        size_t newPosition = 0;
         do
         {
             newPosition = positionDistribution(generator);

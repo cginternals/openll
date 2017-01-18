@@ -25,8 +25,8 @@ public:
 
 protected:
 
-    void handleInfo    (std::stringstream & stream, FontFace & fontFace, float & fontSize) const;
-    void handleCommon  (std::stringstream & stream, FontFace & fontFace, float fontSize) const;
+    void handleInfo    (std::stringstream & stream, FontFace & fontFace) const;
+    void handleCommon  (std::stringstream & stream, FontFace & fontFace) const;
     void handlePage    (std::stringstream & stream, FontFace & fontFace
         , const std::string & filename) const;
     void handleChar    (std::stringstream & stream, FontFace & fontFace) const;

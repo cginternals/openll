@@ -90,7 +90,6 @@ FontFace * FontLoader::load(const std::string & filename) const
 
     auto line = std::string();
     auto identifier = std::string();
-    auto fontSize = 0.f;
 
     while (std::getline(in, line))
     {
@@ -105,11 +104,11 @@ FontFace * FontLoader::load(const std::string & filename) const
 
         if      (identifier == "info")
         {
-            handleInfo(ss, *fontFace, fontSize);
+            handleInfo(ss, *fontFace);
         }
         else if (identifier == "common")
         {
-            handleCommon(ss, *fontFace, fontSize);
+            handleCommon(ss, *fontFace);
         }
         else if (identifier == "page")
         {
@@ -132,11 +131,9 @@ FontFace * FontLoader::load(const std::string & filename) const
     return nullptr;
 }
 
-void FontLoader::handleInfo(std::stringstream & stream, FontFace & fontFace, float & fontSize) const
+void FontLoader::handleInfo(std::stringstream & stream, FontFace & fontFace) const
 {
-    auto pairs = readKeyValuePairs(stream, { "size", "padding" });
-
-    fontSize = fromString<float>(pairs.at("size"));
+    auto pairs = readKeyValuePairs(stream, { "padding" });
 
     auto values = split(pairs.at("padding"), ',');
     assert(values.size() == 4);
@@ -150,7 +147,7 @@ void FontLoader::handleInfo(std::stringstream & stream, FontFace & fontFace, flo
     fontFace.setGlyphTexturePadding(padding);
 }
 
-void FontLoader::handleCommon(std::stringstream & stream, FontFace & fontFace, const float fontSize) const
+void FontLoader::handleCommon(std::stringstream & stream, FontFace & fontFace) const
 {
     auto pairs = readKeyValuePairs(stream, { "lineHeight", "base", "ascent", "descent", "scaleW", "scaleH" });
 
