@@ -43,6 +43,7 @@ set(headers
     ${include_path}/GlyphSequence.h
 	${include_path}/GlyphSequenceConfig.h
     ${include_path}/GlyphVertexCloud.h
+    ${include_path}/SuperSampling.h
     ${include_path}/Typesetter.h
 
     ${include_path}/Drawable.h

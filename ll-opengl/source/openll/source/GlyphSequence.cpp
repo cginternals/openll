@@ -22,6 +22,7 @@ GlyphSequence::GlyphSequence()
 , m_fontColor(glm::vec4(0.f, 0.f, 0.f, 1.0))
 , m_fontFace(nullptr)
 , m_fontSize(12.f)
+, m_superSampling(SuperSampling::Quincunx)
 , m_transformValid(false)
 
 {

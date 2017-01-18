@@ -32,6 +32,7 @@ public:
         // vec2 lowerLeft and vec2 upperRight in glyph texture (uv)
         glm::vec4 uvRect;
         glm::vec4 fontColor;
+        unsigned int superSampling;
     };
 
     using Vertices = std::vector<Vertex>;

@@ -107,12 +107,13 @@ gloperate_text::Drawable * GlyphVertexCloud::createDrawable()
     drawable->setAttributeBindingBuffer(2, vertexBuffer, 0, sizeof(Vertex));
     drawable->setAttributeBindingBuffer(3, vertexBuffer, 0, sizeof(Vertex));
     drawable->setAttributeBindingBuffer(4, vertexBuffer, 0, sizeof(Vertex));
+    drawable->setAttributeBindingBuffer(5, vertexBuffer, 0, sizeof(Vertex));
 
-    drawable->setAttributeBindingFormat(0, 3, gl::GL_FLOAT, gl::GL_FALSE, offset(&Vertex::origin));
-    drawable->setAttributeBindingFormat(1, 3, gl::GL_FLOAT, gl::GL_FALSE, offset(&Vertex::vtan));
-    drawable->setAttributeBindingFormat(2, 3, gl::GL_FLOAT, gl::GL_FALSE, offset(&Vertex::vbitan));
-    drawable->setAttributeBindingFormat(3, 4, gl::GL_FLOAT, gl::GL_FALSE, offset(&Vertex::uvRect));
-    drawable->setAttributeBindingFormat(4, 4, gl::GL_FLOAT, gl::GL_FALSE, offset(&Vertex::fontColor));
+    drawable->setAttributeBindingFormat(0, 3, gl::GL_FLOAT,        gl::GL_FALSE, offset(&Vertex::origin));
+    drawable->setAttributeBindingFormat(1, 3, gl::GL_FLOAT,        gl::GL_FALSE, offset(&Vertex::vtan));
+    drawable->setAttributeBindingFormat(2, 3, gl::GL_FLOAT,        gl::GL_FALSE, offset(&Vertex::vbitan));
+    drawable->setAttributeBindingFormat(3, 4, gl::GL_FLOAT,        gl::GL_FALSE, offset(&Vertex::uvRect));
+    drawable->setAttributeBindingFormat(4, 1, gl::GL_UNSIGNED_INT, gl::GL_FALSE, offset(&Vertex::superSampling));
 
     drawable->enableAllAttributeBindings();
 

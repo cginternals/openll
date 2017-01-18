@@ -12,6 +12,7 @@
 
 #include <openll/Alignment.h>
 #include <openll/LineAnchor.h>
+#include <openll/SuperSampling.h>
 #include <openll/GlyphSequenceConfig.h>
 
 #include <openll/openll_api.h>
@@ -57,6 +58,9 @@ public:
     float fontSize() const;
     void setFontSize(float fontSize);
 
+    float superSampling() const;
+    void setSuperSampling(SuperSampling superSampling);
+
     FontFace * fontFace() const;
     void setFontFace(FontFace * fontFace);
 
@@ -85,6 +89,7 @@ protected:
     glm::vec4 m_fontColor;
     FontFace * m_fontFace;
     float m_fontSize;
+    SuperSampling m_superSampling;
 
     glm::mat4 m_additionalTransform;
     mutable bool m_transformValid;
