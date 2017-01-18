@@ -20,8 +20,11 @@ ScoringFunction OPENLL_API overlapCount;
 
 void OPENLL_API constant(std::vector<Label> & labels);
 void OPENLL_API random(std::vector<Label> & labels);
+
+// scoringFunction should be chosen so that a lower value is better
 void OPENLL_API greedy(std::vector<Label> & labels, ScoringFunction scoringFunction);
 void OPENLL_API discreteGradientDescent(std::vector<Label> & labels, ScoringFunction scoringFunction);
+void OPENLL_API simulatedAnnealing(std::vector<Label> & labels, ScoringFunction scoringFunction);
 
 }
 

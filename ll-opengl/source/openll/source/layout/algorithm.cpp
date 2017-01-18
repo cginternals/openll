@@ -153,6 +153,91 @@ void discreteGradientDescent(std::vector<Label> & labels, ScoringFunction scorin
     }
 }
 
+
+void simulatedAnnealing(std::vector<Label> & labels, ScoringFunction scoringFunction)
+{
+    // based on https://www.eecs.harvard.edu/shieber/Biblio/Papers/tog-final.pdf
+
+    std::vector<std::vector<LabelArea>> labelAreas;
+    std::vector<int> chosenLabels;
+    auto chosenLabel = [&](int i) { return labelAreas[i][chosenLabels[i]]; };
+
+    std::default_random_engine generator;
+
+    // generate LabelArea objects for all possible label placements
+    // generate random start layout
+    for (auto & label : labels)
+    {
+        labelAreas.push_back({});
+        const auto extent = Typesetter::extent(label.sequence);
+        const std::vector<glm::vec2> possibleOrigins {
+            label.pointLocation, label.pointLocation - glm::vec2(extent.x, 0),
+            label.pointLocation - glm::vec2(0, extent.y), label.pointLocation - extent
+        };
+        for (const auto& origin : possibleOrigins)
+        {
+            labelAreas.back().push_back({origin, extent});
+        }
+        std::uniform_int_distribution<int> distribution(0, labelAreas.back().size() - 1);
+        const auto value = distribution(generator);
+        chosenLabels.push_back(value);
+    }
+
+    std::uniform_int_distribution<int> labelDistribution(0, labels.size() - 1);
+
+    float temperature = 0.91023922662f;
+    int temperatureChanges = 0;
+    int changesAtTemperature = 0;
+    int stepsAtTemperature = 0;
+
+    while (true)
+    {
+        const auto labelIndex = labelDistribution(generator);
+        std::uniform_int_distribution<int> positionDistribution(0, labelAreas[labelIndex].size() - 1);
+        int newPosition = 0;
+        do
+        {
+            newPosition = positionDistribution(generator);
+        }
+        while (newPosition == chosenLabels[labelIndex]);
+
+        float improvement = 0.f;
+        auto newLabelArea = labelAreas[labelIndex][newPosition];
+        auto oldLabelArea = chosenLabel(labelIndex);
+        for (size_t i = 0; i < labels.size(); ++i)
+        {
+            if (i == labelIndex) continue;
+            improvement += scoringFunction(oldLabelArea, chosenLabel(i)) - scoringFunction(newLabelArea, chosenLabel(i));
+        }
+
+        float chance = std::exp(-improvement / temperature);
+        std::bernoulli_distribution doAnyway(chance);
+        if (improvement > 0 || doAnyway(generator))
+        {
+            chosenLabels[labelIndex] = newPosition;
+            ++changesAtTemperature;
+        }
+
+        ++stepsAtTemperature;
+        if (changesAtTemperature > 5 * labels.size() || stepsAtTemperature > 20 * labels.size())
+        {
+            // converged
+            if (changesAtTemperature == 0) break;
+            if (temperatureChanges == 50) break;
+
+            temperature *= 0.9f;
+            changesAtTemperature = 0;
+            stepsAtTemperature = 0;
+            ++temperatureChanges;
+        }
+    }
+
+    for (size_t i = 0; i < labels.size(); ++i)
+    {
+        labels[i].placement = {chosenLabel(i).origin - labels[i].pointLocation, Alignment::LeftAligned, LineAnchor::Bottom, true};
+    }
+}
+
 } // namespace layout
 
 } // namespace gloperate_text

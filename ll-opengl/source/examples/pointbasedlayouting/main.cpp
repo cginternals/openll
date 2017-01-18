@@ -239,9 +239,17 @@ int main()
                     algorithmName = "discreteGradientDescent";
                     break;
                 case 6:
-                default:
                     gloperate_text::layout::discreteGradientDescent(labels, gloperate_text::layout::overlapArea);
                     algorithmName = "discreteGradientDescent with area";
+                    break;
+                case 7:
+                    gloperate_text::layout::simulatedAnnealing(labels, gloperate_text::layout::overlapCount);
+                    algorithmName = "simulatedAnnealing";
+                    break;
+                case 8:
+                default:
+                    gloperate_text::layout::simulatedAnnealing(labels, gloperate_text::layout::overlapArea);
+                    algorithmName = "simulatedAnnealing with area";
                     break;
             }
             benchmark(labels, algorithmName);
