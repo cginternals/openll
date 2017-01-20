@@ -17,6 +17,83 @@ namespace gloperate_text
 namespace layout
 {
 
+namespace
+{
+
+struct LabelCollision
+{
+    size_t index;
+    size_t position;
+    float overlapArea;
+};
+
+
+struct Index2D
+{
+    template<typename T>
+    void next(const std::vector<std::vector<T>>& container)
+    {
+        ++inner;
+        if (inner == container[outer].size())
+        {
+            ++outer;
+            inner = 0;
+        }
+    }
+
+    template<typename T>
+    bool end(const std::vector<std::vector<T>>& container) const
+    {
+        return outer == container.size();
+    }
+
+    template<typename T>
+    T& element(std::vector<std::vector<T>>& container) const
+    {
+        return container[outer][inner];
+    }
+
+    template<typename T>
+    const T& element(const std::vector<std::vector<T>>& container) const
+    {
+        return container[outer][inner];
+    }
+
+    size_t outer = 0;
+    size_t inner = 0;
+};
+
+std::vector<std::vector<std::vector<LabelCollision>>> createCollisionGraph(const std::vector<std::vector<LabelArea>>& labelAreas)
+{
+    std::vector<std::vector<std::vector<LabelCollision>>> collisionGraph;
+    collisionGraph.resize(labelAreas.size());
+    for (size_t i = 0; i < labelAreas.size(); ++i)
+    {
+        collisionGraph[i].resize(labelAreas[i].size());
+    }
+
+    for (Index2D index1; !index1.end(labelAreas); index1.next(labelAreas))
+    {
+        auto & collisionElement = index1.element(collisionGraph);
+        for (Index2D index2; !index2.end(labelAreas); index2.next(labelAreas))
+        {
+            if (index1.outer == index2.outer)
+                continue;
+            const auto & label1 = index1.element(labelAreas);
+            const auto & label2 = index2.element(labelAreas);
+            if (label1.overlaps(label2))
+            {
+                auto area = label1.overlapArea(label2);
+                collisionElement.push_back({index2.outer, index2.inner, area});
+                assert(index1.element(collisionGraph).size() > 0);
+            }
+        }
+    }
+    return collisionGraph;
+}
+
+}
+
 void constant(std::vector<Label> & labels)
 {
     for (auto & label : labels)
@@ -106,6 +183,8 @@ void discreteGradientDescent(std::vector<Label> & labels, ScoringFunction scorin
         chosenLabels.push_back(value);
     }
 
+    const auto collisionGraph = createCollisionGraph(labelAreas);
+
     // upper limit to iterations
     for (int iteration = 0; iteration < 1000; ++iteration)
     {
@@ -117,13 +196,16 @@ void discreteGradientDescent(std::vector<Label> & labels, ScoringFunction scorin
         {
             std::vector<float> scores;
             int bestIndex = 0;
-            for (auto & labelArea : singleLabelAreas)
+            for (size_t index = 0; index < singleLabelAreas.size(); ++index)
             {
                 float score = 0.f;
-                for (size_t i = 0; i < labels.size(); ++i)
+
+                const auto & labelArea = singleLabelAreas[index];
+                for (const auto & collison : collisionGraph[labelIndex][index])
                 {
-                    if (i == labelIndex) continue;
-                    score += scoringFunction(labelArea, chosenLabel(i));
+                    if (chosenLabels[collison.index] != collison.position)
+                        continue;
+                    score += scoringFunction(labelArea, chosenLabel(collison.index));
                 }
                 scores.push_back(score);
                 if (score < scores[bestIndex])
@@ -181,6 +263,8 @@ void simulatedAnnealing(std::vector<Label> & labels, ScoringFunction scoringFunc
         chosenLabels.push_back(value);
     }
 
+    const auto collisionGraph = createCollisionGraph(labelAreas);
+
     std::uniform_int_distribution<unsigned int> labelDistribution(0, labels.size() - 1);
 
     float temperature = 0.91023922662f;
@@ -202,10 +286,17 @@ void simulatedAnnealing(std::vector<Label> & labels, ScoringFunction scoringFunc
         float improvement = 0.f;
         auto newLabelArea = labelAreas[labelIndex][newPosition];
         auto oldLabelArea = chosenLabel(labelIndex);
-        for (size_t i = 0; i < labels.size(); ++i)
+        for (const auto & collison : collisionGraph[labelIndex][chosenLabels[labelIndex]])
         {
-            if (i == labelIndex) continue;
-            improvement += scoringFunction(oldLabelArea, chosenLabel(i)) - scoringFunction(newLabelArea, chosenLabel(i));
+            if (chosenLabels[collison.index] != collison.position)
+                continue;
+            improvement += scoringFunction(oldLabelArea, chosenLabel(collison.index));
+        }
+        for (const auto & collison : collisionGraph[labelIndex][newPosition])
+        {
+            if (chosenLabels[collison.index] != collison.position)
+                continue;
+            improvement -= scoringFunction(newLabelArea, chosenLabel(collison.index));
         }
 
         float chance = std::exp(improvement / temperature);

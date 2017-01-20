@@ -192,7 +192,7 @@ void runAndBenchmark(std::vector<gloperate_text::Label> & labels, Algorithm algo
     auto end = std::chrono::steady_clock::now();
     std::chrono::duration<double> diff = end - start;
     std::cout << "Evaluation results for " << algorithm.name << ":" << std::endl
-        << "Runtime: " << diff.count() << "ms" << std::endl
+        << "Runtime: " << diff.count() << "s" << std::endl
         << labelsHidden(labels) << " labels hidden out of " << labels.size() << std::endl
         << labelOverlaps(labels) << " overlaps" << std::endl
         << "with an area of " << labelOverlapArea(labels) << std::endl
