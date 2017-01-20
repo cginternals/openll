@@ -35,7 +35,27 @@ using namespace gl;
 
 glm::uvec2 g_viewport{640, 480};
 bool g_config_changed = true;
-int g_algorithmID = 1;
+size_t g_algorithmID = 1;
+
+struct Algorithm
+{
+    std::string name;
+    std::function<void(std::vector<gloperate_text::Label>&)> function;
+};
+
+using namespace std::placeholders;
+
+std::vector<Algorithm> layoutAlgorithms
+{
+    {"constant",                          gloperate_text::layout::constant},
+    {"random",                            gloperate_text::layout::random},
+    {"greedy",                            std::bind(gloperate_text::layout::greedy, _1, gloperate_text::layout::overlapCount)},
+    {"greedy with area",                  std::bind(gloperate_text::layout::greedy, _1, gloperate_text::layout::overlapArea)},
+    {"discreteGradientDescent",           std::bind(gloperate_text::layout::discreteGradientDescent, _1, gloperate_text::layout::overlapCount)},
+    {"discreteGradientDescent with area", std::bind(gloperate_text::layout::discreteGradientDescent, _1, gloperate_text::layout::overlapArea)},
+    {"simulatedAnnealing",                std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::overlapCount)},
+    {"simulatedAnnealing with area",      std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::overlapArea)},
+};
 
 void onResize(GLFWwindow*, int width, int height)
 {
@@ -51,7 +71,7 @@ void onKeyPress(GLFWwindow * window, int key, int, int action, int mods)
     }
     else if ('1' <= key && key <= '9' && action == GLFW_PRESS)
     {
-        g_algorithmID = key - '1' + 1;
+        g_algorithmID = std::min(static_cast<size_t>(key - '1'), layoutAlgorithms.size() - 1);
         g_config_changed = true;
     }
 }
@@ -165,9 +185,14 @@ void prepareRectangleDrawable(const std::vector<gloperate_text::Label> & labels,
     rectangleDrawable.initialize(rectangles);
 }
 
-void benchmark(const std::vector<gloperate_text::Label> & labels, const std::string & algorithmName)
+void runAndBenchmark(std::vector<gloperate_text::Label> & labels, Algorithm algorithm)
 {
-    std::cout << "Benchmark results for " << algorithmName << ":" << std::endl
+    auto start = std::chrono::steady_clock::now();
+    algorithm.function(labels);
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> diff = end - start;
+    std::cout << "Evaluation results for " << algorithm.name << ":" << std::endl
+        << "Runtime: " << diff.count() << "ms" << std::endl
         << labelsHidden(labels) << " labels hidden out of " << labels.size() << std::endl
         << labelOverlaps(labels) << " overlaps" << std::endl
         << "with an area of " << labelOverlapArea(labels) << std::endl
@@ -215,44 +240,7 @@ int main()
         {
             glViewport(0, 0, g_viewport.x, g_viewport.y);
             labels = prepareLabels(font, g_viewport);
-            std::string algorithmName;
-            switch (g_algorithmID)
-            {
-                case 1:
-                    gloperate_text::layout::constant(labels);
-                    algorithmName = "constant";
-                    break;
-                case 2:
-                    gloperate_text::layout::random(labels);
-                    algorithmName = "random";
-                    break;
-                case 3:
-                    gloperate_text::layout::greedy(labels, gloperate_text::layout::overlapCount);
-                    algorithmName = "greedy";
-                    break;
-                case 4:
-                    gloperate_text::layout::greedy(labels, gloperate_text::layout::overlapArea);
-                    algorithmName = "greedy with area";
-                    break;
-                case 5:
-                    gloperate_text::layout::discreteGradientDescent(labels, gloperate_text::layout::overlapCount);
-                    algorithmName = "discreteGradientDescent";
-                    break;
-                case 6:
-                    gloperate_text::layout::discreteGradientDescent(labels, gloperate_text::layout::overlapArea);
-                    algorithmName = "discreteGradientDescent with area";
-                    break;
-                case 7:
-                    gloperate_text::layout::simulatedAnnealing(labels, gloperate_text::layout::overlapCount);
-                    algorithmName = "simulatedAnnealing";
-                    break;
-                case 8:
-                default:
-                    gloperate_text::layout::simulatedAnnealing(labels, gloperate_text::layout::overlapArea);
-                    algorithmName = "simulatedAnnealing with area";
-                    break;
-            }
-            benchmark(labels, algorithmName);
+            runAndBenchmark(labels, layoutAlgorithms[g_algorithmID]);
             cloud = prepareCloud(labels);
             preparePointDrawable(labels, pointDrawable);
             prepareRectangleDrawable(labels, rectangleDrawable);
