@@ -208,7 +208,7 @@ void simulatedAnnealing(std::vector<Label> & labels, ScoringFunction scoringFunc
             improvement += scoringFunction(oldLabelArea, chosenLabel(i)) - scoringFunction(newLabelArea, chosenLabel(i));
         }
 
-        float chance = std::exp(-improvement / temperature);
+        float chance = std::exp(improvement / temperature);
         std::bernoulli_distribution doAnyway(chance);
         if (improvement > 0 || doAnyway(generator))
         {
@@ -221,7 +221,7 @@ void simulatedAnnealing(std::vector<Label> & labels, ScoringFunction scoringFunc
         {
             // converged
             if (changesAtTemperature == 0) break;
-            if (temperatureChanges == 50) break;
+            if (temperatureChanges == 100) break;
 
             temperature *= 0.9f;
             changesAtTemperature = 0;
