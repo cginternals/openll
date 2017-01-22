@@ -116,38 +116,42 @@ void random(std::vector<Label> & labels)
     }
 }
 
-float overlapArea(const LabelArea & target, const LabelArea & other)
+float overlapArea(int, float overlapArea, RelativeLabelPosition, bool)
 {
-    return target.overlapArea(other);
+    return overlapArea;
 }
-float overlapCount(const LabelArea & target, const LabelArea & other)
+float overlapCount(int overlapCount, float, RelativeLabelPosition, bool)
 {
-    return target.overlaps(other) ? 1.f : 0.f;
+    return overlapCount;
 }
 
-void greedy(std::vector<Label> & labels, ScoringFunction scoringFunction)
+void greedy(std::vector<Label> & labels, PenaltyFunction penaltyFunction)
 {
     std::vector<LabelArea> labelAreas;
     for (auto & label : labels)
     {
         const auto extent = Typesetter::extent(label.sequence);
-        const std::vector<glm::vec2> possibleOrigins {
-            label.pointLocation, label.pointLocation - glm::vec2(extent.x, 0),
-            label.pointLocation - glm::vec2(0, extent.y), label.pointLocation - extent
+        const std::vector<RelativeLabelPosition> positions {
+            RelativeLabelPosition::UpperRight, RelativeLabelPosition::UpperLeft,
+            RelativeLabelPosition::LowerLeft, RelativeLabelPosition::LowerRight
         };
-        float bestScore = std::numeric_limits<float>::max();
+        float bestPenalty = std::numeric_limits<float>::max();
         glm::vec2 bestOrigin;
-        for (const auto& origin : possibleOrigins)
+        for (const auto& position : positions)
         {
+            const auto origin = labelOrigin(position, label.pointLocation, extent);
             const LabelArea newLabelArea {origin, extent};
-            float score = 0.f;
+            float overlap = 0.f;
+            int overlapCount = 0;
             for (const auto& other : labelAreas)
             {
-                score += scoringFunction(newLabelArea, other);
+                overlap += newLabelArea.overlapArea(other);
+                overlapCount += newLabelArea.overlaps(other) ? 1 : 0;
             }
-            if (score < bestScore)
+            auto penalty = penaltyFunction(overlapCount, overlap, position, true);
+            if (penalty < bestPenalty)
             {
-                bestScore = score;
+                bestPenalty = penalty;
                 bestOrigin = origin;
             }
         }
@@ -156,11 +160,15 @@ void greedy(std::vector<Label> & labels, ScoringFunction scoringFunction)
     }
 }
 
-void discreteGradientDescent(std::vector<Label> & labels, ScoringFunction scoringFunction)
+void discreteGradientDescent(std::vector<Label> & labels, PenaltyFunction penaltyFunction)
 {
     std::vector<std::vector<LabelArea>> labelAreas;
-    std::vector<int> chosenLabels;
+    std::vector<unsigned int> chosenLabels;
     auto chosenLabel = [&](int i) { return labelAreas[i][chosenLabels[i]]; };
+    const std::vector<RelativeLabelPosition> positions {
+        RelativeLabelPosition::UpperRight, RelativeLabelPosition::UpperLeft,
+        RelativeLabelPosition::LowerLeft, RelativeLabelPosition::LowerRight
+    };
 
     std::default_random_engine generator;
 
@@ -170,12 +178,9 @@ void discreteGradientDescent(std::vector<Label> & labels, ScoringFunction scorin
     {
         labelAreas.push_back({});
         const auto extent = Typesetter::extent(label.sequence);
-        const std::vector<glm::vec2> possibleOrigins {
-            label.pointLocation, label.pointLocation - glm::vec2(extent.x, 0),
-            label.pointLocation - glm::vec2(0, extent.y), label.pointLocation - extent
-        };
-        for (const auto& origin : possibleOrigins)
+        for (const auto& position : positions)
         {
+            const auto origin = labelOrigin(position, label.pointLocation, extent);
             labelAreas.back().push_back({origin, extent});
         }
         std::uniform_int_distribution<int> distribution(0, labelAreas.back().size() - 1);
@@ -194,26 +199,29 @@ void discreteGradientDescent(std::vector<Label> & labels, ScoringFunction scorin
         size_t labelIndex = 0;
         for (auto & singleLabelAreas : labelAreas)
         {
-            std::vector<float> scores;
+            std::vector<float> penalties;
             int bestIndex = 0;
             for (size_t index = 0; index < singleLabelAreas.size(); ++index)
             {
-                float score = 0.f;
+                float overlap = 0.f;
+                int overlapCount = 0;
 
                 const auto & labelArea = singleLabelAreas[index];
                 for (const auto & collison : collisionGraph[labelIndex][index])
                 {
                     if (chosenLabels[collison.index] != collison.position)
                         continue;
-                    score += scoringFunction(labelArea, chosenLabel(collison.index));
+                    ++overlapCount;
+                    overlap += labelArea.overlapArea(chosenLabel(collison.index));
                 }
-                scores.push_back(score);
-                if (score < scores[bestIndex])
+                auto penalty = penaltyFunction(overlapCount, overlap, positions[index], true);
+                penalties.push_back(penalty);
+                if (penalty < penalties[bestIndex])
                 {
-                    bestIndex = scores.size() - 1;
+                    bestIndex = penalties.size() - 1;
                 }
             }
-            float improvement = scores[chosenLabels[labelIndex]] - scores[bestIndex];
+            float improvement = penalties[chosenLabels[labelIndex]] - penalties[bestIndex];
             if (improvement > bestImprovement)
             {
                 bestImprovement = improvement;
@@ -233,14 +241,17 @@ void discreteGradientDescent(std::vector<Label> & labels, ScoringFunction scorin
     }
 }
 
-
-void simulatedAnnealing(std::vector<Label> & labels, ScoringFunction scoringFunction)
+void simulatedAnnealing(std::vector<Label> & labels, PenaltyFunction penaltyFunction)
 {
     // based on https://www.eecs.harvard.edu/shieber/Biblio/Papers/tog-final.pdf
 
     std::vector<std::vector<LabelArea>> labelAreas;
     std::vector<unsigned int> chosenLabels;
     auto chosenLabel = [&](unsigned int i) { return labelAreas[i][chosenLabels[i]]; };
+    const std::vector<RelativeLabelPosition> positions {
+        RelativeLabelPosition::UpperRight, RelativeLabelPosition::UpperLeft,
+        RelativeLabelPosition::LowerLeft, RelativeLabelPosition::LowerRight
+    };
 
     std::default_random_engine generator;
 
@@ -250,12 +261,9 @@ void simulatedAnnealing(std::vector<Label> & labels, ScoringFunction scoringFunc
     {
         labelAreas.push_back({});
         const auto extent = Typesetter::extent(label.sequence);
-        const std::vector<glm::vec2> possibleOrigins {
-            label.pointLocation, label.pointLocation - glm::vec2(extent.x, 0),
-            label.pointLocation - glm::vec2(0, extent.y), label.pointLocation - extent
-        };
-        for (const auto& origin : possibleOrigins)
+        for (const auto& position : positions)
         {
+            const auto origin = labelOrigin(position, label.pointLocation, extent);
             labelAreas.back().push_back({origin, extent});
         }
         std::uniform_int_distribution<int> distribution(0, labelAreas.back().size() - 1);
@@ -277,27 +285,36 @@ void simulatedAnnealing(std::vector<Label> & labels, ScoringFunction scoringFunc
         const auto labelIndex = labelDistribution(generator);
         std::uniform_int_distribution<unsigned int> positionDistribution(0, labelAreas[labelIndex].size() - 1);
         size_t newPosition = 0;
+        const auto oldPosition = chosenLabels[labelIndex];
         do
         {
             newPosition = positionDistribution(generator);
         }
-        while (newPosition == chosenLabels[labelIndex]);
+        while (newPosition == oldPosition);
 
-        float improvement = 0.f;
-        auto newLabelArea = labelAreas[labelIndex][newPosition];
-        auto oldLabelArea = chosenLabel(labelIndex);
-        for (const auto & collison : collisionGraph[labelIndex][chosenLabels[labelIndex]])
+        const auto newLabelArea = labelAreas[labelIndex][newPosition];
+        const auto oldLabelArea = chosenLabel(labelIndex);
+        float newOverlapArea = 0.f;
+        int newOverlapCount = 0;
+        float oldOverlapArea = 0.f;
+        int oldOverlapCount = 0;
+        for (const auto & collison : collisionGraph[labelIndex][oldPosition])
         {
             if (chosenLabels[collison.index] != collison.position)
                 continue;
-            improvement += scoringFunction(oldLabelArea, chosenLabel(collison.index));
+            oldOverlapArea += oldLabelArea.overlapArea(chosenLabel(collison.index));
+            ++oldOverlapCount;
         }
         for (const auto & collison : collisionGraph[labelIndex][newPosition])
         {
             if (chosenLabels[collison.index] != collison.position)
                 continue;
-            improvement -= scoringFunction(newLabelArea, chosenLabel(collison.index));
+            newOverlapArea += newLabelArea.overlapArea(chosenLabel(collison.index));
+            ++newOverlapCount;
         }
+        auto oldPenalty = penaltyFunction(oldOverlapCount, oldOverlapArea, positions[oldPosition], true);
+        auto newPenalty = penaltyFunction(newOverlapCount, newOverlapArea, positions[newPosition], true);
+        const auto improvement = oldPenalty - newPenalty;
 
         float chance = std::exp(improvement / temperature);
         std::bernoulli_distribution doAnyway(chance);
