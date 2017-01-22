@@ -12,7 +12,6 @@
 #include <glbinding/gl/enum.h>
 
 #include <openll/RawFile.h>
-
 #include <openll/FontFace.h>
 
 namespace {

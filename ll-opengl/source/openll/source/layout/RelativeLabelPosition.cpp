@@ -5,7 +5,7 @@
 namespace gloperate_text
 {
 
-glm::vec2 labelOrigin(RelativeLabelPosition position, glm::vec2 origin, glm::vec2 extent)
+glm::vec2 labelOrigin(RelativeLabelPosition position, const glm::vec2 & origin, const glm::vec2 & extent)
 {
     switch (position)
     {
@@ -15,6 +15,16 @@ glm::vec2 labelOrigin(RelativeLabelPosition position, glm::vec2 origin, glm::vec
     case RelativeLabelPosition::LowerRight: return origin - glm::vec2(0.f, extent.y);
     default: assert(false);
     }
+}
+
+RelativeLabelPosition relativeLabelPosition(const glm::vec2 & offset, const glm::vec2 & extent)
+{
+    const auto midpointOffset = offset + extent / 2.f;
+    if (midpointOffset.x > 0 && midpointOffset.y > 0) return RelativeLabelPosition::UpperRight;
+    if (midpointOffset.x < 0 && midpointOffset.y > 0) return RelativeLabelPosition::UpperLeft;
+    if (midpointOffset.x < 0 && midpointOffset.y < 0) return RelativeLabelPosition::LowerLeft;
+    if (midpointOffset.x > 0 && midpointOffset.y < 0) return RelativeLabelPosition::LowerRight;
+    assert(false);
 }
 
 } // namespace gloperate_text

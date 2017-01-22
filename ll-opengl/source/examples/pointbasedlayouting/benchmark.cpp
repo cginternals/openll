@@ -1,6 +1,7 @@
 #include "benchmark.h"
 
 #include <algorithm>
+#include <map>
 
 #include <openll/layout/LabelArea.h>
 #include <openll/Typesetter.h>
@@ -58,18 +59,21 @@ int labelsHidden(const std::vector<gloperate_text::Label> & labels)
     });
 }
 
-std::vector<unsigned int> labelPositionDesirability(const std::vector<gloperate_text::Label> & labels)
+std::map<gloperate_text::RelativeLabelPosition, unsigned int> labelPositionDesirability(const std::vector<gloperate_text::Label> & labels)
 {
-    std::vector<unsigned int> result(4, 0);
+    std::map<gloperate_text::RelativeLabelPosition, unsigned int> result
+    {
+        {gloperate_text::RelativeLabelPosition::UpperRight, 0},
+        {gloperate_text::RelativeLabelPosition::UpperLeft, 0},
+        {gloperate_text::RelativeLabelPosition::LowerLeft, 0},
+        {gloperate_text::RelativeLabelPosition::LowerRight, 0}
+    };
     for (const auto & label : labels)
     {
         if (!label.placement.display) continue;
         const auto extent = gloperate_text::Typesetter::extent(label.sequence);
-        const auto midpointOffset = label.placement.offset + extent / 2.f;
-        if (midpointOffset.x > 0 && midpointOffset.y > 0) ++result[0];
-        if (midpointOffset.x < 0 && midpointOffset.y > 0) ++result[1];
-        if (midpointOffset.x < 0 && midpointOffset.y < 0) ++result[2];
-        if (midpointOffset.x > 0 && midpointOffset.y < 0) ++result[3];
+        const auto position = gloperate_text::relativeLabelPosition(label.placement.offset, extent);
+        ++result[position];
     }
     return result;
 }

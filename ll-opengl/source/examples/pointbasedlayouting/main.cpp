@@ -192,15 +192,17 @@ void runAndBenchmark(std::vector<gloperate_text::Label> & labels, Algorithm algo
     auto end = std::chrono::steady_clock::now();
     std::chrono::duration<double> diff = end - start;
     std::cout << "Evaluation results for " << algorithm.name << ":" << std::endl
-        << "Runtime: " << diff.count() << "s" << std::endl
-        << labelsHidden(labels) << " labels hidden out of " << labels.size() << std::endl
-        << labelOverlaps(labels) << " overlaps" << std::endl
-        << "with an area of " << labelOverlapArea(labels) << std::endl
-        << "Relative label positions (from upper right counterclockwise):" << std::endl;
-    for (const auto position : labelPositionDesirability(labels))
-    {
-        std::cout << position << "   ";
-    }
+        << "Runtime:          " << diff.count() << "s" << std::endl
+        << "Labels hidden:    " << labelsHidden(labels) << "/" << labels.size() << std::endl
+        << "Overlaps:         " << labelOverlaps(labels) << std::endl
+        << "Overlap area:     " << labelOverlapArea(labels) << std::endl
+        << "Relative label positions:" << std::endl;
+    auto positions = labelPositionDesirability(labels);
+    std::cout
+        << "  Upper Right:    " << positions[gloperate_text::RelativeLabelPosition::UpperRight] << std::endl
+        << "  Upper Left:     " << positions[gloperate_text::RelativeLabelPosition::UpperLeft] << std::endl
+        << "  Lower Right:    " << positions[gloperate_text::RelativeLabelPosition::LowerRight] << std::endl
+        << "  Lower Left:     " << positions[gloperate_text::RelativeLabelPosition::LowerLeft] << std::endl;
     std::cout << std::endl;
 }
 
