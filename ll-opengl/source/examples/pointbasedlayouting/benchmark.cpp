@@ -57,3 +57,19 @@ int labelsHidden(const std::vector<gloperate_text::Label> & labels)
         return !label.placement.display;
     });
 }
+
+std::vector<unsigned int> labelPositionDesirability(const std::vector<gloperate_text::Label> & labels)
+{
+    std::vector<unsigned int> result(4, 0);
+    for (const auto & label : labels)
+    {
+        if (!label.placement.display) continue;
+        const auto extent = gloperate_text::Typesetter::extent(label.sequence);
+        const auto midpointOffset = label.placement.offset + extent / 2.f;
+        if (midpointOffset.x > 0 && midpointOffset.y > 0) ++result[0];
+        if (midpointOffset.x < 0 && midpointOffset.y > 0) ++result[1];
+        if (midpointOffset.x < 0 && midpointOffset.y < 0) ++result[2];
+        if (midpointOffset.x > 0 && midpointOffset.y < 0) ++result[3];
+    }
+    return result;
+}

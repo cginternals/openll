@@ -35,7 +35,7 @@ using namespace gl;
 
 glm::uvec2 g_viewport{640, 480};
 bool g_config_changed = true;
-size_t g_algorithmID = 1;
+size_t g_algorithmID = 0;
 
 struct Algorithm
 {
@@ -196,7 +196,12 @@ void runAndBenchmark(std::vector<gloperate_text::Label> & labels, Algorithm algo
         << labelsHidden(labels) << " labels hidden out of " << labels.size() << std::endl
         << labelOverlaps(labels) << " overlaps" << std::endl
         << "with an area of " << labelOverlapArea(labels) << std::endl
-        << std::endl;
+        << "Relative label positions (from upper right counterclockwise):" << std::endl;
+    for (const auto position : labelPositionDesirability(labels))
+    {
+        std::cout << position << "   ";
+    }
+    std::cout << std::endl;
 }
 
 
