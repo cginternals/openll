@@ -12,6 +12,7 @@ struct OPENLL_API LabelArea
 public:
     bool overlaps(const LabelArea & other) const;
     float overlapArea(const LabelArea & other) const;
+    float area() const;
 
 public:
     glm::vec2 origin;

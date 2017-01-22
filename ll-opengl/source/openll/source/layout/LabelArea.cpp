@@ -24,4 +24,9 @@ float LabelArea::overlapArea(const LabelArea & other) const
     return std::max(0.f, upper_right.x - lower_left.x) * std::max(0.f, upper_right.y - lower_left.y);
 }
 
+float LabelArea::area() const
+{
+    return extent.x * extent.y;
+}
+
 } // namespace gloperate_text

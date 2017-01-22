@@ -157,27 +157,28 @@ float overlapCount(int overlapCount, float, RelativeLabelPosition, bool)
 void greedy(std::vector<Label> & labels, PenaltyFunction penaltyFunction)
 {
     std::vector<LabelArea> labelAreas;
+    const std::vector<RelativeLabelPosition> positions {
+        RelativeLabelPosition::UpperRight, RelativeLabelPosition::UpperLeft,
+        RelativeLabelPosition::LowerLeft, RelativeLabelPosition::LowerRight
+    };
     for (auto & label : labels)
     {
         const auto extent = Typesetter::extent(label.sequence);
-        const std::vector<RelativeLabelPosition> positions {
-            RelativeLabelPosition::UpperRight, RelativeLabelPosition::UpperLeft,
-            RelativeLabelPosition::LowerLeft, RelativeLabelPosition::LowerRight
-        };
         float bestPenalty = std::numeric_limits<float>::max();
         glm::vec2 bestOrigin;
         for (const auto& position : positions)
         {
             const auto origin = labelOrigin(position, label.pointLocation, extent);
             const LabelArea newLabelArea {origin, extent};
-            float overlap = 0.f;
+            float overlapArea = 0.f;
             int overlapCount = 0;
             for (const auto& other : labelAreas)
             {
-                overlap += newLabelArea.overlapArea(other);
+                overlapArea += newLabelArea.overlapArea(other);
                 overlapCount += newLabelArea.overlaps(other) ? 1 : 0;
             }
-            auto penalty = penaltyFunction(overlapCount, overlap, position, true);
+            overlapArea /= newLabelArea.area();
+            auto penalty = penaltyFunction(overlapCount, overlapArea, position, true);
             if (penalty < bestPenalty)
             {
                 bestPenalty = penalty;
@@ -224,6 +225,7 @@ void discreteGradientDescent(std::vector<Label> & labels, PenaltyFunction penalt
                     ++overlapCount;
                     overlapArea += labelArea.overlapArea(chosenLabel(collison.index));
                 }
+                overlapArea /= labelArea.area();
                 const auto penalty = penaltyFunction(overlapCount, overlapArea, positions[index], true);
                 penalties.push_back(penalty);
                 if (penalty < penalties[bestIndex])
@@ -296,6 +298,7 @@ void simulatedAnnealing(std::vector<Label> & labels, PenaltyFunction penaltyFunc
                 overlapArea += labelArea.overlapArea(chosenLabel(collison.index));
                 ++overlapCount;
             }
+            overlapArea /= labelArea.area();
             return penaltyFunction(overlapCount, overlapArea, positions[position], true);
         };
 
