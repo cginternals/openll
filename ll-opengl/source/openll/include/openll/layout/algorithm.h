@@ -16,9 +16,13 @@ struct LabelArea;
 namespace layout
 {
 
-using PenaltyFunction = float (int overlapCount, float overlapArea, RelativeLabelPosition position, bool displayed);
+using PenaltyFunction = float (
+    int overlapCount, float overlapArea, RelativeLabelPosition position,
+    bool displayed, unsigned int priority);
+
 PenaltyFunction OPENLL_API overlapArea;
 PenaltyFunction OPENLL_API overlapCount;
+PenaltyFunction OPENLL_API standard;
 
 void OPENLL_API constant(std::vector<Label> & labels);
 void OPENLL_API random(std::vector<Label> & labels);

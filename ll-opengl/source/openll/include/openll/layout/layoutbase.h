@@ -25,6 +25,7 @@ struct OPENLL_API Label
 {
     GlyphSequence sequence;
     glm::vec2 pointLocation;
+    unsigned int priority;
     LabelPlacement placement;
 };
 
