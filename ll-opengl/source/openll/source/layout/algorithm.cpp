@@ -92,6 +92,35 @@ std::vector<std::vector<std::vector<LabelCollision>>> createCollisionGraph(const
     return collisionGraph;
 }
 
+// generate LabelArea objects for all possible label placements
+std::vector<std::vector<LabelArea>> computeLabelAreas(const std::vector<Label> & labels, const std::vector<RelativeLabelPosition>& positions)
+{
+    std::vector<std::vector<LabelArea>> result;
+    for (const auto & label : labels)
+    {
+        result.push_back({});
+        const auto extent = Typesetter::extent(label.sequence);
+        for (const auto& position : positions)
+        {
+            const auto origin = labelOrigin(position, label.pointLocation, extent);
+            result.back().push_back({origin, extent});
+        }
+    }
+    return result;
+}
+
+std::vector<unsigned int> randomStartLabelAreas(const std::vector<std::vector<LabelArea>> & labelAreas)
+{
+    std::vector<unsigned int> result;
+    std::default_random_engine generator;
+    for (const auto & singleLabelAreas : labelAreas)
+    {
+        std::uniform_int_distribution<int> distribution(0, singleLabelAreas.size() - 1);
+        result.push_back(distribution(generator));
+    }
+    return result;
+}
+
 }
 
 void constant(std::vector<Label> & labels)
@@ -162,33 +191,15 @@ void greedy(std::vector<Label> & labels, PenaltyFunction penaltyFunction)
 
 void discreteGradientDescent(std::vector<Label> & labels, PenaltyFunction penaltyFunction)
 {
-    std::vector<std::vector<LabelArea>> labelAreas;
-    std::vector<unsigned int> chosenLabels;
-    auto chosenLabel = [&](int i) { return labelAreas[i][chosenLabels[i]]; };
     const std::vector<RelativeLabelPosition> positions {
         RelativeLabelPosition::UpperRight, RelativeLabelPosition::UpperLeft,
         RelativeLabelPosition::LowerLeft, RelativeLabelPosition::LowerRight
     };
 
-    std::default_random_engine generator;
-
-    // generate LabelArea objects for all possible label placements
-    // generate random start layout
-    for (auto & label : labels)
-    {
-        labelAreas.push_back({});
-        const auto extent = Typesetter::extent(label.sequence);
-        for (const auto& position : positions)
-        {
-            const auto origin = labelOrigin(position, label.pointLocation, extent);
-            labelAreas.back().push_back({origin, extent});
-        }
-        std::uniform_int_distribution<int> distribution(0, labelAreas.back().size() - 1);
-        const auto value = distribution(generator);
-        chosenLabels.push_back(value);
-    }
-
+    const std::vector<std::vector<LabelArea>> labelAreas = computeLabelAreas(labels, positions);
+    std::vector<unsigned int> chosenLabels = randomStartLabelAreas(labelAreas);
     const auto collisionGraph = createCollisionGraph(labelAreas);
+    const auto chosenLabel = [&](unsigned int i) { return labelAreas[i][chosenLabels[i]]; };
 
     // upper limit to iterations
     for (int iteration = 0; iteration < 1000; ++iteration)
@@ -203,22 +214,21 @@ void discreteGradientDescent(std::vector<Label> & labels, PenaltyFunction penalt
             int bestIndex = 0;
             for (size_t index = 0; index < singleLabelAreas.size(); ++index)
             {
-                float overlap = 0.f;
-                int overlapCount = 0;
-
                 const auto & labelArea = singleLabelAreas[index];
+                float overlapArea = 0.f;
+                int overlapCount = 0;
                 for (const auto & collison : collisionGraph[labelIndex][index])
                 {
                     if (chosenLabels[collison.index] != collison.position)
                         continue;
                     ++overlapCount;
-                    overlap += labelArea.overlapArea(chosenLabel(collison.index));
+                    overlapArea += labelArea.overlapArea(chosenLabel(collison.index));
                 }
-                auto penalty = penaltyFunction(overlapCount, overlap, positions[index], true);
+                const auto penalty = penaltyFunction(overlapCount, overlapArea, positions[index], true);
                 penalties.push_back(penalty);
                 if (penalty < penalties[bestIndex])
                 {
-                    bestIndex = penalties.size() - 1;
+                    bestIndex = index;
                 }
             }
             float improvement = penalties[chosenLabels[labelIndex]] - penalties[bestIndex];
@@ -245,34 +255,17 @@ void simulatedAnnealing(std::vector<Label> & labels, PenaltyFunction penaltyFunc
 {
     // based on https://www.eecs.harvard.edu/shieber/Biblio/Papers/tog-final.pdf
 
-    std::vector<std::vector<LabelArea>> labelAreas;
-    std::vector<unsigned int> chosenLabels;
-    auto chosenLabel = [&](unsigned int i) { return labelAreas[i][chosenLabels[i]]; };
     const std::vector<RelativeLabelPosition> positions {
         RelativeLabelPosition::UpperRight, RelativeLabelPosition::UpperLeft,
         RelativeLabelPosition::LowerLeft, RelativeLabelPosition::LowerRight
     };
 
-    std::default_random_engine generator;
-
-    // generate LabelArea objects for all possible label placements
-    // generate random start layout
-    for (auto & label : labels)
-    {
-        labelAreas.push_back({});
-        const auto extent = Typesetter::extent(label.sequence);
-        for (const auto& position : positions)
-        {
-            const auto origin = labelOrigin(position, label.pointLocation, extent);
-            labelAreas.back().push_back({origin, extent});
-        }
-        std::uniform_int_distribution<int> distribution(0, labelAreas.back().size() - 1);
-        const auto value = distribution(generator);
-        chosenLabels.push_back(value);
-    }
-
+    const std::vector<std::vector<LabelArea>> labelAreas = computeLabelAreas(labels, positions);
+    std::vector<unsigned int> chosenLabels = randomStartLabelAreas(labelAreas);
     const auto collisionGraph = createCollisionGraph(labelAreas);
+    const auto chosenLabel = [&](unsigned int i) { return labelAreas[i][chosenLabels[i]]; };
 
+    std::default_random_engine generator;
     std::uniform_int_distribution<unsigned int> labelDistribution(0, labels.size() - 1);
 
     float temperature = 0.91023922662f;
@@ -292,28 +285,22 @@ void simulatedAnnealing(std::vector<Label> & labels, PenaltyFunction penaltyFunc
         }
         while (newPosition == oldPosition);
 
-        const auto newLabelArea = labelAreas[labelIndex][newPosition];
-        const auto oldLabelArea = chosenLabel(labelIndex);
-        float newOverlapArea = 0.f;
-        int newOverlapCount = 0;
-        float oldOverlapArea = 0.f;
-        int oldOverlapCount = 0;
-        for (const auto & collison : collisionGraph[labelIndex][oldPosition])
+        const auto computePenalty = [&](const LabelArea & labelArea, size_t position)
         {
-            if (chosenLabels[collison.index] != collison.position)
-                continue;
-            oldOverlapArea += oldLabelArea.overlapArea(chosenLabel(collison.index));
-            ++oldOverlapCount;
-        }
-        for (const auto & collison : collisionGraph[labelIndex][newPosition])
-        {
-            if (chosenLabels[collison.index] != collison.position)
-                continue;
-            newOverlapArea += newLabelArea.overlapArea(chosenLabel(collison.index));
-            ++newOverlapCount;
-        }
-        auto oldPenalty = penaltyFunction(oldOverlapCount, oldOverlapArea, positions[oldPosition], true);
-        auto newPenalty = penaltyFunction(newOverlapCount, newOverlapArea, positions[newPosition], true);
+            float overlapArea = 0.f;
+            int overlapCount = 0;
+            for (const auto & collison : collisionGraph[labelIndex][position])
+            {
+                if (chosenLabels[collison.index] != collison.position)
+                    continue;
+                overlapArea += labelArea.overlapArea(chosenLabel(collison.index));
+                ++overlapCount;
+            }
+            return penaltyFunction(overlapCount, overlapArea, positions[position], true);
+        };
+
+        const auto oldPenalty = computePenalty(chosenLabel(labelIndex), oldPosition);
+        const auto newPenalty = computePenalty(labelAreas[labelIndex][newPosition], newPosition);
         const auto improvement = oldPenalty - newPenalty;
 
         float chance = std::exp(improvement / temperature);
