@@ -55,6 +55,7 @@ std::vector<Algorithm> layoutAlgorithms
     {"discreteGradientDescent with area", std::bind(gloperate_text::layout::discreteGradientDescent, _1, gloperate_text::layout::overlapArea)},
     {"simulatedAnnealing",                std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::overlapCount)},
     {"simulatedAnnealing with area",      std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::overlapArea)},
+    {"simulatedAnnealing with area",      std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard)},
 };
 
 void onResize(GLFWwindow*, int width, int height)
@@ -144,7 +145,8 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
             , gloperate_text::Alignment::LeftAligned, gloperate_text::LineAnchor::Baseline, true };
 
         sequence.setAdditionalTransform(transform);
-        labels.push_back({sequence, origin, placement });
+        const unsigned int priority = 1;
+        labels.push_back({sequence, origin, priority, placement });
     }
     return labels;
 }
