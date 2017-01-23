@@ -36,6 +36,7 @@ using namespace gl;
 glm::uvec2 g_viewport{640, 480};
 bool g_config_changed = true;
 size_t g_algorithmID = 0;
+bool g_frames_visible = true;
 
 struct Algorithm
 {
@@ -69,6 +70,10 @@ void onKeyPress(GLFWwindow * window, int key, int, int action, int mods)
     if (key == 'Q' && action == GLFW_PRESS && mods == GLFW_MOD_CONTROL)
     {
         glfwSetWindowShouldClose(window, 1);
+    }
+    else if (key == 'F' && action == GLFW_PRESS)
+    {
+        g_frames_visible = !g_frames_visible;
     }
     else if ('1' <= key && key <= '9' && action == GLFW_PRESS)
     {
@@ -266,7 +271,8 @@ int main()
 
         renderer.render(cloud);
         pointDrawable.render();
-        rectangleDrawable.render();
+        if (g_frames_visible)
+            rectangleDrawable.render();
 
         gl::glDepthMask(gl::GL_TRUE);
         gl::glDisable(gl::GL_CULL_FACE);
