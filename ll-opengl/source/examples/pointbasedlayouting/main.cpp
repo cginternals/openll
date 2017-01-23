@@ -53,9 +53,9 @@ std::vector<Algorithm> layoutAlgorithms
     {"greedy with area",                  std::bind(gloperate_text::layout::greedy, _1, gloperate_text::layout::overlapArea)},
     {"discreteGradientDescent",           std::bind(gloperate_text::layout::discreteGradientDescent, _1, gloperate_text::layout::overlapCount)},
     {"discreteGradientDescent with area", std::bind(gloperate_text::layout::discreteGradientDescent, _1, gloperate_text::layout::overlapArea)},
-    {"simulatedAnnealing",                std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::overlapCount)},
-    {"simulatedAnnealing with area",      std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::overlapArea)},
-    {"simulatedAnnealing with area",      std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard)},
+    {"simulatedAnnealing with area",      std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::overlapArea, false)},
+    {"simulatedAnnealing",                std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, false)},
+    {"simulatedAnnealing with selection", std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, true)},
 };
 
 void onResize(GLFWwindow*, int width, int height)
@@ -119,19 +119,22 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
 
     std::default_random_engine generator;
     std::uniform_real_distribution<float> distribution(-1.f, 1.f);
+    std::uniform_int_distribution<unsigned int> priorityDistribution(1, 10);
 
     for (int i = 0; i < 50; ++i)
     {
-        auto string = random_name(generator);
+        const auto string = random_name(generator);
+        const auto priority = priorityDistribution(generator);
         gloperate_text::GlyphSequence sequence;
         std::u32string unicode_string(string.begin(), string.end());
         sequence.setString(unicode_string);
         sequence.setWordWrap(true);
-        sequence.setLineWidth(200.f);
+        sequence.setLineWidth(400.f);
         sequence.setAlignment(gloperate_text::Alignment::LeftAligned);
         sequence.setLineAnchor(gloperate_text::LineAnchor::Ascent);
-        sequence.setFontSize(16.f);
+        sequence.setFontSize(10.f + priority);
         sequence.setFontFace(font);
+        sequence.setFontColor(glm::vec4(glm::vec3(0.5f - priority * 0.05f), 1.f));
 
         const auto origin = glm::vec2{distribution(generator), distribution(generator)};
         // compute  transform matrix
@@ -145,7 +148,6 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
             , gloperate_text::Alignment::LeftAligned, gloperate_text::LineAnchor::Baseline, true };
 
         sequence.setAdditionalTransform(transform);
-        const unsigned int priority = 1;
         labels.push_back({sequence, origin, priority, placement });
     }
     return labels;

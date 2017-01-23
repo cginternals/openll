@@ -11,7 +11,7 @@ namespace gloperate_text
 
 enum class RelativeLabelPosition : unsigned char
 {
-    UpperRight, UpperLeft, LowerRight, LowerLeft
+    UpperRight, UpperLeft, LowerRight, LowerLeft, Hidden
 };
 
 glm::vec2 OPENLL_API labelOrigin(RelativeLabelPosition position, const glm::vec2 & origin, const glm::vec2 & extent);

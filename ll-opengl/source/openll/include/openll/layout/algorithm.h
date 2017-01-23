@@ -18,7 +18,7 @@ namespace layout
 
 using PenaltyFunction = float (
     int overlapCount, float overlapArea, RelativeLabelPosition position,
-    bool displayed, unsigned int priority);
+    unsigned int priority);
 
 PenaltyFunction OPENLL_API overlapArea;
 PenaltyFunction OPENLL_API overlapCount;
@@ -30,7 +30,7 @@ void OPENLL_API random(std::vector<Label> & labels);
 // penaltyFunction should be chosen so that a lower value is better
 void OPENLL_API greedy(std::vector<Label> & labels, PenaltyFunction penaltyFunction);
 void OPENLL_API discreteGradientDescent(std::vector<Label> & labels, PenaltyFunction penaltyFunction);
-void OPENLL_API simulatedAnnealing(std::vector<Label> & labels, PenaltyFunction penaltyFunction);
+void OPENLL_API simulatedAnnealing(std::vector<Label> & labels, PenaltyFunction penaltyFunction, bool allowSelection = true);
 
 }
 
