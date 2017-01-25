@@ -67,6 +67,7 @@ This section introduces and partially extends common terminology from typography
   <dt>Point</dt><dd>ToDo 2D and 3D</dd>
   <dt>Line</dt><dd>ToDo 2D and 3D</dd>
   <dt>Spline</dt><dd>ToDo 2D and 3D</dd>
+  <dt>Surface</dt><dd>ToDo 2D and 3D</dd>
   <dt>Visibility</dt><dd>ToDo</dd>
   <dt>Overlap</dt><dd>ToDo</dd>
   <dt>Precedence</dt><dd>ToDo</dd>
