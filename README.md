@@ -22,9 +22,11 @@ This section introduces and partially extends common terminology from computer g
 <dl>
   <dt>Bitmask</dt><dd>A rectangular, high-resolution bitfield that approximates the shape of a grapheme by means of 'inside' and 'outside' bits.</dd>
   <dt>Distance Map</dt><dd>A discrete, low-resolution scalar field that specifies the minimum distance to a shape's contour approximated by a bitmask. The distance may be signed to distinguish between the inside and outside of the shape.</dd>
-  <dt>Texture</dt><dd>A rectangular container storing data (i.e., bitmap or distance map) in a GPU friendly format for efficient processing.</dd>
+  <dt>Texture</dt><dd>A rectangular container storing data in a GPU friendly format for efficient processing.</dd>
   <dt>Texture Atlas</dt><dd>A large, rectangular container comprising multiple sub-textures that can be efficiently accessed as one texture.</dd>
 </dl>
+
+For efficient label rendering *OpenLL* uses texture atlases of distance maps of graphemes. *OpenLL* further allows the compuation of distance maps based bitmasks at run-time.
 
 ### Reference Systems and Units
 
