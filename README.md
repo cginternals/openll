@@ -35,7 +35,7 @@ This section introduces and partially extends common terminology from typography
   <dt>Dots per Inch</dt><dd>ToDo</dd>
   <dt>Screen Space</dt><dd>ToDo</dd>
   <dt>World Space</dt><dd>ToDo also refer to Object Space here</dd>
-  <dt>Local Space</dt><dd>ToDo</dd>
+  <dt>Local Space</dt><dd>ToDo Typesetting Space</dd>
 </dl>
 
 ### Typography
@@ -46,10 +46,19 @@ This section introduces and partially extends common terminology from typography
   It is defined by a sub ... ToDo</dd>
   <dt>Ligature</dt><dd>ToDo</dd>
   <dt>Glyph Sequence</dt><dd>ToDo</dd>
-  <dt>Kerning</dt><dd>ToDo</dd>
   <dt>Glyph Catalogue</dt><dd>ToDo</dd>
   <dt>Font Face</dt><dd>A collection of glyph-based  described by, e.g., font-size, line spacing, a glyph catalogue, as well as kerning information... ToDo</dd>
-  <dt>Type Setting</dt><dd>ToDo</dd>
+</dl>
+
+### Typesetting
+<dl>
+  <dt>Kerning</dt><dd>ToDo</dd>
+  <dt>Base Line</dt><dd>ToDo</dd>
+  <dt>Advance</dt><dd>ToDo</dd>
+  <dt>Anchor</dt><dd>ToDo</dd>
+  <dt>Alignment</dt><dd>ToDo</dd>
+  <dt>...</dt><dd>ToDo</dd>
+  <dt>Typesetting</dt><dd>ToDo</dd>
 </dl>
 
 ### Positioning and Layouting
@@ -58,7 +67,6 @@ This section introduces and partially extends common terminology from typography
   <dt>Point</dt><dd>ToDo 2D and 3D</dd>
   <dt>Line</dt><dd>ToDo 2D and 3D</dd>
   <dt>Spline</dt><dd>ToDo 2D and 3D</dd>
-  <dt>Alignment</dt><dd>ToDo</dd>
   <dt>Visibility</dt><dd>ToDo</dd>
   <dt>Overlap</dt><dd>ToDo</dd>
   <dt>Precedence</dt><dd>ToDo</dd>
