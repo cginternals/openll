@@ -37,6 +37,7 @@ glm::uvec2 g_viewport{640, 480};
 bool g_config_changed = true;
 size_t g_algorithmID = 0;
 bool g_frames_visible = true;
+long int g_seed = 0;
 
 struct Algorithm
 {
@@ -74,6 +75,11 @@ void onKeyPress(GLFWwindow * window, int key, int, int action, int mods)
     else if (key == 'F' && action == GLFW_PRESS)
     {
         g_frames_visible = !g_frames_visible;
+    }
+    else if (key == 'R' && action == GLFW_PRESS)
+    {
+        g_seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        g_config_changed = true;
     }
     else if ('1' <= key && key <= '9' && action == GLFW_PRESS)
     {
@@ -123,6 +129,7 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
     std::vector<gloperate_text::Label> labels;
 
     std::default_random_engine generator;
+    generator.seed(g_seed);
     std::uniform_real_distribution<float> distribution(-1.f, 1.f);
     std::uniform_int_distribution<unsigned int> priorityDistribution(1, 10);
 
