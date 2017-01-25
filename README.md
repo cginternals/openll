@@ -26,7 +26,7 @@ This section introduces and partially extends common terminology from computer g
   <dt>Texture Atlas</dt><dd>A large, rectangular container comprising multiple sub-textures that can be efficiently accessed as one texture.</dd>
 </dl>
 
-For efficient label rendering *OpenLL* uses texture atlases of distance maps of graphemes. *OpenLL* further allows the compuation of distance maps based bitmasks at run-time.
+For efficient label rendering *OpenLL* uses texture atlases of distance maps of graphemes. *OpenLL* further allows the computation of distance maps based on bitmasks at run-time.
 
 ### Reference Systems and Units
 
