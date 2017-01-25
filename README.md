@@ -15,16 +15,15 @@ Open Label Library is an opensource, MIT licensed API specification for high per
 
 ## Terminology
 
-This section introduces and partially extends common terminology from typography within the context of texture-based glyph rendering, as it is the basis of *OpenLL* and required for comprehending its API.
+This section introduces and partially extends common terminology from computer graphics and typography within the context of texture-based glyph rendering, as it is the basis of *OpenLL* and required for comprehending its API. Please note that these are not intended as general definitions but instead used to clarify their use within *OpenLL*.
 
 ### Basic Computer Graphics
 
 <dl>
-  <dt>Bitmap</dt><dd>ToDo</dd>
-  <dt>Bitmask</dt><dd>ToDo</dd>
-  <dt>Distance Field</dt><dd>ToDo</dd>
-  <dt>Texture</dt><dd>ToDo</dd>
-  <dt>Texture Atlas</dt><dd>ToDo</dd>
+  <dt>Bitmask</dt><dd>A rectangular, high-resolution bitfield that approximates the shape of a grapheme by means of 'inside' and 'outside' bits.</dd>
+  <dt>Distance Map</dt><dd>A discrete, low-resolution scalar field that specifies the minimum distance to a shape's contour approximated by a bitmask. The distance may be signed to distinguish between the inside and outside of the shape.</dd>
+  <dt>Texture</dt><dd>A rectangular container storing data (i.e., bitmap or distance map) in a GPU friendly format for efficient processing.</dd>
+  <dt>Texture Atlas</dt><dd>A large, rectangular container comprising multiple sub-textures that can be efficiently accessed as one texture.</dd>
 </dl>
 
 ### Reference Systems and Units
