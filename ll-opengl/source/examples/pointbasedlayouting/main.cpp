@@ -38,6 +38,7 @@ bool g_config_changed = true;
 size_t g_algorithmID = 0;
 bool g_frames_visible = true;
 long int g_seed = 0;
+int g_numLabels = 64;
 
 struct Algorithm
 {
@@ -79,6 +80,16 @@ void onKeyPress(GLFWwindow * window, int key, int, int action, int mods)
     else if (key == 'R' && action == GLFW_PRESS)
     {
         g_seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        g_config_changed = true;
+    }
+    else if (key == '-' && action == GLFW_PRESS)
+    {
+        g_numLabels = std::max(g_numLabels / 2, 1);
+        g_config_changed = true;
+    }
+    else if ((key == '+' || key == '=') && action == GLFW_PRESS)
+    {
+        g_numLabels = std::min(g_numLabels * 2, 1024);
         g_config_changed = true;
     }
     else if ('1' <= key && key <= '9' && action == GLFW_PRESS)
@@ -133,7 +144,7 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
     std::uniform_real_distribution<float> distribution(-1.f, 1.f);
     std::uniform_int_distribution<unsigned int> priorityDistribution(1, 10);
 
-    for (int i = 0; i < 50; ++i)
+    for (int i = 0; i < g_numLabels; ++i)
     {
         const auto string = random_name(generator);
         const auto priority = priorityDistribution(generator);
