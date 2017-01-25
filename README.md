@@ -71,6 +71,7 @@ This section introduces and partially extends common terminology from typography
   <dt>Visibility</dt><dd>ToDo</dd>
   <dt>Overlap</dt><dd>ToDo</dd>
   <dt>Precedence</dt><dd>ToDo</dd>
+  <dt>Transformation</dt><dd>ToDo Additional glyph and glpyh sequence...</dd>
 </dl>
 
 ### Stylization
