@@ -59,6 +59,7 @@ std::vector<Algorithm> layoutAlgorithms
     {"simulatedAnnealing",                std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, false, glm::vec2(0.f))},
     {"simulatedAnnealing with padding",   std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, false, glm::vec2(0.2f))},
     {"simulatedAnnealing with selection", std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, true, glm::vec2(0.f))},
+    {"simulatedAnnealing (everything)",   std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, true, glm::vec2(0.2f))},
 };
 
 void onResize(GLFWwindow*, int width, int height)
@@ -84,12 +85,12 @@ void onKeyPress(GLFWwindow * window, int key, int, int action, int mods)
     }
     else if (key == '-' && action == GLFW_PRESS)
     {
-        g_numLabels = std::max(g_numLabels / 2, 1);
+        g_numLabels = std::max(g_numLabels - 8, 8);
         g_config_changed = true;
     }
     else if ((key == '+' || key == '=') && action == GLFW_PRESS)
     {
-        g_numLabels = std::min(g_numLabels * 2, 1024);
+        g_numLabels = std::min(g_numLabels + 8, 1024);
         g_config_changed = true;
     }
     else if ('1' <= key && key <= '9' && action == GLFW_PRESS)
@@ -192,10 +193,14 @@ gloperate_text::GlyphVertexCloud prepareCloud(const std::vector<gloperate_text::
 
 void preparePointDrawable(const std::vector<gloperate_text::Label> & labels, PointDrawable& pointDrawable)
 {
-    std::vector<glm::vec2> points;
+    std::vector<Point> points;
     for (const auto & label : labels)
     {
-        points.push_back(label.pointLocation);
+        points.push_back({
+            label.pointLocation,
+            label.placement.display ? glm::vec3(.7f, .0f, .0f) : glm::vec3(.5f, .5f, .5f),
+            (label.placement.display ? 4.f : 2.f) * g_viewport.x / 640
+        });
     }
     pointDrawable.initialize(points);
 }

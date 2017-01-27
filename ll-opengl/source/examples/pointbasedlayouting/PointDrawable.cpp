@@ -13,6 +13,18 @@
 
 using namespace gl;
 
+
+namespace
+{
+
+template <typename Class, typename Type>
+std::ptrdiff_t offset(Type Class::*member)
+{
+    return reinterpret_cast<std::ptrdiff_t>(&(((Class*)0)->*member));
+}
+
+}
+
 PointDrawable::PointDrawable(const std::string & dataPath)
 :   m_count(-1)
 {
@@ -29,7 +41,7 @@ PointDrawable::~PointDrawable()
 {
 }
 
-void PointDrawable::initialize(const std::vector<glm::vec2> & points)
+void PointDrawable::initialize(const std::vector<Point> & points)
 {
     m_count = points.size();
 
@@ -40,9 +52,22 @@ void PointDrawable::initialize(const std::vector<glm::vec2> & points)
 
     auto binding = m_vao->binding(0);
     binding->setAttribute(0);
-    binding->setBuffer(buffer, 0, sizeof(glm::vec2));
-    binding->setFormat(2, GL_FLOAT, GL_FALSE, 0);
+    binding->setBuffer(buffer, 0, sizeof(Point));
+    binding->setFormat(2, GL_FLOAT, GL_FALSE, offset(&Point::coords));
+
+    binding = m_vao->binding(1);
+    binding->setAttribute(1);
+    binding->setBuffer(buffer, 0, sizeof(Point));
+    binding->setFormat(3, GL_FLOAT, GL_FALSE, offset(&Point::color));
+
+    binding = m_vao->binding(2);
+    binding->setAttribute(2);
+    binding->setBuffer(buffer, 0, sizeof(Point));
+    binding->setFormat(1, GL_FLOAT, GL_FALSE, offset(&Point::size));
+
     m_vao->enable(0);
+    m_vao->enable(1);
+    m_vao->enable(2);
 }
 
 void PointDrawable::render()
