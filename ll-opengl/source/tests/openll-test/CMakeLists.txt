@@ -15,6 +15,7 @@ message(STATUS "Test ${target}")
 set(sources
     main.cpp
     FontLoader_test.cpp
+    LabelArea_test.cpp
 )
 
 

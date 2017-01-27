@@ -24,13 +24,13 @@ std::vector<gloperate_text::LabelArea> computeLabelAreas(const std::vector<glope
 
 }
 
-int labelOverlaps(const std::vector<gloperate_text::Label> & labels)
+int labelOverlaps(const std::vector<gloperate_text::Label> & labels, const glm::vec2 & relativePadding)
 {
     auto areas = computeLabelAreas(labels);
     int counter = 0;
     for (size_t i = 0; i < areas.size(); ++i) {
         for (size_t j = i + 1; j < areas.size(); ++j) {
-            if (areas[i].overlaps(areas[j]))
+            if (areas[i].paddedOverlaps(areas[j], relativePadding))
             {
                 ++counter;
             }
@@ -39,13 +39,13 @@ int labelOverlaps(const std::vector<gloperate_text::Label> & labels)
     return counter;
 }
 
-float labelOverlapArea(const std::vector<gloperate_text::Label> & labels)
+float labelOverlapArea(const std::vector<gloperate_text::Label> & labels, const glm::vec2 & relativePadding)
 {
     auto areas = computeLabelAreas(labels);
     float area = 0;
     for (size_t i = 0; i < areas.size(); ++i) {
         for (size_t j = i + 1; j < areas.size(); ++j) {
-            area += areas[i].overlapArea(areas[j]);
+            area += areas[i].paddedOverlapArea(areas[j], relativePadding);
         }
     }
     return area;

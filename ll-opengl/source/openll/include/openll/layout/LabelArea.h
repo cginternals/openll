@@ -11,7 +11,9 @@ struct OPENLL_API LabelArea
 {
 public:
     bool overlaps(const LabelArea & other) const;
+    bool paddedOverlaps(const LabelArea & other, const glm::vec2 & relativePadding) const;
     float overlapArea(const LabelArea & other) const;
+    float paddedOverlapArea(const LabelArea & other, const glm::vec2 & relativePadding) const;
     float area() const;
 
 public:

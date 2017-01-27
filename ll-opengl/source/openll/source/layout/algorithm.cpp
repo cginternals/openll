@@ -63,7 +63,7 @@ struct Index2D
     size_t inner = 0;
 };
 
-std::vector<std::vector<std::vector<LabelCollision>>> createCollisionGraph(const std::vector<std::vector<LabelArea>>& labelAreas)
+std::vector<std::vector<std::vector<LabelCollision>>> createCollisionGraph(const std::vector<std::vector<LabelArea>>& labelAreas, const glm::vec2 & relativePadding = {0.f, 0.f})
 {
     std::vector<std::vector<std::vector<LabelCollision>>> collisionGraph;
     collisionGraph.resize(labelAreas.size());
@@ -81,9 +81,9 @@ std::vector<std::vector<std::vector<LabelCollision>>> createCollisionGraph(const
                 continue;
             const auto & label1 = index1.element(labelAreas);
             const auto & label2 = index2.element(labelAreas);
-            if (label1.overlaps(label2))
+            if (label1.paddedOverlaps(label2, relativePadding))
             {
-                auto area = label1.overlapArea(label2);
+                auto area = label1.paddedOverlapArea(label2, relativePadding);
                 collisionElement.push_back({index2.outer, index2.inner, area});
                 assert(index1.element(collisionGraph).size() > 0);
             }
@@ -255,7 +255,7 @@ void discreteGradientDescent(std::vector<Label> & labels, PenaltyFunction penalt
                     overlapArea += collision.overlapArea;
                 }
                 overlapArea /= labelArea.area();
-                const auto penalty = penaltyFunction(overlapCount, overlapArea, positions[index], 1);
+                const auto penalty = penaltyFunction(overlapCount, overlapArea, positions[index], labels[labelIndex].priority);
                 penalties.push_back(penalty);
                 if (penalty < penalties[bestIndex])
                 {
@@ -282,7 +282,7 @@ void discreteGradientDescent(std::vector<Label> & labels, PenaltyFunction penalt
     }
 }
 
-void simulatedAnnealing(std::vector<Label> & labels, PenaltyFunction penaltyFunction, bool allowSelection)
+void simulatedAnnealing(std::vector<Label> & labels, PenaltyFunction penaltyFunction, bool allowSelection, const glm::vec2 & relativePadding)
 {
     // based on https://www.eecs.harvard.edu/shieber/Biblio/Papers/tog-final.pdf
 
@@ -293,7 +293,7 @@ void simulatedAnnealing(std::vector<Label> & labels, PenaltyFunction penaltyFunc
 
     const std::vector<std::vector<LabelArea>> labelAreas = computeLabelAreas(labels, positions);
     std::vector<unsigned int> chosenLabels = randomStartLabelAreas(labelAreas);
-    const auto collisionGraph = createCollisionGraph(labelAreas);
+    const auto collisionGraph = createCollisionGraph(labelAreas, relativePadding);
     const auto chosenLabel = [&](unsigned int i) { return labelAreas[i][chosenLabels[i]]; };
 
     std::default_random_engine generator;
@@ -346,7 +346,7 @@ void simulatedAnnealing(std::vector<Label> & labels, PenaltyFunction penaltyFunc
         {
             // converged
             if (changesAtTemperature == 0) break;
-            if (temperatureChanges == 100) break;
+            if (temperatureChanges == 50) break;
 
             temperature *= 0.9f;
             changesAtTemperature = 0;

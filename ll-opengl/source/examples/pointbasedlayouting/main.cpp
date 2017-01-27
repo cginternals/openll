@@ -53,13 +53,12 @@ std::vector<Algorithm> layoutAlgorithms
 {
     {"constant",                          gloperate_text::layout::constant},
     {"random",                            gloperate_text::layout::random},
-    {"greedy",                            std::bind(gloperate_text::layout::greedy, _1, gloperate_text::layout::overlapCount)},
     {"greedy with area",                  std::bind(gloperate_text::layout::greedy, _1, gloperate_text::layout::overlapArea)},
-    {"discreteGradientDescent",           std::bind(gloperate_text::layout::discreteGradientDescent, _1, gloperate_text::layout::overlapCount)},
     {"discreteGradientDescent with area", std::bind(gloperate_text::layout::discreteGradientDescent, _1, gloperate_text::layout::overlapArea)},
-    {"simulatedAnnealing with area",      std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::overlapArea, false)},
-    {"simulatedAnnealing",                std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, false)},
-    {"simulatedAnnealing with selection", std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, true)},
+    {"simulatedAnnealing with area",      std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::overlapArea, false, glm::vec2(0.f))},
+    {"simulatedAnnealing",                std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, false, glm::vec2(0.f))},
+    {"simulatedAnnealing with padding",   std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, false, glm::vec2(0.2f))},
+    {"simulatedAnnealing with selection", std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, true, glm::vec2(0.f))},
 };
 
 void onResize(GLFWwindow*, int width, int height)
@@ -220,18 +219,19 @@ void runAndBenchmark(std::vector<gloperate_text::Label> & labels, Algorithm algo
     algorithm.function(labels);
     auto end = std::chrono::steady_clock::now();
     std::chrono::duration<double> diff = end - start;
-    std::cout << "Evaluation results for " << algorithm.name << ":" << std::endl
-        << "Runtime:          " << diff.count() << "s" << std::endl
-        << "Labels hidden:    " << labelsHidden(labels) << "/" << labels.size() << std::endl
-        << "Overlaps:         " << labelOverlaps(labels) << std::endl
-        << "Overlap area:     " << labelOverlapArea(labels) << std::endl
-        << "Relative label positions:" << std::endl;
     auto positions = labelPositionDesirability(labels);
-    std::cout
-        << "  Upper Right:    " << positions[gloperate_text::RelativeLabelPosition::UpperRight] << std::endl
-        << "  Upper Left:     " << positions[gloperate_text::RelativeLabelPosition::UpperLeft] << std::endl
-        << "  Lower Right:    " << positions[gloperate_text::RelativeLabelPosition::LowerRight] << std::endl
-        << "  Lower Left:     " << positions[gloperate_text::RelativeLabelPosition::LowerLeft] << std::endl;
+    std::cout << "Evaluation results for " << algorithm.name << ":" << std::endl
+        << "Runtime:                 " << diff.count() << "s" << std::endl
+        << "Labels hidden:           " << labelsHidden(labels) << "/" << labels.size() << std::endl
+        << "Overlaps:                " << labelOverlaps(labels) << std::endl
+        << "Overlap area:            " << labelOverlapArea(labels) << std::endl
+        << "Padding Violations:      " << labelOverlaps(labels, {0.2f, 0.2f}) << std::endl
+        << "Padding Overlap:         " << labelOverlapArea(labels, {0.2f, 0.2f}) << std::endl
+        << "Relative label positions:" << std::endl
+        << "  Upper Right:           " << positions[gloperate_text::RelativeLabelPosition::UpperRight] << std::endl
+        << "  Upper Left:            " << positions[gloperate_text::RelativeLabelPosition::UpperLeft]  << std::endl
+        << "  Lower Left:            " << positions[gloperate_text::RelativeLabelPosition::LowerLeft]  << std::endl
+        << "  Lower Right:           " << positions[gloperate_text::RelativeLabelPosition::LowerRight] << std::endl;
     std::cout << std::endl;
 }
 
