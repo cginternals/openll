@@ -129,6 +129,16 @@ void GlyphSequence::setLineAnchor(const LineAnchor anchor)
     m_anchor = anchor;
 }
 
+SuperSampling GlyphSequence::superSampling() const
+{
+    return m_superSampling;
+}
+
+void GlyphSequence::setSuperSampling(const SuperSampling superSampling)
+{
+    m_superSampling = superSampling;
+}
+
 const glm::vec4 & GlyphSequence::fontColor() const
 {
     return m_fontColor;

@@ -21,6 +21,7 @@
 #include <openll/GlyphSequence.h>
 #include <openll/Alignment.h>
 #include <openll/LineAnchor.h>
+#include <openll/SuperSampling.h>
 #include <openll/layout/layoutbase.h>
 #include <openll/layout/algorithm.h>
 
@@ -158,6 +159,7 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
         sequence.setFontSize(10.f + priority);
         sequence.setFontFace(font);
         sequence.setFontColor(glm::vec4(glm::vec3(0.5f - priority * 0.05f), 1.f));
+        sequence.setSuperSampling(gloperate_text::SuperSampling::Quincunx);
 
         const auto origin = glm::vec2{distribution(generator), distribution(generator)};
         // compute  transform matrix
@@ -171,7 +173,7 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
             , gloperate_text::Alignment::LeftAligned, gloperate_text::LineAnchor::Baseline, true };
 
         sequence.setAdditionalTransform(transform);
-        labels.push_back({sequence, origin, priority, placement });
+        labels.push_back({sequence, origin, priority, placement});
     }
     return labels;
 }
