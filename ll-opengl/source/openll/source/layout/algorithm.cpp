@@ -247,12 +247,12 @@ void discreteGradientDescent(std::vector<Label> & labels, PenaltyFunction penalt
                 const auto & labelArea = singleLabelAreas[index];
                 float overlapArea = 0.f;
                 int overlapCount = 0;
-                for (const auto & collison : collisionGraph[labelIndex][index])
+                for (const auto & collision : collisionGraph[labelIndex][index])
                 {
-                    if (chosenLabels[collison.index] != collison.position)
+                    if (chosenLabels[collision.index] != collision.position)
                         continue;
                     ++overlapCount;
-                    overlapArea += labelArea.overlapArea(chosenLabel(collison.index));
+                    overlapArea += collision.overlapArea;
                 }
                 overlapArea /= labelArea.area();
                 const auto penalty = penaltyFunction(overlapCount, overlapArea, positions[index], 1);
@@ -318,11 +318,11 @@ void simulatedAnnealing(std::vector<Label> & labels, PenaltyFunction penaltyFunc
                 return penaltyFunction(0, 0.f, RelativeLabelPosition::Hidden, priority);
             float overlapArea = 0.f;
             int overlapCount = 0;
-            for (const auto & collison : collisionGraph[labelIndex][position])
+            for (const auto & collision : collisionGraph[labelIndex][position])
             {
-                if (chosenLabels[collison.index] != collison.position)
+                if (chosenLabels[collision.index] != collision.position)
                     continue;
-                overlapArea += labelArea.overlapArea(chosenLabel(collison.index));
+                overlapArea += collision.overlapArea;
                 ++overlapCount;
             }
             overlapArea /= labelArea.area();
