@@ -41,9 +41,11 @@ using namespace gl;
 
 namespace
 {
-	auto g_frame = 0u;
+	auto g_frame = 0u; //unused
 	auto g_size = glm::ivec2{};
 	auto g_size_changed = true;
+
+	float g_time = 0.f;
 
 	std::vector<gloperate_text::GlyphVertexCloud> g_vertexClouds;
 	gloperate_text::FontFace * g_font;
@@ -192,8 +194,19 @@ void draw(gloperate_text::GlyphRenderer &renderer)
 	gl::glEnable(gl::GL_BLEND);
 	gl::glBlendFunc(gl::GL_SRC_ALPHA, gl::GL_ONE_MINUS_SRC_ALPHA);
 
+	glm::vec3 myRotationAxis(0, 1, 0);
+	auto m = glm::mat4();
+	auto rotatedM = glm::rotate(m, 0.2f, myRotationAxis);
+	g_time+=0.005;
+
 	for (size_t i = 0; i < g_vertexClouds.size(); i++) {
-		renderer.render(g_vertexClouds[i]);
+		//renderer.render(g_vertexClouds[i]);
+
+		//renderer.renderInWorld(g_vertexClouds[i], glm::lookAt(glm::vec3(0, 0, -10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)));
+		glm::vec3 myRotationAxis(0, 1, 0);
+		auto m = glm::mat4();
+		auto rotatedM = glm::rotate(m, g_time, myRotationAxis);
+		renderer.renderInWorld(g_vertexClouds[i],rotatedM);
 	}
 
 	gl::glDepthMask(gl::GL_TRUE);
