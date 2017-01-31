@@ -58,7 +58,7 @@ public:
     float fontSize() const;
     void setFontSize(float fontSize);
 
-    float superSampling() const;
+    SuperSampling superSampling() const;
     void setSuperSampling(SuperSampling superSampling);
 
     FontFace * fontFace() const;
