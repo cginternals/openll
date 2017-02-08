@@ -28,6 +28,7 @@ message(STATUS "Plugin ${target}")
 set(sources
 
     main.cpp
+    datapath.inl
     PointDrawable.cpp
     PointDrawable.h
     RectangleDrawable.cpp

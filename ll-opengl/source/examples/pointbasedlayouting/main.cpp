@@ -1,21 +1,30 @@
+
 #include <cassert>
+#include <chrono>
 #include <iostream>
 #include <map>
 #include <random>
 
-#include <GLFW/glfw3.h>
-
-#include <glbinding/Binding.h>
-#include <glbinding/callbacks.h>
-#include <glbinding/gl/gl.h>
-#include <globjects/globjects.h>
+#include <cpplocate/cpplocate.h>
+#include <cpplocate/ModuleInfo.h>
 
 #include <glm/gtc/matrix_transform.hpp>
+
+#include <glbinding/gl/gl.h>
+#include <glbinding/gl/extension.h>
+#include <glbinding/gl/bitfield.h>
+#include <glbinding/ContextInfo.h>
+#include <glbinding/Version.h>
+
+#include <GLFW/glfw3.h>
+
+#include <globjects/globjects.h>
+#include <globjects/logging.h>
+#include <globjects/base/File.h>
 
 #include <openll/GlyphRenderer.h>
 #include <openll/FontLoader.h>
 #include <openll/Typesetter.h>
-#include <openll/stages/GlyphPreparationStage.h>
 
 #include <openll/FontFace.h>
 #include <openll/GlyphSequence.h>
@@ -25,101 +34,50 @@
 #include <openll/layout/layoutbase.h>
 #include <openll/layout/algorithm.h>
 
-#include <cpplocate/cpplocate.h>
-#include <cpplocate/ModuleInfo.h>
-
 #include "PointDrawable.h"
 #include "RectangleDrawable.h"
 #include "benchmark.h"
 
+#include "datapath.inl"
+
 using namespace gl;
 
-glm::uvec2 g_viewport{640, 480};
-bool g_config_changed = true;
-size_t g_algorithmID = 0;
-bool g_frames_visible = true;
-long int g_seed = 0;
-int g_numLabels = 64;
-
-struct Algorithm
+namespace
 {
-    std::string name;
-    std::function<void(std::vector<gloperate_text::Label>&)> function;
-};
+    auto g_size = glm::ivec2{ };
+    bool g_config_changed = true;
+    size_t g_algorithmID = 0;
+    bool g_frames_visible = true;
+    long int g_seed = 0;
+    int g_numLabels = 64;
+    std::unique_ptr<gloperate_text::FontFace> g_font;
+    std::unique_ptr<PointDrawable> g_pointDrawable;
+    std::unique_ptr<RectangleDrawable> g_rectangleDrawable;
+    std::unique_ptr<gloperate_text::GlyphRenderer> g_renderer;
+    std::unique_ptr<gloperate_text::GlyphVertexCloud> g_cloud;
 
-using namespace std::placeholders;
+    struct Algorithm
+    {
+        std::string name;
+        std::function<void(std::vector<gloperate_text::Label>&)> function;
+    };
 
-std::vector<Algorithm> layoutAlgorithms
-{
-    {"Constant",                                 gloperate_text::layout::constant},
-    {"Random",                                   gloperate_text::layout::random},
-    {"Greedy",                                   std::bind(gloperate_text::layout::greedy, _1, gloperate_text::layout::standard)},
-    {"Discrete Gradient Descent with area",      std::bind(gloperate_text::layout::discreteGradientDescent, _1, gloperate_text::layout::standard)},
-    {"Simulated Annealing",                      std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, false, glm::vec2(0.f))},
-    {"Simulated Annealing with padding",         std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, false, glm::vec2(0.2f))},
-    {"Simulated Annealing with selection",       std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, true, glm::vec2(0.f))},
-    {"Simulated Annealing (padding, selection)", std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, true, glm::vec2(0.2f))},
-};
+    using namespace std::placeholders;
 
-void onResize(GLFWwindow*, int width, int height)
-{
-    g_viewport = {width, height};
-    g_config_changed = true;
+    std::vector<Algorithm> layoutAlgorithms
+    {
+        {"Constant",                                 gloperate_text::layout::constant},
+        {"Random",                                   gloperate_text::layout::random},
+        {"Greedy",                                   std::bind(gloperate_text::layout::greedy, _1, gloperate_text::layout::standard)},
+        {"Discrete Gradient Descent with area",      std::bind(gloperate_text::layout::discreteGradientDescent, _1, gloperate_text::layout::standard)},
+        {"Simulated Annealing",                      std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, false, glm::vec2(0.f))},
+        {"Simulated Annealing with padding",         std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, false, glm::vec2(0.2f))},
+        {"Simulated Annealing with selection",       std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, true, glm::vec2(0.f))},
+        {"Simulated Annealing (padding, selection)", std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, true, glm::vec2(0.2f))},
+    };
 }
 
-void onKeyPress(GLFWwindow * window, int key, int, int action, int mods)
-{
-    if (key == 'Q' && action == GLFW_PRESS && mods == GLFW_MOD_CONTROL)
-    {
-        glfwSetWindowShouldClose(window, 1);
-    }
-    else if (key == 'F' && action == GLFW_PRESS)
-    {
-        g_frames_visible = !g_frames_visible;
-    }
-    else if (key == 'R' && action == GLFW_PRESS)
-    {
-        g_seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-        g_config_changed = true;
-    }
-    else if (key == '-' && action == GLFW_PRESS)
-    {
-        g_numLabels = std::max(g_numLabels - 8, 8);
-        g_config_changed = true;
-    }
-    else if ((key == '+' || key == '=') && action == GLFW_PRESS)
-    {
-        g_numLabels = std::min(g_numLabels + 8, 1024);
-        g_config_changed = true;
-    }
-    else if ('1' <= key && key <= '9' && action == GLFW_PRESS)
-    {
-        g_algorithmID = std::min(static_cast<size_t>(key - '1'), layoutAlgorithms.size() - 1);
-        g_config_changed = true;
-    }
-}
 
-void glInitialize()
-{
-    glbinding::Binding::initialize(false);
-    glbinding::setCallbackMaskExcept(
-        glbinding::CallbackMask::After | glbinding::CallbackMask::Parameters,
-        {"glGetError"});
-    glbinding::setAfterCallback([](const glbinding::FunctionCall& call) {
-        const auto error = glGetError();
-        if (error != GL_NO_ERROR)
-        {
-            std::cout << error << " in " << call.function->name()
-                      << " with parameters:" << std::endl;
-            for (const auto& parameter : call.parameters)
-            {
-                std::cout << "    " << parameter->asString() << std::endl;
-            }
-        }
-    });
-    globjects::init();
-    std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
-}
 
 
 std::string random_name(std::default_random_engine engine)
@@ -231,7 +189,7 @@ void preparePointDrawable(const std::vector<gloperate_text::Label> & labels, Poi
         points.push_back({
             label.pointLocation,
             label.placement.display ? glm::vec3(.7f, .0f, .0f) : glm::vec3(.5f, .5f, .5f),
-            (label.placement.display ? 4.f : 2.f) * g_viewport.x / 640
+            (label.placement.display ? 4.f : 2.f) * g_size.x / 640
         });
     }
     pointDrawable.initialize(points);
@@ -272,76 +230,169 @@ void runAndBenchmark(std::vector<gloperate_text::Label> & labels, Algorithm algo
     std::cout << std::endl;
 }
 
+void initialize()
+{
+    glClearColor(1.f, 1.f, 1.f, 1.f);
+
+    const auto dataPath = common::retrieveDataPath("openll", "dataPath");
+
+    gloperate_text::FontLoader loader;
+    g_font = std::unique_ptr<gloperate_text::FontFace>(loader.load(dataPath + "/fonts/opensansr36/opensansr36.fnt"));
+    g_pointDrawable = std::unique_ptr<PointDrawable>(new PointDrawable(dataPath));
+    g_rectangleDrawable = std::unique_ptr<RectangleDrawable>(new RectangleDrawable(dataPath));
+    g_renderer = std::unique_ptr<gloperate_text::GlyphRenderer>(new gloperate_text::GlyphRenderer);
+    g_cloud = std::unique_ptr<gloperate_text::GlyphVertexCloud>(new gloperate_text::GlyphVertexCloud);
+}
+
+void deinitialize()
+{
+
+    globjects::detachAllObjects();
+}
+
+void draw()
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    if (g_config_changed)
+    {
+        glViewport(0, 0, g_size.x, g_size.y);
+        auto labels = prepareLabels(g_font.get(), g_size);
+        runAndBenchmark(labels, layoutAlgorithms[g_algorithmID]);
+        auto sequences = getSequences(labels);
+        sequences.push_back(prepareHeadline(g_font.get(), g_size, layoutAlgorithms[g_algorithmID].name));
+        g_cloud->updateWithSequences(sequences, true);
+        preparePointDrawable(labels, *g_pointDrawable);
+        prepareRectangleDrawable(labels, *g_rectangleDrawable);
+    }
+
+    gl::glDepthMask(gl::GL_FALSE);
+    gl::glEnable(gl::GL_CULL_FACE);
+    gl::glEnable(gl::GL_BLEND);
+    gl::glBlendFunc(gl::GL_SRC_ALPHA, gl::GL_ONE_MINUS_SRC_ALPHA);
+
+    g_renderer->render(*g_cloud);
+    g_pointDrawable->render();
+    if (g_frames_visible)
+        g_rectangleDrawable->render();
+
+    gl::glDepthMask(gl::GL_TRUE);
+    gl::glDisable(gl::GL_CULL_FACE);
+    gl::glDisable(gl::GL_BLEND);
+
+    g_config_changed = false;
+}
+
+
+void error(int errnum, const char * errmsg)
+{
+    globjects::critical() << errnum << ": " << errmsg << std::endl;
+}
+
+void framebuffer_size_callback(GLFWwindow * /*window*/, int width, int height)
+{
+    g_size = glm::ivec2{ width, height };
+
+    // ToDo
+}
+
+void key_callback(GLFWwindow * window, int key, int /*scancode*/, int action, int /*mods*/)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    {
+            glfwSetWindowShouldClose(window, 1);
+    }
+    if (key == GLFW_KEY_F5 && action == GLFW_RELEASE)
+    {
+        globjects::File::reloadAll();
+    }
+    else if (key == 'F' && action == GLFW_PRESS)
+    {
+        g_frames_visible = !g_frames_visible;
+    }
+    else if (key == 'R' && action == GLFW_PRESS)
+    {
+        g_seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        g_config_changed = true;
+    }
+    else if (key == '-' && action == GLFW_PRESS)
+    {
+        g_numLabels = std::max(g_numLabels - 8, 8);
+        g_config_changed = true;
+    }
+    else if ((key == '+' || key == '=') && action == GLFW_PRESS)
+    {
+        g_numLabels = std::min(g_numLabels + 8, 1024);
+        g_config_changed = true;
+    }
+    else if ('1' <= key && key <= '9' && action == GLFW_PRESS)
+    {
+        g_algorithmID = std::min(static_cast<size_t>(key - '1'), layoutAlgorithms.size() - 1);
+        g_config_changed = true;
+    }
+}
+
 
 int main()
 {
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+#ifdef SYSTEM_DARWIN
+    globjects::critical() << "macOS does currently not support compute shader (OpenGL 4.3. required).";
+    return 0;
+#endif
+
+    // Initialize GLFW
+    if (!glfwInit())
+        return 1;
+
+    glfwSetErrorCallback(error);
+    glfwDefaultWindowHints();
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    auto window = glfwCreateWindow(g_viewport.x, g_viewport.y, "Text-Demo", 0, nullptr);
-
+    // Create a context and, if valid, make it current
+    GLFWwindow * window = glfwCreateWindow(640, 480, "ll-opengl | minimal-label", nullptr, nullptr);
     if (!window)
     {
+        globjects::critical() << "Context creation failed. Terminate execution.";
+
         glfwTerminate();
         return -1;
     }
 
+    glfwSetKeyCallback(window, key_callback);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
     glfwMakeContextCurrent(window);
 
-    glInitialize();
+    // Initialize globjects (internally initializes glbinding, and registers the current context)
+    globjects::init();
 
-    glfwSetWindowSizeCallback(window, onResize);
-    glfwSetKeyCallback(window, onKeyPress);
+    std::cout << std::endl
+        << "OpenGL Version:  " << glbinding::ContextInfo::version() << std::endl
+        << "OpenGL Vendor:   " << glbinding::ContextInfo::vendor() << std::endl
+        << "OpenGL Renderer: " << glbinding::ContextInfo::renderer() << std::endl << std::endl;
 
-    cpplocate::ModuleInfo moduleInfo = cpplocate::findModule("openll");
-    std::string dataPath = moduleInfo.value("dataPath");
+    globjects::DebugMessage::enable();
 
-    gloperate_text::FontLoader loader;
-    const auto font = loader.load(dataPath + "/fonts/opensansr36/opensansr36.fnt");
-    gloperate_text::GlyphRenderer renderer;
-    gloperate_text::GlyphVertexCloud cloud;
-    std::vector<gloperate_text::Label> labels;
-    PointDrawable pointDrawable {dataPath};
-    RectangleDrawable rectangleDrawable {dataPath};
-    glClearColor(1.f, 1.f, 1.f, 1.f);
+    // globjects::info() << "Press F5 to reload compute shader." << std::endl << std::endl;
 
 
+    glfwGetFramebufferSize(window, &g_size[0], &g_size[1]);
+    initialize();
+
+    // Main loop
     while (!glfwWindowShouldClose(window))
     {
-        if (g_config_changed)
-        {
-            glViewport(0, 0, g_viewport.x, g_viewport.y);
-            labels = prepareLabels(font, g_viewport);
-            runAndBenchmark(labels, layoutAlgorithms[g_algorithmID]);
-            auto sequences = getSequences(labels);
-            sequences.push_back(prepareHeadline(font, g_viewport, layoutAlgorithms[g_algorithmID].name));
-            cloud = gloperate_text::prepareGlyphs(sequences, true);
-            preparePointDrawable(labels, pointDrawable);
-            prepareRectangleDrawable(labels, rectangleDrawable);
-        }
-
-        gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
-
-        gl::glDepthMask(gl::GL_FALSE);
-        gl::glEnable(gl::GL_CULL_FACE);
-        gl::glEnable(gl::GL_BLEND);
-        gl::glBlendFunc(gl::GL_SRC_ALPHA, gl::GL_ONE_MINUS_SRC_ALPHA);
-
-        renderer.render(cloud);
-        pointDrawable.render();
-        if (g_frames_visible)
-            rectangleDrawable.render();
-
-        gl::glDepthMask(gl::GL_TRUE);
-        gl::glDisable(gl::GL_CULL_FACE);
-        gl::glDisable(gl::GL_BLEND);
-
-        g_config_changed = false;
-
-        glfwSwapBuffers(window);
         glfwPollEvents();
+        draw();
+        glfwSwapBuffers(window);
     }
+    deinitialize();
 
+    // Properly shutdown GLFW
     glfwTerminate();
+
+    return 0;
 }
