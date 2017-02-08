@@ -9,6 +9,7 @@
 #include <cpplocate/ModuleInfo.h>
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/vec2.hpp>
 
 #include <glbinding/gl/gl.h>
 #include <glbinding/gl/extension.h>
@@ -28,6 +29,7 @@
 
 #include <openll/FontFace.h>
 #include <openll/GlyphSequence.h>
+#include <openll/GlyphVertexCloud.h>
 #include <openll/Alignment.h>
 #include <openll/LineAnchor.h>
 #include <openll/SuperSampling.h>
@@ -95,7 +97,7 @@ std::string random_name(std::default_random_engine engine)
     return {characters.begin(), characters.end()};
 }
 
-std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font, glm::uvec2 viewport)
+std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font, glm::ivec2 viewport)
 {
     std::vector<gloperate_text::Label> labels;
 
@@ -140,7 +142,7 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
 }
 
 
-gloperate_text::GlyphSequence prepareHeadline(gloperate_text::FontFace * font, glm::uvec2 viewport, const std::string & name)
+gloperate_text::GlyphSequence prepareHeadline(gloperate_text::FontFace * font, glm::ivec2 viewport, const std::string & name)
 {
 
     const std::u32string unicode_string {name.begin(), name.end()};
