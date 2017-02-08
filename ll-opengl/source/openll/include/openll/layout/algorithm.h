@@ -28,9 +28,9 @@ void OPENLL_API constant(std::vector<Label> & labels);
 void OPENLL_API random(std::vector<Label> & labels);
 
 // penaltyFunction should be chosen so that a lower value is better
-void OPENLL_API greedy(std::vector<Label> & labels, PenaltyFunction penaltyFunction);
-void OPENLL_API discreteGradientDescent(std::vector<Label> & labels, PenaltyFunction penaltyFunction);
-void OPENLL_API simulatedAnnealing(std::vector<Label> & labels, PenaltyFunction penaltyFunction, bool allowSelection = true, const glm::vec2 & relativePadding = {0.2f, 0.2f});
+void OPENLL_API greedy                 (std::vector<Label> & labels, PenaltyFunction penaltyFunction, const glm::vec2 & relativePadding = {0.2f, 0.2f});
+void OPENLL_API discreteGradientDescent(std::vector<Label> & labels, PenaltyFunction penaltyFunction, const glm::vec2 & relativePadding = {0.2f, 0.2f});
+void OPENLL_API simulatedAnnealing     (std::vector<Label> & labels, PenaltyFunction penaltyFunction, const glm::vec2 & relativePadding = {0.2f, 0.2f});
 
 }
 

@@ -70,12 +70,12 @@ namespace
     {
         {"Constant",                                 gloperate_text::layout::constant},
         {"Random",                                   gloperate_text::layout::random},
-        {"Greedy",                                   std::bind(gloperate_text::layout::greedy, _1, gloperate_text::layout::standard)},
-        {"Discrete Gradient Descent with area",      std::bind(gloperate_text::layout::discreteGradientDescent, _1, gloperate_text::layout::standard)},
-        {"Simulated Annealing",                      std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, false, glm::vec2(0.f))},
-        {"Simulated Annealing with padding",         std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, false, glm::vec2(0.2f))},
-        {"Simulated Annealing with selection",       std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, true, glm::vec2(0.f))},
-        {"Simulated Annealing (padding, selection)", std::bind(gloperate_text::layout::simulatedAnnealing, _1, gloperate_text::layout::standard, true, glm::vec2(0.2f))},
+        {"Greedy",                                   std::bind(gloperate_text::layout::greedy,                  _1, gloperate_text::layout::standard, glm::vec2(0.2f))},
+        {"Discrete Gradient Descent",                std::bind(gloperate_text::layout::discreteGradientDescent, _1, gloperate_text::layout::standard, glm::vec2(0.2f))},
+        {"Simulated Annealing",                      std::bind(gloperate_text::layout::simulatedAnnealing,      _1, gloperate_text::layout::standard, glm::vec2(0.f))},
+        {"Simulated Annealing with padding",         std::bind(gloperate_text::layout::simulatedAnnealing,      _1, gloperate_text::layout::standard, glm::vec2(0.2f))},
+        {"Simulated Annealing with selection",       std::bind(gloperate_text::layout::simulatedAnnealing,      _1, gloperate_text::layout::standard, glm::vec2(0.f))},
+        {"Simulated Annealing (padding, selection)", std::bind(gloperate_text::layout::simulatedAnnealing,      _1, gloperate_text::layout::standard, glm::vec2(0.2f))},
     };
 }
 
@@ -294,8 +294,7 @@ void error(int errnum, const char * errmsg)
 void framebuffer_size_callback(GLFWwindow * /*window*/, int width, int height)
 {
     g_size = glm::ivec2{ width, height };
-
-    // ToDo
+    g_config_changed = true;
 }
 
 void key_callback(GLFWwindow * window, int key, int /*scancode*/, int action, int /*mods*/)

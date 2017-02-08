@@ -10,6 +10,8 @@ namespace gloperate_text
 
 bool LabelArea::overlaps(const LabelArea & other) const
 {
+    if (position == RelativeLabelPosition::Hidden || other.position == RelativeLabelPosition::Hidden)
+        return false;
     const auto upperRight = origin + extent;
     const auto otherUpperRight = other.origin + other.extent;
     return
@@ -21,6 +23,8 @@ bool LabelArea::overlaps(const LabelArea & other) const
 
 bool LabelArea::paddedOverlaps(const LabelArea & other, const glm::vec2 & relativePadding) const
 {
+    if (position == RelativeLabelPosition::Hidden || other.position == RelativeLabelPosition::Hidden)
+        return false;
     const auto aLowerLeft = origin - extent * relativePadding;
     const auto bLowerLeft = other.origin - other.extent * relativePadding;
     const auto aUpperRight = origin + extent * (relativePadding + 1.f);
@@ -34,6 +38,8 @@ bool LabelArea::paddedOverlaps(const LabelArea & other, const glm::vec2 & relati
 
 float LabelArea::overlapArea(const LabelArea & other) const
 {
+    if (position == RelativeLabelPosition::Hidden || other.position == RelativeLabelPosition::Hidden)
+        return 0.f;
     const auto lower_left = glm::max(origin, other.origin);
     const auto upper_right = glm::min(origin + extent, other.origin + other.extent);
     return std::max(0.f, upper_right.x - lower_left.x) * std::max(0.f, upper_right.y - lower_left.y);
@@ -41,6 +47,8 @@ float LabelArea::overlapArea(const LabelArea & other) const
 
 float LabelArea::paddedOverlapArea(const LabelArea & other, const glm::vec2 & relativePadding) const
 {
+    if (position == RelativeLabelPosition::Hidden || other.position == RelativeLabelPosition::Hidden)
+        return 0.f;
     const auto lower_left  = glm::max(origin - extent * relativePadding,         other.origin - other.extent * relativePadding);
     const auto upper_right = glm::min(origin + extent * (relativePadding + 1.f), other.origin + other.extent * (relativePadding + 1.f));
     return std::max(0.f, upper_right.x - lower_left.x) * std::max(0.f, upper_right.y - lower_left.y);

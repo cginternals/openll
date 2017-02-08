@@ -18,6 +18,11 @@ glm::vec2 labelOrigin(RelativeLabelPosition position, const glm::vec2 & origin, 
     }
 }
 
+bool OPENLL_API isVisible(RelativeLabelPosition position)
+{
+    return position != RelativeLabelPosition::Hidden;
+}
+
 RelativeLabelPosition relativeLabelPosition(const glm::vec2 & offset, const glm::vec2 & extent)
 {
     const auto midpointOffset = offset + extent / 2.f;
