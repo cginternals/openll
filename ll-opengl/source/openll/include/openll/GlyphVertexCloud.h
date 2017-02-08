@@ -53,6 +53,7 @@ public:
     void update();
     // allows for volatile optimizations
     void update(const Vertices & vertices);
+    void updateWithSequences(const std::vector<GlyphSequence>& sequences, bool optimized);
 
     void optimize(const std::vector<GlyphSequence> & sequences);
 

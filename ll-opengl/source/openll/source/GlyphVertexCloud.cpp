@@ -8,6 +8,7 @@
 #include <glbinding/gl/boolean.h>
 
 #include <openll/GlyphSequence.h>
+#include <openll/Typesetter.h>
 
 
 namespace
@@ -137,6 +138,35 @@ void GlyphVertexCloud::update(const Vertices & vertices)
 
     m_drawable->buffer(0)->setData(vertices, gl::GL_STATIC_DRAW);
     m_drawable->setSize(vertices.size());
+}
+
+void GlyphVertexCloud::updateWithSequences(const std::vector<GlyphSequence>& sequences, bool optimized)
+{
+    // get total number of glyphs
+    auto numGlyphs = size_t(0u);
+    for (const auto & sequence : sequences)
+        numGlyphs += sequence.depictableSize();
+
+    // prepare vertex cloud storage
+    m_vertices.resize(numGlyphs);
+
+    if (sequences.empty()) return;
+
+    auto index = m_vertices.begin();
+    for (const auto & sequence : sequences)
+    {
+        Typesetter::typeset(sequence, index);
+        index += sequence.depictableSize();
+    }
+
+    FontFace * font = sequences[0].fontFace();
+
+    if(optimized)
+        optimize(sequences); // optimize and update drawable
+    else
+        update(); // update drawable
+
+    setTexture(font->glyphTexture());
 }
 
 void GlyphVertexCloud::optimize(const std::vector<GlyphSequence> & sequences)
