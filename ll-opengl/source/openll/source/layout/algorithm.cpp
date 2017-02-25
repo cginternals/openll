@@ -169,15 +169,20 @@ void constant(std::vector<Label> & labels)
 
 void random(std::vector<Label> & labels)
 {
+    const std::vector<RelativeLabelPosition> positions {
+        RelativeLabelPosition::UpperRight, RelativeLabelPosition::UpperLeft,
+        RelativeLabelPosition::LowerLeft, RelativeLabelPosition::LowerRight,
+        RelativeLabelPosition::Hidden
+    };
     std::default_random_engine generator;
-    std::bernoulli_distribution bool_distribution;
+    std::uniform_int_distribution<int> distribution(0, positions.size() - 1);
     for (auto & label : labels)
     {
         const auto extent = Typesetter::extent(label.sequence);
-        glm::vec2 offset;
-        offset.x = bool_distribution(generator) ? -extent.x : 0.f;
-        offset.y = bool_distribution(generator) ? -extent.y : 0.f;
-        label.placement = {offset, Alignment::LeftAligned, LineAnchor::Bottom, true};
+        const auto index = distribution(generator);
+        const auto origin = labelOrigin(positions[index], label.pointLocation, extent);
+        LabelArea area {origin, extent, positions[index]};
+        label.placement = placementFor(area, label.pointLocation);
     }
 }
 
@@ -199,7 +204,7 @@ float standard(int, float overlapArea, RelativeLabelPosition position, unsigned 
         case RelativeLabelPosition::UpperLeft:  positionPenalty = 1; break;
         case RelativeLabelPosition::LowerLeft:  positionPenalty = 2; break;
         case RelativeLabelPosition::LowerRight: positionPenalty = 3; break;
-        case RelativeLabelPosition::Hidden:     return 1.5f * priority;
+        case RelativeLabelPosition::Hidden:     return 2.f * priority;
         default: assert(false);
     }
     return 15.f * overlapArea + .3f * positionPenalty;
