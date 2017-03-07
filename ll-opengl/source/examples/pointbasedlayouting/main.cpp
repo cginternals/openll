@@ -79,9 +79,6 @@ namespace
     };
 }
 
-
-
-
 std::string random_name(std::default_random_engine engine)
 {
     std::uniform_int_distribution<int> upperDistribution(65, 90);
@@ -273,10 +270,10 @@ void draw()
     gl::glEnable(gl::GL_BLEND);
     gl::glBlendFunc(gl::GL_SRC_ALPHA, gl::GL_ONE_MINUS_SRC_ALPHA);
 
-    g_renderer->render(*g_cloud);
     g_pointDrawable->render();
     if (g_frames_visible)
         g_rectangleDrawable->render();
+    g_renderer->render(*g_cloud);
 
     gl::glDepthMask(gl::GL_TRUE);
     gl::glDisable(gl::GL_CULL_FACE);
@@ -353,7 +350,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // Create a context and, if valid, make it current
-    GLFWwindow * window = glfwCreateWindow(640, 480, "ll-opengl | minimal-label", nullptr, nullptr);
+    GLFWwindow * window = glfwCreateWindow(640, 480, "ll-opengl | pointbasedlayouting", nullptr, nullptr);
     if (!window)
     {
         globjects::critical() << "Context creation failed. Terminate execution.";
