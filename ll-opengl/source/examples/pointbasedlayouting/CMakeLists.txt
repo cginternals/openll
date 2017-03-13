@@ -35,6 +35,10 @@ set(sources
     RectangleDrawable.h
     benchmark.cpp
     benchmark.h
+    GeoData.cpp
+    GeoData.h
+    ScreenAlignedQuad.cpp
+    ScreenAlignedQuad.h
 )
 
 

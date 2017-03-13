@@ -204,10 +204,10 @@ float standard(int, float overlapArea, RelativeLabelPosition position, unsigned 
         case RelativeLabelPosition::UpperLeft:  positionPenalty = 1; break;
         case RelativeLabelPosition::LowerLeft:  positionPenalty = 2; break;
         case RelativeLabelPosition::LowerRight: positionPenalty = 3; break;
-        case RelativeLabelPosition::Hidden:     return 2.f * priority;
+        case RelativeLabelPosition::Hidden:     return 0.02f * priority * priority;
         default: assert(false);
     }
-    return 15.f * overlapArea + .3f * positionPenalty;
+    return 15.f * overlapArea + .03f * positionPenalty;
 }
 
 
