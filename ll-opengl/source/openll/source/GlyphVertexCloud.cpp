@@ -110,12 +110,12 @@ gloperate_text::Drawable * GlyphVertexCloud::createDrawable()
     drawable->setAttributeBindingBuffer(4, vertexBuffer, 0, sizeof(Vertex));
     drawable->setAttributeBindingBuffer(5, vertexBuffer, 0, sizeof(Vertex));
 
-    drawable->setAttributeBindingFormat(0, 3, gl::GL_FLOAT,        gl::GL_FALSE, offset(&Vertex::origin));
-    drawable->setAttributeBindingFormat(1, 3, gl::GL_FLOAT,        gl::GL_FALSE, offset(&Vertex::vtan));
-    drawable->setAttributeBindingFormat(2, 3, gl::GL_FLOAT,        gl::GL_FALSE, offset(&Vertex::vbitan));
-    drawable->setAttributeBindingFormat(3, 4, gl::GL_FLOAT,        gl::GL_FALSE, offset(&Vertex::uvRect));
-    drawable->setAttributeBindingFormat(4, 4, gl::GL_FLOAT,        gl::GL_FALSE, offset(&Vertex::fontColor));
-    drawable->setAttributeBindingFormat(5, 1, gl::GL_UNSIGNED_INT, gl::GL_FALSE, offset(&Vertex::superSampling));
+    drawable->setAttributeBindingFormat(0, 3, gl::GL_FLOAT, gl::GL_FALSE, offset(&Vertex::origin));
+    drawable->setAttributeBindingFormat(1, 3, gl::GL_FLOAT, gl::GL_FALSE, offset(&Vertex::vtan));
+    drawable->setAttributeBindingFormat(2, 3, gl::GL_FLOAT, gl::GL_FALSE, offset(&Vertex::vbitan));
+    drawable->setAttributeBindingFormat(3, 4, gl::GL_FLOAT, gl::GL_FALSE, offset(&Vertex::uvRect));
+    drawable->setAttributeBindingFormat(4, 4, gl::GL_FLOAT, gl::GL_FALSE, offset(&Vertex::fontColor));
+    drawable->setAttributeBindingFormatI(5, 1, gl::GL_UNSIGNED_INT, offset(&Vertex::superSampling));
 
     drawable->enableAllAttributeBindings();
 
@@ -152,14 +152,16 @@ void GlyphVertexCloud::updateWithSequences(const std::vector<GlyphSequence>& seq
 
     if (sequences.empty()) return;
 
+    FontFace * font = sequences[0].fontFace();
+
     auto index = m_vertices.begin();
     for (const auto & sequence : sequences)
     {
+        assert(font == sequence.fontFace());
         Typesetter::typeset(sequence, index);
         index += sequence.depictableSize();
     }
 
-    FontFace * font = sequences[0].fontFace();
 
     if(optimized)
         optimize(sequences); // optimize and update drawable
