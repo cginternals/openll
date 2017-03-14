@@ -6,8 +6,8 @@
 #include <cpplocate/cpplocate.h>
 #include <cpplocate/ModuleInfo.h>
 
-#include <glm/gtc/constants.hpp>
 #include <glm/vec2.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <glbinding/gl/gl.h>
 #include <glbinding/gl/extension.h>
@@ -21,9 +21,15 @@
 #include <globjects/logging.h>
 #include <globjects/base/File.h>
 
-#include <globjects/Program.h>
-#include <globjects/Shader.h>
+#include <openll/GlyphRenderer.h>
+#include <openll/FontLoader.h>
 
+#include <openll/FontFace.h>
+#include <openll/GlyphSequence.h>
+#include <openll/GlyphVertexCloud.h>
+#include <openll/Alignment.h>
+#include <openll/LineAnchor.h>
+#include <openll/SuperSampling.h>
 
 #include "datapath.inl"
 
@@ -33,14 +39,29 @@ using namespace gl;
 
 namespace
 {
+    std::vector<int> g_fontSizes {36, 72, 144};
+    std::map<int, gloperate_text::FontFace *> g_fonts;
+    std::vector<gloperate_text::GlyphVertexCloud> g_clouds;
     auto g_size = glm::ivec2{ };
     bool g_config_changed = true;
-    size_t g_algorithmID = 0;
-    std::unique_ptr<gloperate_text::FontFace> g_font36;
-    std::unique_ptr<gloperate_text::FontFace> g_font72;
-    std::unique_ptr<gloperate_text::FontFace> g_font144;
+    size_t g_patternID = 0;
     std::unique_ptr<gloperate_text::GlyphRenderer> g_renderer;
-    std::unique_ptr<gloperate_text::GlyphVertexCloud> g_cloud;
+
+    struct SamplingPattern
+    {
+        std::string name;
+        gloperate_text::SuperSampling pattern;
+    };
+    std::vector<SamplingPattern> g_patterns {
+        {"None",     gloperate_text::SuperSampling::None},
+        {"Grid1x3",  gloperate_text::SuperSampling::Grid1x3},
+        {"Grid2x4",  gloperate_text::SuperSampling::Grid2x4},
+        {"RGSS2x2",  gloperate_text::SuperSampling::RGSS2x2},
+        {"Quincunx", gloperate_text::SuperSampling::Quincunx},
+        {"Rooks8",   gloperate_text::SuperSampling::Rooks8},
+        {"Grid3x3",  gloperate_text::SuperSampling::Grid3x3},
+        {"Grid4x4",  gloperate_text::SuperSampling::Grid4x4}
+    };
 }
 
 void initialize()
@@ -50,28 +71,39 @@ void initialize()
     const auto dataPath = common::retrieveDataPath("openll", "dataPath");
 
     gloperate_text::FontLoader loader;
-    g_font = std::unique_ptr<gloperate_text::FontFace>(loader.load(dataPath + "/fonts/opensansr36/opensansr36.fnt"));
-    g_font = std::unique_ptr<gloperate_text::FontFace>(loader.load(dataPath + "/fonts/opensansr72/opensansr72.fnt"));
-    g_font = std::unique_ptr<gloperate_text::FontFace>(loader.load(dataPath + "/fonts/opensansr144/opensansr144.fnt"));
+    for (auto size : g_fontSizes)
+    {
+        auto string = std::to_string(size);
+        auto font = loader.load(dataPath + "/fonts/opensansr" + string + "/opensansr" + string + ".fnt");
+        g_fonts[size] = font;
+    }
     g_renderer = std::unique_ptr<gloperate_text::GlyphRenderer>(new gloperate_text::GlyphRenderer);
-    g_cloud = std::unique_ptr<gloperate_text::GlyphVertexCloud>(new gloperate_text::GlyphVertexCloud);
 }
 
 void deinitialize()
 {
+    for (auto pair : g_fonts)
+    {
+        delete pair.second;
+    }
     globjects::detachAllObjects();
 }
 
-std::vector<gloperate_text::GlyphSequence> prepareSequences(gloperate_text::FontFace * font, glm::ivec2 viewport)
+std::vector<gloperate_text::GlyphSequence> prepareSequences(
+    glm::ivec2 viewport
+,   gloperate_text::SuperSampling pattern
+,   int size
+,   float x_coord
+    )
 {
-    std::vector<gloperate_text::GlyphSequence> labels;
+    std::vector<gloperate_text::GlyphSequence> sequences;
 
-    for (int i = 0; i < g_numLabels; ++i)
+    auto y = -.8f;
+    for (int renderSize = 5; renderSize < 30; ++renderSize)
     {
-        const auto string = random_name(generator);
+        const auto string = std::string{"Example (font "} + std::to_string(size) + ", size " + std::to_string(renderSize) + ")";
         const std::u32string unicode_string {string.begin(), string.end()};
-        const auto priority = priorityDistribution(generator);
-        const auto origin = glm::vec2{x_distribution(generator), y_distribution(generator)};
+        const auto origin = glm::vec2{x_coord, y};
 
         gloperate_text::GlyphSequence sequence;
         sequence.setString(unicode_string);
@@ -79,10 +111,10 @@ std::vector<gloperate_text::GlyphSequence> prepareSequences(gloperate_text::Font
         sequence.setLineWidth(400.f);
         sequence.setAlignment(gloperate_text::Alignment::LeftAligned);
         sequence.setLineAnchor(gloperate_text::LineAnchor::Ascent);
-        sequence.setFontSize(10.f + priority);
-        sequence.setFontFace(font);
-        sequence.setFontColor(glm::vec4(glm::vec3(0.5f - priority * 0.05f), 1.f));
-        sequence.setSuperSampling(gloperate_text::SuperSampling::Quincunx);
+        sequence.setFontSize(renderSize);
+        sequence.setFontFace(g_fonts[size]);
+        sequence.setFontColor(glm::vec4(glm::vec3(0.f), 1.f));
+        sequence.setSuperSampling(pattern);
 
         // compute  transform matrix
         glm::mat4 transform;
@@ -91,13 +123,11 @@ std::vector<gloperate_text::GlyphSequence> prepareSequences(gloperate_text::Font
             static_cast<float>(viewport.x) / viewport.y, 1.f));
         transform = glm::scale(transform, glm::vec3(1 / 300.f));
 
-        const auto placement = gloperate_text::LabelPlacement{ glm::vec2{ 0.f, 0.f }
-            , gloperate_text::Alignment::LeftAligned, gloperate_text::LineAnchor::Baseline, true };
-
         sequence.setAdditionalTransform(transform);
-        labels.push_back({sequence, origin, priority, placement});
+        sequences.push_back(sequence);
+        y += 0.02f + renderSize * 0.005f;
     }
-    return labels;
+    return sequences;
 }
 
 void draw()
@@ -107,8 +137,18 @@ void draw()
     if (g_config_changed)
     {
         glViewport(0, 0, g_size.x, g_size.y);
-        auto sequences = prepareSequences(g_font.get(), g_size);
-        g_cloud->updateWithSequences(sequences, true);
+
+        std::cout << g_patterns[g_patternID].name <<std::endl;
+        auto x = -.9f;
+        g_clouds.clear();
+        for (auto pair : g_fonts)
+        {
+            auto size = pair.first;
+            auto sequences = prepareSequences(g_size, g_patterns[g_patternID].pattern, size, x);
+            g_clouds.push_back({});
+            g_clouds.back().updateWithSequences(sequences, true);
+            x += 0.6f;
+        }
     }
 
     gl::glDepthMask(gl::GL_FALSE);
@@ -116,7 +156,8 @@ void draw()
     gl::glEnable(gl::GL_BLEND);
     gl::glBlendFunc(gl::GL_SRC_ALPHA, gl::GL_ONE_MINUS_SRC_ALPHA);
 
-    g_renderer->render(*g_cloud);
+    for (auto cloud : g_clouds)
+        g_renderer->render(cloud);
 
     gl::glDepthMask(gl::GL_TRUE);
     gl::glDisable(gl::GL_CULL_FACE);
@@ -144,6 +185,12 @@ void key_callback(GLFWwindow * window, int key, int /*scancode*/, int action, in
 
     if (key == GLFW_KEY_F5 && action == GLFW_RELEASE)
         globjects::File::reloadAll();
+
+    if ('1' <= key && key <= '9' && action == GLFW_PRESS)
+    {
+        g_patternID = std::min(static_cast<size_t>(key - '1'), g_patterns.size() - 1);
+        g_config_changed = true;
+    }
 }
 
 

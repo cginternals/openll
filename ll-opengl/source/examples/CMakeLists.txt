@@ -49,6 +49,7 @@ install_module_info(${META_PROJECT_NAME}
 # Example applications
 #add_subdirectory(basic-text-display)
 add_subdirectory(labeling-at-point)
+add_subdirectory(supersampling)
 add_subdirectory(minimal-label) # new example (template)
 
 # ToDo: port to new projects above ...
