@@ -78,6 +78,7 @@ void initialize()
         g_fonts[size] = font;
     }
     g_renderer = std::unique_ptr<gloperate_text::GlyphRenderer>(new gloperate_text::GlyphRenderer);
+    std::cout << "Press 1-9 to choose different supersampling patterns" << std::endl;
 }
 
 void deinitialize()
@@ -119,9 +120,8 @@ std::vector<gloperate_text::GlyphSequence> prepareSequences(
         // compute  transform matrix
         glm::mat4 transform;
         transform = glm::translate(transform, glm::vec3(origin, 0.f));
-        transform = glm::scale(transform, glm::vec3(1.f,
-            static_cast<float>(viewport.x) / viewport.y, 1.f));
-        transform = glm::scale(transform, glm::vec3(1 / 300.f));
+        transform = glm::scale(transform, glm::vec3(static_cast<float>(viewport.y) / viewport.x, 1.f, 1.f));
+        transform = glm::scale(transform, glm::vec3(2.f / viewport.y));
 
         sequence.setAdditionalTransform(transform);
         sequences.push_back(sequence);
@@ -138,7 +138,6 @@ void draw()
     {
         glViewport(0, 0, g_size.x, g_size.y);
 
-        std::cout << g_patterns[g_patternID].name <<std::endl;
         auto x = -.9f;
         g_clouds.clear();
         for (auto pair : g_fonts)
@@ -190,6 +189,7 @@ void key_callback(GLFWwindow * window, int key, int /*scancode*/, int action, in
     {
         g_patternID = std::min(static_cast<size_t>(key - '1'), g_patterns.size() - 1);
         g_config_changed = true;
+        std::cout << "Supersampling pattern: " << g_patterns[g_patternID].name << std::endl;
     }
 }
 
