@@ -272,7 +272,7 @@ void initialize()
     {
         auto texture = globjects::Texture::createDefault(GL_TEXTURE_2D);
         texture->ref();
-        texture->image2D(0, GL_RGBA, glm::vec2(8192, 4096), 0, GL_RGBA, GL_UNSIGNED_BYTE, static_cast<const gl::GLvoid *>(raw.data()));
+        texture->image2D(0, GL_RGBA, glm::ivec2(8192, 4096), 0, GL_RGBA, GL_UNSIGNED_BYTE, static_cast<const gl::GLvoid *>(raw.data()));
         g_quad = std::unique_ptr<ScreenAlignedQuad>(new ScreenAlignedQuad(texture));
     }
 
