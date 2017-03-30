@@ -9,6 +9,7 @@
 #include <cpplocate/ModuleInfo.h>
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
 #include <glm/vec2.hpp>
 
 #include <glbinding/gl/gl.h>
@@ -55,10 +56,16 @@ namespace
     bool g_frames_visible = false;
     long int g_seed = 0;
     int g_numLabels = 64;
+
+    bool g_3D = false;
+    std::chrono::time_point<std::chrono::steady_clock> g_startTime;
+    glm::mat4 g_mvp;
+
     bool g_geodata = false;
     bool g_geodataAvailable = false;
     glm::vec2 g_lowerLeftCoords  {-12.f, 35.f};
     glm::vec2 g_upperRightCoords {30.f, 72.f};
+
     std::unique_ptr<gloperate_text::FontFace> g_font;
     std::unique_ptr<PointDrawable> g_pointDrawable;
     std::unique_ptr<RectangleDrawable> g_rectangleDrawable;
@@ -109,10 +116,15 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
 
     std::default_random_engine generator;
     generator.seed(g_seed);
-    std::uniform_real_distribution<float> y_distribution(-.8f, .6f);
     std::uniform_real_distribution<float> x_distribution(-.8f, .8f);
+    std::uniform_real_distribution<float> y_distribution(-.8f, .6f);
+    std::uniform_real_distribution<float> z_distribution(-1.f, 1.f);
     std::uniform_int_distribution<unsigned int> priorityDistribution(1, 10);
-    const auto citiesInArea = cities.featuresInArea(g_lowerLeftCoords, g_upperRightCoords);
+    std::vector<Feature> citiesInArea;
+    if (g_geodata)
+    {
+        citiesInArea = cities.featuresInArea(g_lowerLeftCoords, g_upperRightCoords);
+    }
 
     for (int i = 0; i < g_numLabels; ++i)
     {
@@ -122,11 +134,21 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
         auto fontsize  = 10.f + priority;
         auto fontcolor = .5f - priority * .05f;
 
+        if (g_3D)
+        {
+            auto origin3D = glm::vec4{origin, z_distribution(generator), 1.f};
+            auto projected = g_mvp * origin3D;
+            projected /= projected.w;
+            origin = glm::vec2(projected);
+            fontsize  = 30.f - projected.z * 15.f;
+            fontcolor = .8f * (std::exp(projected.z) - 1) / (glm::e<float>() - 1);
+        }
+
         if (g_geodata)
         {
-            string   = citiesInArea.at(i).name;
-            priority = citiesInArea.at(i).population / 50000;
-            origin   = citiesInArea.at(i).location;
+            string    = citiesInArea.at(i).name;
+            priority  = citiesInArea.at(i).population / 50000;
+            origin    = citiesInArea.at(i).location;
             fontsize  = 10.f + priority * .05f;
             fontcolor = .8f + priority * 0.02f;
         }
@@ -274,10 +296,14 @@ void initialize()
         g_quad = std::unique_ptr<ScreenAlignedQuad>(new ScreenAlignedQuad(texture));
     }
 
+    g_startTime = std::chrono::steady_clock::now();
+
     std::cout
         << "Press 1-9 to choose different layout algorithms" << std::endl
-        << "Press G to switch between random data and city data"
+        << "Press Q to use city data"
         << (g_geodataAvailable ? "" : " (currently not available, must be downloaded beforehand)") << std::endl
+        << "Press W to use random 2D data (default)" << std::endl
+        << "Press E to use random rotating 3D data" << std::endl
         << "Press + and - to increase/decrease number of features" << std::endl
         << "Press F to toggle rendering of frames around labels" << std::endl
         << "Press R to use a different seed for random data" << std::endl;
@@ -293,7 +319,21 @@ void draw()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    if (g_config_changed)
+    if (g_3D)
+    {
+        auto now = std::chrono::steady_clock::now();
+        std::chrono::duration<float> duration = now - g_startTime;
+        auto timePassed = duration.count();
+
+        const auto model = glm::rotate(std::fmod(timePassed / 5, glm::pi<float>() * 2), glm::vec3(0.f, 1.f, 0.f));
+        const auto view = glm::lookAt(
+            glm::vec3(0.f, 0.f, 1.5f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+        const auto projection = glm::perspective(2.0f, 1.0f, 0.1f, 3.f);
+
+        g_mvp = projection * view * model;
+    }
+
+    if (g_config_changed || g_3D)
     {
         glViewport(0, 0, g_size.x, g_size.y);
         if (g_geodata)
@@ -367,9 +407,22 @@ void key_callback(GLFWwindow * window, int key, int /*scancode*/, int action, in
         g_seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
         g_config_changed = true;
     }
-    else if (key == 'G' && action == GLFW_PRESS && g_geodataAvailable)
+    else if (key == 'Q' && action == GLFW_PRESS && g_geodataAvailable)
     {
-        g_geodata = !g_geodata;
+        g_geodata = true;
+        g_3D = false;
+        g_config_changed = true;
+    }
+    else if (key == 'W' && action == GLFW_PRESS)
+    {
+        g_3D = false;
+        g_geodata = false;
+        g_config_changed = true;
+    }
+    else if (key == 'E' && action == GLFW_PRESS)
+    {
+        g_3D = true;
+        g_geodata = false;
         g_config_changed = true;
     }
     else if (key == '-' && action == GLFW_PRESS)
