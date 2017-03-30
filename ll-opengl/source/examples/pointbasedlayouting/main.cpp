@@ -56,6 +56,7 @@ namespace
     long int g_seed = 0;
     int g_numLabels = 64;
     bool g_geodata = false;
+    bool g_geodataAvailable = false;
     glm::vec2 g_lowerLeftCoords  {-12.f, 35.f};
     glm::vec2 g_upperRightCoords {30.f, 72.f};
     std::unique_ptr<gloperate_text::FontFace> g_font;
@@ -264,17 +265,21 @@ void initialize()
     g_cloud = std::unique_ptr<gloperate_text::GlyphVertexCloud>(new gloperate_text::GlyphVertexCloud);
 
     // parameters specify which columns contain data to be loaded
-    cities.loadCSV(dataPath + "/geodata/cities.csv", 1, 2, 3, 4);
-    auto texture = globjects::Texture::createDefault(GL_TEXTURE_2D);
-    texture->ref();
+    auto csvValid = cities.loadCSV(dataPath + "/geodata/cities.csv", 1, 2, 3, 4);
     auto raw = gloperate_text::RawFile(dataPath + "/geodata/world.8192.4096.rgba.ub.raw");
-    assert(raw.isValid());
-    texture->image2D(0, GL_RGBA, glm::vec2(8192, 4096), 0, GL_RGBA, GL_UNSIGNED_BYTE, static_cast<const gl::GLvoid *>(raw.data()));
+    g_geodataAvailable = csvValid && raw.isValid();
+    if (g_geodataAvailable)
+    {
+        auto texture = globjects::Texture::createDefault(GL_TEXTURE_2D);
+        texture->ref();
+        texture->image2D(0, GL_RGBA, glm::vec2(8192, 4096), 0, GL_RGBA, GL_UNSIGNED_BYTE, static_cast<const gl::GLvoid *>(raw.data()));
+        g_quad = std::unique_ptr<ScreenAlignedQuad>(new ScreenAlignedQuad(texture));
+    }
 
-    g_quad = std::unique_ptr<ScreenAlignedQuad>(new ScreenAlignedQuad(texture));
     std::cout
         << "Press 1-9 to choose different layout algorithms" << std::endl
-        << "Press G to switch between random data and city data (must be downloaded beforehand)" << std::endl
+        << "Press G to switch between random data and city data"
+        << (g_geodataAvailable ? "" : " (currently not available, must be downloaded beforehand)") << std::endl
         << "Press + and - to increase/decrease number of features" << std::endl
         << "Press F to toggle rendering of frames around labels" << std::endl
         << "Press R to use a different seed for random data" << std::endl;
@@ -297,7 +302,8 @@ void draw()
         auto height = width * g_size.y / g_size.x;
         g_upperRightCoords.y = g_lowerLeftCoords.y + height;
         auto texCoords = cities.textureCoordsForArea(g_lowerLeftCoords, g_upperRightCoords);
-        g_quad->setTextureArea(texCoords.first, texCoords.second);
+        if (g_geodata)
+            g_quad->setTextureArea(texCoords.first, texCoords.second);
         auto labels = prepareLabels(g_font.get(), g_size);
         runAndBenchmark(labels, layoutAlgorithms[g_algorithmID]);
         auto sequences = getSequences(labels);
@@ -360,7 +366,7 @@ void key_callback(GLFWwindow * window, int key, int /*scancode*/, int action, in
         g_seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
         g_config_changed = true;
     }
-    else if (key == 'G' && action == GLFW_PRESS)
+    else if (key == 'G' && action == GLFW_PRESS && g_geodataAvailable)
     {
         g_geodata = !g_geodata;
         g_config_changed = true;
