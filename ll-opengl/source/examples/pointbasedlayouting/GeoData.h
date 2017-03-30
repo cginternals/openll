@@ -10,7 +10,7 @@ struct Feature
 {
     std::string name;
     glm::vec2 location;
-    float additional;
+    float population;
 };
 
 class GeoData

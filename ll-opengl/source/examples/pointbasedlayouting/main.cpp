@@ -52,9 +52,10 @@ namespace
     auto g_size = glm::ivec2{ };
     bool g_config_changed = true;
     size_t g_algorithmID = 0;
-    bool g_frames_visible = true;
+    bool g_frames_visible = false;
     long int g_seed = 0;
     int g_numLabels = 64;
+    bool g_geodata = false;
     glm::vec2 g_lowerLeftCoords  {-12.f, 35.f};
     glm::vec2 g_upperRightCoords {30.f, 72.f};
     std::unique_ptr<gloperate_text::FontFace> g_font;
@@ -114,10 +115,22 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
 
     for (int i = 0; i < g_numLabels; ++i)
     {
-        const auto string = citiesInArea.at(i).name;
+        auto string    = random_name(generator);
+        auto priority  = priorityDistribution(generator);
+        auto origin    = glm::vec2{x_distribution(generator), y_distribution(generator)};
+        auto fontsize  = 10.f + priority;
+        auto fontcolor = .5f - priority * .05f;
+
+        if (g_geodata)
+        {
+            string   = citiesInArea.at(i).name;
+            priority = citiesInArea.at(i).population / 50000;
+            origin   = citiesInArea.at(i).location;
+            fontsize  = 10.f + priority * .05f;
+            fontcolor = .8f + priority * 0.02f;
+        }
+
         const std::u32string unicode_string {string.begin(), string.end()};
-        const unsigned int priority = citiesInArea.at(i).additional / 50000;
-        const auto origin = citiesInArea.at(i).location;
 
         gloperate_text::GlyphSequence sequence;
         sequence.setString(unicode_string);
@@ -125,9 +138,9 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
         sequence.setLineWidth(400.f);
         sequence.setAlignment(gloperate_text::Alignment::LeftAligned);
         sequence.setLineAnchor(gloperate_text::LineAnchor::Ascent);
-        sequence.setFontSize(10.f + priority * .05f);
+        sequence.setFontSize(fontsize);
         sequence.setFontFace(font);
-        sequence.setFontColor(glm::vec4(glm::vec3(0.8f + priority * 0.02f), 1.f));
+        sequence.setFontColor(glm::vec4(glm::vec3(fontcolor), 1.f));
         sequence.setSuperSampling(gloperate_text::SuperSampling::Quincunx);
 
         // compute  transform matrix
@@ -249,15 +262,22 @@ void initialize()
     g_rectangleDrawable = std::unique_ptr<RectangleDrawable>(new RectangleDrawable(dataPath));
     g_renderer = std::unique_ptr<gloperate_text::GlyphRenderer>(new gloperate_text::GlyphRenderer);
     g_cloud = std::unique_ptr<gloperate_text::GlyphVertexCloud>(new gloperate_text::GlyphVertexCloud);
-    cities.loadCSV("/home/simon/Documents/infovis/2015_Uebung3_v2/data/simplemaps-worldcities-basic.csv", 1, 3, 2, 4);
 
+    // parameters specify which columns contain data to be loaded
+    cities.loadCSV(dataPath + "/geodata/cities.csv", 1, 2, 3, 4);
     auto texture = globjects::Texture::createDefault(GL_TEXTURE_2D);
     texture->ref();
-    auto raw = gloperate_text::RawFile("/home/simon/Documents/infovis/2015_Uebung3_v2/data/world-middle.8192.4096.rgba.ub.raw");
+    auto raw = gloperate_text::RawFile(dataPath + "/geodata/world.8192.4096.rgba.ub.raw");
     assert(raw.isValid());
     texture->image2D(0, GL_RGBA, glm::vec2(8192, 4096), 0, GL_RGBA, GL_UNSIGNED_BYTE, static_cast<const gl::GLvoid *>(raw.data()));
 
     g_quad = std::unique_ptr<ScreenAlignedQuad>(new ScreenAlignedQuad(texture));
+    std::cout
+        << "Press 1-9 to choose different layout algorithms" << std::endl
+        << "Press G to switch between random data and city data (must be downloaded beforehand)" << std::endl
+        << "Press + and - to increase/decrease number of features" << std::endl
+        << "Press F to toggle rendering of frames around labels" << std::endl
+        << "Press R to use a different seed for random data" << std::endl;
 }
 
 void deinitialize()
@@ -292,7 +312,10 @@ void draw()
     gl::glEnable(gl::GL_BLEND);
     gl::glBlendFunc(gl::GL_SRC_ALPHA, gl::GL_ONE_MINUS_SRC_ALPHA);
 
-    g_quad->draw();
+    if (g_geodata)
+    {
+        g_quad->draw();
+    }
 
     g_pointDrawable->render();
     if (g_frames_visible)
@@ -337,6 +360,11 @@ void key_callback(GLFWwindow * window, int key, int /*scancode*/, int action, in
         g_seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
         g_config_changed = true;
     }
+    else if (key == 'G' && action == GLFW_PRESS)
+    {
+        g_geodata = !g_geodata;
+        g_config_changed = true;
+    }
     else if (key == '-' && action == GLFW_PRESS)
     {
         g_numLabels = std::max(g_numLabels - 8, 8);
@@ -355,17 +383,12 @@ void key_callback(GLFWwindow * window, int key, int /*scancode*/, int action, in
 }
 
 
-int main(int argc, char * argv[])
+int main()
 {
 #ifdef SYSTEM_DARWIN
     globjects::critical() << "macOS does currently not support compute shader (OpenGL 4.3. required).";
     return 0;
 #endif
-
-    std::string dataPath = "";
-    if (argc >= 2)
-    {
-    }
 
     // Initialize GLFW
     if (!glfwInit())

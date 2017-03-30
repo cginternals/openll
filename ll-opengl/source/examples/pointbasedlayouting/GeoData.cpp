@@ -37,7 +37,7 @@ GeoData::~GeoData()
 {
 }
 
-void GeoData::loadCSV(const std::string & filename, int nameColumn, int latitudeColumn, int longitudeColumn, int additionalColumn)
+void GeoData::loadCSV(const std::string & filename, int nameColumn, int longitudeColumn, int latitudeColumn, int populationColumn)
 {
     std::ifstream file {filename};
     assert(file.is_open());
@@ -49,10 +49,10 @@ void GeoData::loadCSV(const std::string & filename, int nameColumn, int latitude
         if (data.size() != 9) continue;
         auto name = data[nameColumn];
         glm::vec2 location {std::stof(data[latitudeColumn]), std::stof(data[longitudeColumn])};
-        float additionalData = std::stof(data[additionalColumn]);
-        m_features.push_back({name, location, additionalData});
+        float populationData = std::stof(data[populationColumn]);
+        m_features.push_back({name, location, populationData});
     }
-    std::sort(m_features.begin(), m_features.end(), [](Feature a, Feature b) {return a.additional > b.additional; });
+    std::sort(m_features.begin(), m_features.end(), [](Feature a, Feature b) {return a.population > b.population; });
 }
 
 std::vector<Feature> GeoData::featuresInArea(glm::vec2 lowerLeft, glm::vec2 upperRight)
