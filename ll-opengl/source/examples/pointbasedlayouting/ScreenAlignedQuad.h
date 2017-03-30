@@ -23,7 +23,7 @@ public:
     ScreenAlignedQuad(globjects::Texture * texture);
 
     void setTextureArea(glm::vec2 lowerLeft, glm::vec2 upperRight);
-	void draw();
+	void render();
 
 protected:
     void initialize();

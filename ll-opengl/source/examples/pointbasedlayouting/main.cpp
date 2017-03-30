@@ -144,11 +144,10 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
         sequence.setFontColor(glm::vec4(glm::vec3(fontcolor), 1.f));
         sequence.setSuperSampling(gloperate_text::SuperSampling::Quincunx);
 
-        // compute  transform matrix
+        // compute transform matrix
         glm::mat4 transform;
         transform = glm::translate(transform, glm::vec3(origin, 0.f));
-        transform = glm::scale(transform, glm::vec3(1.f,
-            static_cast<float>(viewport.x) / viewport.y, 1.f));
+        transform = glm::scale(transform, glm::vec3(1.f, static_cast<float>(viewport.x) / viewport.y, 1.f));
         transform = glm::scale(transform, glm::vec3(1 / 300.f));
 
         const auto placement = gloperate_text::LabelPlacement{ glm::vec2{ 0.f, 0.f }
@@ -165,14 +164,14 @@ gloperate_text::GlyphSequence prepareHeadline(gloperate_text::FontFace * font, g
 {
 
     const std::u32string unicode_string {name.begin(), name.end()};
-    const auto origin = glm::vec2{-0.9f, 0.75f};
+    const auto origin = glm::vec2{-0.9f, 0.9f};
 
     gloperate_text::GlyphSequence sequence;
     sequence.setString(unicode_string);
     sequence.setWordWrap(false);
     sequence.setLineWidth(800.f);
     sequence.setAlignment(gloperate_text::Alignment::LeftAligned);
-    sequence.setLineAnchor(gloperate_text::LineAnchor::Descent);
+    sequence.setLineAnchor(gloperate_text::LineAnchor::Ascent);
     sequence.setFontSize(30.f);
     sequence.setFontFace(font);
     sequence.setFontColor(glm::vec4(0.4f, 0.4f, 1.0f, 1.f));
@@ -180,8 +179,7 @@ gloperate_text::GlyphSequence prepareHeadline(gloperate_text::FontFace * font, g
     // compute  transform matrix
     glm::mat4 transform;
     transform = glm::translate(transform, glm::vec3(origin, 0.f));
-    transform = glm::scale(transform, glm::vec3(1.f,
-        static_cast<float>(viewport.x) / viewport.y, 1.f));
+    transform = glm::scale(transform, glm::vec3(1.f, static_cast<float>(viewport.x) / viewport.y, 1.f));
     transform = glm::scale(transform, glm::vec3(1 / 300.f));
 
     sequence.setAdditionalTransform(transform);
@@ -272,7 +270,7 @@ void initialize()
     {
         auto texture = globjects::Texture::createDefault(GL_TEXTURE_2D);
         texture->ref();
-        texture->image2D(0, GL_RGBA, glm::ivec2(8192, 4096), 0, GL_RGBA, GL_UNSIGNED_BYTE, static_cast<const gl::GLvoid *>(raw.data()));
+        texture->image2D(0, GL_RGBA, glm::ivec2(8192, 4096), 0, GL_RGBA, GL_UNSIGNED_BYTE, static_cast<const GLvoid *>(raw.data()));
         g_quad = std::unique_ptr<ScreenAlignedQuad>(new ScreenAlignedQuad(texture));
     }
 
@@ -298,12 +296,14 @@ void draw()
     if (g_config_changed)
     {
         glViewport(0, 0, g_size.x, g_size.y);
-        auto width = (g_upperRightCoords - g_lowerLeftCoords).x;
-        auto height = width * g_size.y / g_size.x;
-        g_upperRightCoords.y = g_lowerLeftCoords.y + height;
-        auto texCoords = cities.textureCoordsForArea(g_lowerLeftCoords, g_upperRightCoords);
         if (g_geodata)
+        {
+            auto width = (g_upperRightCoords - g_lowerLeftCoords).x;
+            auto height = width * g_size.y / g_size.x;
+            g_upperRightCoords.y = g_lowerLeftCoords.y + height;
+            auto texCoords = cities.textureCoordsForArea(g_lowerLeftCoords, g_upperRightCoords);
             g_quad->setTextureArea(texCoords.first, texCoords.second);
+        }
         auto labels = prepareLabels(g_font.get(), g_size);
         runAndBenchmark(labels, layoutAlgorithms[g_algorithmID]);
         auto sequences = getSequences(labels);
@@ -313,24 +313,25 @@ void draw()
         prepareRectangleDrawable(labels, *g_rectangleDrawable);
     }
 
-    gl::glDepthMask(gl::GL_FALSE);
-    gl::glEnable(gl::GL_CULL_FACE);
-    gl::glEnable(gl::GL_BLEND);
-    gl::glBlendFunc(gl::GL_SRC_ALPHA, gl::GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     if (g_geodata)
     {
-        g_quad->draw();
+        g_quad->render();
     }
-
     g_pointDrawable->render();
     if (g_frames_visible)
+    {
         g_rectangleDrawable->render();
+    }
     g_renderer->render(*g_cloud);
 
-    gl::glDepthMask(gl::GL_TRUE);
-    gl::glDisable(gl::GL_CULL_FACE);
-    gl::glDisable(gl::GL_BLEND);
+    glDepthMask(GL_TRUE);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_BLEND);
 
     g_config_changed = false;
 }

@@ -106,7 +106,7 @@ void ScreenAlignedQuad::setTextureArea(glm::vec2 lowerLeft, glm::vec2 upperRight
     m_program->release();
 }
 
-void ScreenAlignedQuad::draw()
+void ScreenAlignedQuad::render()
 {
     if (m_texture)
 	{
