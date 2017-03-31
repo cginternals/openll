@@ -1,4 +1,6 @@
 
+#include <cassert>
+
 #include <openll/Typesetter.h>
 
 #include <glm/common.hpp>

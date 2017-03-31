@@ -11,6 +11,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/vec2.hpp>
+#include <glm/gtc/constants.hpp>
 
 #include <glbinding/gl/gl.h>
 #include <glbinding/gl/extension.h>
@@ -130,16 +131,16 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
     {
         auto string    = random_name(generator);
         auto priority  = priorityDistribution(generator);
-        auto origin    = glm::vec2{x_distribution(generator), y_distribution(generator)};
+        auto origin    = glm::vec3{x_distribution(generator), y_distribution(generator), 0.f};
         auto fontsize  = 10.f + priority;
         auto fontcolor = .5f - priority * .05f;
 
         if (g_3D)
         {
-            auto origin3D = glm::vec4{origin, z_distribution(generator), 1.f};
+            glm::vec4 origin3D {glm::vec2(origin), z_distribution(generator), 1.f};
             auto projected = g_mvp * origin3D;
             projected /= projected.w;
-            origin = glm::vec2(projected);
+            origin = glm::vec3(projected);
             fontsize  = 30.f - projected.z * 15.f;
             fontcolor = .8f * (std::exp(projected.z) - 1) / (glm::e<float>() - 1);
         }
@@ -148,7 +149,7 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
         {
             string    = citiesInArea.at(i).name;
             priority  = citiesInArea.at(i).population / 50000;
-            origin    = citiesInArea.at(i).location;
+            origin    = glm::vec3(citiesInArea.at(i).location, 0.f);
             fontsize  = 10.f + priority * .05f;
             fontcolor = .8f + priority * 0.02f;
         }
@@ -168,7 +169,7 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
 
         // compute transform matrix
         glm::mat4 transform;
-        transform = glm::translate(transform, glm::vec3(origin, 0.f));
+        transform = glm::translate(transform, origin);
         transform = glm::scale(transform, glm::vec3(1.f, static_cast<float>(viewport.x) / viewport.y, 1.f));
         transform = glm::scale(transform, glm::vec3(1 / 300.f));
 
@@ -176,7 +177,7 @@ std::vector<gloperate_text::Label> prepareLabels(gloperate_text::FontFace * font
             , gloperate_text::Alignment::LeftAligned, gloperate_text::LineAnchor::Baseline, true };
 
         sequence.setAdditionalTransform(transform);
-        labels.push_back({sequence, origin, priority, placement});
+        labels.push_back({sequence, glm::vec2(origin), priority, placement});
     }
     return labels;
 }
