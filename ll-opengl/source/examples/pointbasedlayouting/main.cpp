@@ -91,8 +91,6 @@ namespace
         {"Discrete Gradient Descent",                std::bind(gloperate_text::layout::discreteGradientDescent, _1, gloperate_text::layout::standard, glm::vec2(0.2f))},
         {"Simulated Annealing",                      std::bind(gloperate_text::layout::simulatedAnnealing,      _1, gloperate_text::layout::standard, glm::vec2(0.f))},
         {"Simulated Annealing with padding",         std::bind(gloperate_text::layout::simulatedAnnealing,      _1, gloperate_text::layout::standard, glm::vec2(0.2f))},
-        {"Simulated Annealing with selection",       std::bind(gloperate_text::layout::simulatedAnnealing,      _1, gloperate_text::layout::standard, glm::vec2(0.f))},
-        {"Simulated Annealing (padding, selection)", std::bind(gloperate_text::layout::simulatedAnnealing,      _1, gloperate_text::layout::standard, glm::vec2(0.2f))},
     };
 }
 
