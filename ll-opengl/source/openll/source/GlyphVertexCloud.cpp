@@ -8,6 +8,7 @@
 #include <glbinding/gl/boolean.h>
 
 #include <openll/GlyphSequence.h>
+#include <openll/Typesetter.h>
 
 
 namespace
@@ -109,12 +110,12 @@ gloperate_text::Drawable * GlyphVertexCloud::createDrawable()
     drawable->setAttributeBindingBuffer(4, vertexBuffer, 0, sizeof(Vertex));
     drawable->setAttributeBindingBuffer(5, vertexBuffer, 0, sizeof(Vertex));
 
-    drawable->setAttributeBindingFormat(0, 3, gl::GL_FLOAT,        gl::GL_FALSE, offset(&Vertex::origin));
-    drawable->setAttributeBindingFormat(1, 3, gl::GL_FLOAT,        gl::GL_FALSE, offset(&Vertex::vtan));
-    drawable->setAttributeBindingFormat(2, 3, gl::GL_FLOAT,        gl::GL_FALSE, offset(&Vertex::vbitan));
-    drawable->setAttributeBindingFormat(3, 4, gl::GL_FLOAT,        gl::GL_FALSE, offset(&Vertex::uvRect));
-    drawable->setAttributeBindingFormat(4, 4, gl::GL_FLOAT,        gl::GL_FALSE, offset(&Vertex::fontColor));
-    drawable->setAttributeBindingFormat(5, 1, gl::GL_UNSIGNED_INT, gl::GL_FALSE, offset(&Vertex::superSampling));
+    drawable->setAttributeBindingFormat(0, 3, gl::GL_FLOAT, gl::GL_FALSE, offset(&Vertex::origin));
+    drawable->setAttributeBindingFormat(1, 3, gl::GL_FLOAT, gl::GL_FALSE, offset(&Vertex::vtan));
+    drawable->setAttributeBindingFormat(2, 3, gl::GL_FLOAT, gl::GL_FALSE, offset(&Vertex::vbitan));
+    drawable->setAttributeBindingFormat(3, 4, gl::GL_FLOAT, gl::GL_FALSE, offset(&Vertex::uvRect));
+    drawable->setAttributeBindingFormat(4, 4, gl::GL_FLOAT, gl::GL_FALSE, offset(&Vertex::fontColor));
+    drawable->setAttributeBindingFormatI(5, 1, gl::GL_UNSIGNED_INT, offset(&Vertex::superSampling));
 
     drawable->enableAllAttributeBindings();
 
@@ -137,6 +138,37 @@ void GlyphVertexCloud::update(const Vertices & vertices)
 
     m_drawable->buffer(0)->setData(vertices, gl::GL_STATIC_DRAW);
     m_drawable->setSize(vertices.size());
+}
+
+void GlyphVertexCloud::updateWithSequences(const std::vector<GlyphSequence>& sequences, bool optimized)
+{
+    // get total number of glyphs
+    auto numGlyphs = size_t(0u);
+    for (const auto & sequence : sequences)
+        numGlyphs += sequence.depictableSize();
+
+    // prepare vertex cloud storage
+    m_vertices.resize(numGlyphs);
+
+    if (sequences.empty()) return;
+
+    FontFace * font = sequences[0].fontFace();
+
+    auto index = m_vertices.begin();
+    for (const auto & sequence : sequences)
+    {
+        assert(font == sequence.fontFace());
+        Typesetter::typeset(sequence, index);
+        index += sequence.depictableSize();
+    }
+
+
+    if(optimized)
+        optimize(sequences); // optimize and update drawable
+    else
+        update(); // update drawable
+
+    setTexture(font->glyphTexture());
 }
 
 void GlyphVertexCloud::optimize(const std::vector<GlyphSequence> & sequences)

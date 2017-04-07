@@ -1,4 +1,4 @@
-info face=font size=36 bold=0 italic=0 charset= unicode= stretchH=100 smooth=1 aa=1 padding=2.8,2.8,2.8,2.8 spacing=0,0 outline=0
+info face=opensansr36 size=36 bold=0 italic=0 charset= unicode= stretchH=100 smooth=1 aa=1 padding=2.8,2.8,2.8,2.8 spacing=0,0 outline=0
 common lineHeight=49.03 base=34 ascent=27.5 descent=-8.5 scaleW=512 scaleH=512 pages=1 packed=0
 page id=0 file="opensansr36.512.512.r.ub.raw"
 chars count=217

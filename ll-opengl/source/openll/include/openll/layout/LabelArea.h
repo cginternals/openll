@@ -3,6 +3,7 @@
 #include <glm/vec2.hpp>
 
 #include <openll/openll_api.h>
+#include <openll/layout/RelativeLabelPosition.h>
 
 namespace gloperate_text
 {
@@ -19,6 +20,7 @@ public:
 public:
     glm::vec2 origin;
     glm::vec2 extent;
+    RelativeLabelPosition position;
 };
 
 } // namespace gloperate_text

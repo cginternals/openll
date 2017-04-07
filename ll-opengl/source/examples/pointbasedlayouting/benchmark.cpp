@@ -14,10 +14,12 @@ std::vector<gloperate_text::LabelArea> computeLabelAreas(const std::vector<glope
     std::vector<gloperate_text::LabelArea> areas;
     for (const auto& label : labels)
     {
-        if (!label.placement.display) continue;
         auto origin = label.pointLocation + label.placement.offset;
         auto extent = gloperate_text::Typesetter::extent(label.sequence);
-        areas.push_back({origin, extent});
+        const auto position = label.placement.display ?
+            gloperate_text::relativeLabelPosition(label.placement.offset, extent) :
+            gloperate_text::RelativeLabelPosition::Hidden;
+        areas.push_back({origin, extent, position});
     }
     return areas;
 }

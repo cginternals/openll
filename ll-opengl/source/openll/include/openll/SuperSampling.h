@@ -6,7 +6,7 @@ namespace gloperate_text
 {
 
 
-enum class SuperSampling : unsigned char
+enum class SuperSampling : unsigned int
 {
     None     = 0u,
     Grid1x3  = 1u,

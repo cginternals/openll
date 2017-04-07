@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include <openll/openll_api.h>
+
 
 namespace gloperate_text
 {
@@ -18,7 +20,7 @@ namespace gloperate_text
 *    texture, the file does not provide this information. To create raw textures, you can use
 *    for example glraw.
 */
-class RawFile
+class OPENLL_API RawFile
 {
 public:
     RawFile(const std::string & filePath);

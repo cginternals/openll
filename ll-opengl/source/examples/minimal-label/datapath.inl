@@ -1,5 +1,6 @@
 
 #include <string>
+#include <algorithm>
 
 #include <cpplocate/cpplocate.h>
 #include <cpplocate/ModuleInfo.h>

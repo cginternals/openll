@@ -10,13 +10,14 @@
 #include <globjects/globjects.h>
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/vec2.hpp>
 
 #include <openll/GlyphRenderer.h>
 #include <openll/FontLoader.h>
-#include <openll/stages/GlyphPreparationStage.h>
 
 #include <openll/FontFace.h>
 #include <openll/GlyphSequence.h>
+#include <openll/GlyphVertexCloud.h>
 #include <openll/Alignment.h>
 #include <openll/LineAnchor.h>
 
@@ -67,7 +68,7 @@ void glInitialize()
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 }
 
-gloperate_text::GlyphVertexCloud prepareGlyphSequences(std::string string, gloperate_text::FontFace * font, glm::uvec2 viewport)
+std::vector<gloperate_text::GlyphSequence> prepareGlyphSequences(std::string string, gloperate_text::FontFace * font, glm::uvec2 viewport)
 {
     std::vector<gloperate_text::GlyphSequence> sequences;
 
@@ -104,7 +105,7 @@ gloperate_text::GlyphVertexCloud prepareGlyphSequences(std::string string, glope
     sequence.setAdditionalTransform(transform);
     sequences.push_back(sequence);
 
-    return gloperate_text::prepareGlyphs(sequences, true);
+    return sequences;
 }
 
 
@@ -146,7 +147,8 @@ int main()
         {
             std::cout << "updated viewport (" << g_viewport.x << ", " << g_viewport.y << ")" << std::endl;
             glViewport(0, 0, g_viewport.x, g_viewport.y);
-            cloud = prepareGlyphSequences(lorem, font, g_viewport);
+            auto sequences = prepareGlyphSequences(lorem, font, g_viewport);
+            cloud.updateWithSequences(sequences, true);
         }
 
         gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);

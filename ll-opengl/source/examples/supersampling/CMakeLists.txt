@@ -10,15 +10,15 @@ find_package(globjects REQUIRED)
 find_package(GLFW REQUIRED)
 
 
-# 
+#
 # Executable name and options
-# 
+#
 
 # Target name
-set(target pointbasedlayouting)
+set(target supersampling)
 
 # Exit here if required dependencies are not met
-message(STATUS "Plugin ${target}")
+message(STATUS "Example ${target}")
 
 
 #
@@ -26,25 +26,14 @@ message(STATUS "Plugin ${target}")
 #
 
 set(sources
-
     main.cpp
     datapath.inl
-    PointDrawable.cpp
-    PointDrawable.h
-    RectangleDrawable.cpp
-    RectangleDrawable.h
-    benchmark.cpp
-    benchmark.h
-    GeoData.cpp
-    GeoData.h
-    ScreenAlignedQuad.cpp
-    ScreenAlignedQuad.h
 )
 
 
-# 
+#
 # Create executable
-# 
+#
 
 # Build executable
 add_executable(${target}
@@ -55,9 +44,9 @@ add_executable(${target}
 add_executable(${META_PROJECT_NAME}::${target} ALIAS ${target})
 
 
-# 
+#
 # Project options
-# 
+#
 
 set_target_properties(${target}
     PROPERTIES
@@ -66,9 +55,9 @@ set_target_properties(${target}
 )
 
 
-# 
+#
 # Include directories
-# 
+#
 
 target_include_directories(${target}
     PRIVATE
@@ -79,9 +68,9 @@ target_include_directories(${target}
 )
 
 
-# 
+#
 # Libraries
-# 
+#
 
 target_link_libraries(${target}
     PRIVATE
@@ -94,9 +83,9 @@ target_link_libraries(${target}
 )
 
 
-# 
+#
 # Compile definitions
-# 
+#
 
 target_compile_definitions(${target}
     PRIVATE
@@ -106,9 +95,9 @@ target_compile_definitions(${target}
 )
 
 
-# 
+#
 # Compile options
-# 
+#
 
 target_compile_options(${target}
     PRIVATE
@@ -116,9 +105,9 @@ target_compile_options(${target}
 )
 
 
-# 
+#
 # Linker options
-# 
+#
 
 target_link_libraries(${target}
     PRIVATE
@@ -126,9 +115,9 @@ target_link_libraries(${target}
 )
 
 
-# 
+#
 # Deployment
-# 
+#
 
 # Executable
 install(TARGETS ${target}

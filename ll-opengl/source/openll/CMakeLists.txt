@@ -49,8 +49,6 @@ set(headers
     ${include_path}/Drawable.h
     ${include_path}/RawFile.h
 
-    ${include_path}/stages/GlyphPreparationStage.h
-
     ${include_path}/layout/layoutbase.h
     ${include_path}/layout/algorithm.h
     ${include_path}/layout/LabelArea.h
@@ -69,8 +67,6 @@ set(sources
 
     ${source_path}/Drawable.cpp
     ${source_path}/RawFile.cpp
-
-    ${source_path}/stages/GlyphPreparationStage.cpp
 
     ${source_path}/layout/layoutbase.cpp
     ${source_path}/layout/algorithm.cpp

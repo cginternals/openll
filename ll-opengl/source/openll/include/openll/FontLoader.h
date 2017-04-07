@@ -21,7 +21,7 @@ class OPENLL_API FontLoader
 public:
     FontLoader();
 
-    FontFace * load(const std::string & filename) const;
+    FontFace * load(const std::string & filename, bool headless = false) const;
 
 protected:
 

@@ -1,4 +1,6 @@
 
+#include <cassert>
+
 #include <openll/Typesetter.h>
 
 #include <glm/common.hpp>
@@ -143,7 +145,7 @@ glm::vec2 Typesetter::typeset(
     if (!dryrun)
     {
         anchor_transform(sequence, begin, vertex);
-        vertex_transform(sequence.transform(), sequence.fontColor(), begin, vertex);
+        vertex_transform(sequence.transform(), sequence.fontColor(), sequence.superSampling(), begin, vertex);
     }
 
     return extent_transform(sequence, extent);
@@ -300,6 +302,7 @@ inline void Typesetter::anchor_transform(
 inline void Typesetter::vertex_transform(
     const glm::mat4 & transform
 ,   const glm::vec4 & fontColor
+,   const SuperSampling & superSampling
 ,   const GlyphVertexCloud::Vertices::iterator & begin
 ,   const GlyphVertexCloud::Vertices::iterator & end)
 {
@@ -314,6 +317,7 @@ inline void Typesetter::vertex_transform(
         v->vtan   = glm::vec3(lr - ll);
         v->vbitan = glm::vec3(ul - ll);
         v->fontColor = fontColor;
+        v->superSampling = static_cast<GLuint>(superSampling);
     }
 }
 

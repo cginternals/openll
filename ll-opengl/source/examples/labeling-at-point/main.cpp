@@ -30,8 +30,8 @@
 #include <openll/GlyphRenderer.h>
 #include <openll/GlyphSequence.h>
 #include <openll/GlyphSequenceConfig.h>
+#include <openll/GlyphVertexCloud.h>
 #include <openll/LineAnchor.h>
-#include <openll/stages/GlyphPreparationStage.h>
 
 #include "datapath.inl"
 #include "PointDrawable.h"
@@ -89,7 +89,9 @@ gloperate_text::GlyphVertexCloud prepareGlyphSequences(const glm::vec2 origin, s
 	sequence.setAdditionalTransform(transform);
 	sequences.push_back(sequence);
 
-	return gloperate_text::prepareGlyphs(sequences, true);
+	gloperate_text::GlyphVertexCloud cloud;
+	cloud.updateWithSequences(sequences, true);
+	return cloud;
 }
 
 gloperate_text::GlyphVertexCloud preparePoint(const glm::vec2 origin, gloperate_text::FontFace * font) {
@@ -130,7 +132,9 @@ gloperate_text::GlyphVertexCloud preparePoint(const glm::vec2 origin, gloperate_
 
 	sequences.push_back(sequence);
 
-	return gloperate_text::prepareGlyphs(sequences, true);
+	gloperate_text::GlyphVertexCloud cloud;
+	cloud.updateWithSequences(sequences, true);
+	return cloud;
 }
 
 

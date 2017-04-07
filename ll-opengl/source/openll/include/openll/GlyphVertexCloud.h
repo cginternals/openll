@@ -6,6 +6,8 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
+#include <glbinding/gl/types.h>
+
 #include <globjects/base/ref_ptr.h>
 #include <globjects/Texture.h>
 
@@ -13,6 +15,7 @@
 
 #include <openll/openll_api.h>
 
+using namespace gl;
 
 namespace gloperate_text
 {
@@ -32,7 +35,7 @@ public:
         // vec2 lowerLeft and vec2 upperRight in glyph texture (uv)
         glm::vec4 uvRect;
         glm::vec4 fontColor;
-        unsigned int superSampling;
+        GLuint superSampling;
     };
 
     using Vertices = std::vector<Vertex>;
@@ -53,6 +56,7 @@ public:
     void update();
     // allows for volatile optimizations
     void update(const Vertices & vertices);
+    void updateWithSequences(const std::vector<GlyphSequence>& sequences, bool optimized);
 
     void optimize(const std::vector<GlyphSequence> & sequences);
 

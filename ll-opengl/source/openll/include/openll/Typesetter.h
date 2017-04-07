@@ -4,6 +4,7 @@
 #include <glm/fwd.hpp>
 
 #include <openll/GlyphVertexCloud.h>
+#include <openll/SuperSampling.h>
 
 #include <openll/openll_api.h>
 
@@ -75,6 +76,7 @@ private:
     static void vertex_transform(
         const glm::mat4 & sequence
     ,   const glm::vec4 & fontColor
+    ,   const SuperSampling & superSampling
     ,   const GlyphVertexCloud::Vertices::iterator & begin
     ,   const GlyphVertexCloud::Vertices::iterator & end);
 
