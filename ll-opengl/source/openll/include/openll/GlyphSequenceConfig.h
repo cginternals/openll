@@ -56,10 +56,6 @@ protected:
 
 	glm::vec4 m_margins;
 	float m_ppiScale;
-
-	//TODO: is it useful to set them here? Does not make sense for batch processing...
-	//glm::mat4 m_additionalTransform;
-	//std::u32string m_string;
 };
 
 }// namespace gloperate_text

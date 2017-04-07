@@ -34,6 +34,7 @@
 #include <openll/stages/GlyphPreparationStage.h>
 
 #include "datapath.inl"
+#include "PointDrawable.h"
 
 
 using namespace gl;
@@ -44,6 +45,9 @@ namespace
 	auto g_frame = 0u; //unused
 	auto g_size = glm::ivec2{};
 	auto g_size_changed = true;
+
+	std::vector<Point> g_points;
+	PointDrawable * g_pointDrawable = nullptr;
 
 	float g_time = 0.f;
 
@@ -133,7 +137,6 @@ gloperate_text::GlyphVertexCloud preparePoint(const glm::vec2 origin, gloperate_
 void annotatePoint(const glm::vec2 origin, const glm::vec2 offset, std::string string, gloperate_text::GlyphSequenceConfig config)
 {
 	g_vertexClouds.push_back(prepareGlyphSequences(origin + offset, string, config));
-	g_vertexClouds.push_back(preparePoint(origin, config.fontFace()));
 }
 
 
@@ -143,6 +146,8 @@ void initialize()
 
 	gloperate_text::FontLoader loader;
 	g_font = loader.load(dataPath + "/fonts/opensansr36/opensansr36.fnt");
+	
+	g_pointDrawable = new PointDrawable{ dataPath };
 
 	//initialize all used configs. There is no need to initialize them and never change them. It's just this example.
 	auto defaultConfig = gloperate_text::GlyphSequenceConfig(g_font);
@@ -160,6 +165,20 @@ void initialize()
 	configVertical.setLineWidth(0);
 	g_configs.push_back(configVertical);
 
+
+	//this is so bad hard-coded
+	std::vector<glm::vec2> points{glm::vec2(-0.2, 0.f), glm::vec2(0.2, -0.2), glm::vec2(-0.2, -0.6)
+		, glm::vec2(-0.8, 0.8), glm::vec2(-0.7, 0.4), glm::vec2(0.8, 0.8) };
+
+	for (auto point : points) {
+		g_points.push_back({
+			point,
+			glm::vec3(0.f, 0.f, 1.f), //color: blue
+			10.f * g_size.x / 1000 //size
+		});
+	}
+	g_pointDrawable->initialize(g_points);
+
 	glClearColor(1.f, 1.f, 1.f, 1.f);
 }
 
@@ -175,7 +194,6 @@ void draw(gloperate_text::GlyphRenderer &renderer)
 	if (g_size_changed)
 	{
 		glViewport(0, 0, g_size.x, g_size.y);
-
 
 		g_vertexClouds.clear();
 
@@ -197,12 +215,11 @@ void draw(gloperate_text::GlyphRenderer &renderer)
 	glm::vec3 myRotationAxis(0, 1, 0);
 	auto m = glm::mat4();
 	auto rotatedM = glm::rotate(m, 0.2f, myRotationAxis);
-	g_time+=0.005;
+	g_time+=0.004;
+
+	g_pointDrawable->render();
 
 	for (size_t i = 0; i < g_vertexClouds.size(); i++) {
-		//renderer.render(g_vertexClouds[i]);
-
-		//renderer.renderInWorld(g_vertexClouds[i], glm::lookAt(glm::vec3(0, 0, -10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)));
 		glm::vec3 myRotationAxis(0, 1, 0);
 		auto m = glm::mat4();
 		auto rotatedM = glm::rotate(m, g_time, myRotationAxis);
@@ -257,7 +274,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Create a context and, if valid, make it current
-	GLFWwindow * window = glfwCreateWindow(640, 480, "ll-opengl | labeling-at-point", nullptr, nullptr);
+	GLFWwindow * window = glfwCreateWindow(1000, 1000, "ll-opengl | labeling-at-point", nullptr, nullptr);
 
 	if (!window)
 	{
