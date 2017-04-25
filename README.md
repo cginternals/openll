@@ -42,11 +42,12 @@ For efficient label rendering *OpenLL* uses texture atlases of distance maps of 
 ### Typography
 
 <dl>
-  <dt>Grapheme</dt><dd>ToDo</dd>
-  <dt>Glyph</dt><dd>An elemental symbol intended to represent a readable character for the purposes of written communication.
+  <dt>Character</dt><dd>Abstract idea of a smallest readable component with semantic value in written language.</dd>
+  <dt>Grapheme</dt><dd>Term intended to designate a unit of a writing system, parallel to phoneme and morpheme, but in practice used as a synonym for letter, diacritic, character, or sign. (taken from: https://de.wikipedia.org/wiki/Graphem#cite_note-DanielsBright1995:Glossar-11)</dd>
+  <dt>Glyph</dt><dd>An elemental symbol (graphical unit) intended to represent a readable character for the purposes of written communication.
   It is defined by a sub ... ToDo</dd>
-  <dt>Ligature</dt><dd>ToDo</dd>
-  <dt>Glyph Sequence</dt><dd>ToDo</dd>
+  <dt>Ligature</dt><dd>Two or more graphemes or glyphs are joined as a single glyph.</dd>
+  <dt>Glyph Sequence</dt><dd>Sequence of glyphs placed along the base line.</dd>
   <dt>Glyph Catalogue</dt><dd>ToDo</dd>
   <dt>Font Face</dt><dd>A collection of glyph-based  described by, e.g., font-size, line spacing, a glyph catalogue, as well as kerning information... ToDo</dd>
 </dl>
@@ -54,10 +55,10 @@ For efficient label rendering *OpenLL* uses texture atlases of distance maps of 
 ### Typesetting
 <dl>
   <dt>Kerning</dt><dd>ToDo</dd>
-  <dt>Base Line</dt><dd>ToDo</dd>
+  <dt>Base Line</dt><dd>Line or spine along which glyphs are placed in a glyph sequence. Descending glyphs (such as 'p') extend below the base line.</dd>
   <dt>Advance</dt><dd>ToDo</dd>
   <dt>Anchor</dt><dd>ToDo</dd>
-  <dt>Alignment</dt><dd>ToDo</dd>
+  <dt>Alignment</dt><dd>Setting of text flow along the maximum extent of the base line, e.g. centered, left, right, block.</dd>
   <dt>...</dt><dd>ToDo</dd>
   <dt>Typesetting</dt><dd>ToDo</dd>
 </dl>
