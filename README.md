@@ -88,8 +88,8 @@ For efficient label rendering *OpenLL* uses texture atlases of distance maps of 
 <dl>
   <dt>Renderer</dt><dd>ToDo</dd>
   <dt>Attributed Vertex Cloud</dt><dd>ToDo</dd>
-  <dt>Super Sampling</dt><dd>ToDo</dd>
-  <dt>Back-face Culling</dt><dd>ToDo</dd>
-  <dt>Texture Array</dt><dd>ToDo page...</dd>
+  <dt>Super Sampling</dt><dd>spatial anti-aliasing method to make jagged glyph edges appear smoother. For each output pixel, multiple samples at higher resolution are processed to calculate the average value for that pixel. The number of samples influences the quality.</dd>
+  <dt>Back-face Culling</dt><dd>When activated, the back-faces are not rendered, i.e. Glyphs are not visible when the viewer would see them from behind. If culling is not active, the viewer would see mirrored glyphs.</dd>
+  <dt>Texture Array</dt><dd>ToDo page... Texture Array <-> OpenGL Array Texture (mipmap)?</dd>
   <dt>Sub Texture</dt><dd>ToDo</dd>
 </dl>
