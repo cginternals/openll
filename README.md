@@ -55,13 +55,13 @@ For efficient label rendering *OpenLL* uses texture atlases of distance maps of 
 
 ### Typesetting
 <dl>
-  <dt>Kerning</dt><dd>ToDo</dd>
+  <dt>Kerning</dt><dd>process of adjusting the spacing between two glyphs to achieve a visually pleasing result. The kerning value depends on each glyph pair and can be positive (larger spacing) or negative (smaller spacing). As opposed to kerning, the term tracking (letter-spacing) means adjusting the spacing uniformly and independently of the affected glyphs.</dd>
   <dt>Baseline</dt><dd>Line or spine along which glyphs are placed in a glyph sequence. Descending glyphs (such as 'p') extend below the baseline.</dd>
   <dt>Advance</dt><dd>ToDo</dd>
   <dt>Anchor</dt><dd>ToDo</dd>
   <dt>Alignment</dt><dd>Setting of text flow along the maximum extent of the baseline, e.g. centered, left, right, block.</dd>
   <dt>...</dt><dd>ToDo</dd>
-  <dt>Typesetting</dt><dd>ToDo</dd>
+  <dt>Typesetting</dt><dd>composition of text; arranging glyphs according to a font</dd>
 </dl>
 
 ### Positioning and Layouting
