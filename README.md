@@ -1,13 +1,33 @@
 # OpenLL
 
-Open Label Library is an Open Source, MIT licensed API specification for high performance label (glyphs, text, etc) rendering in 2D and 3D graphics environments. 
+Open Label Library is an Open Source, MIT licensed API specification for high performance label (glyphs, text, etc) rendering in 2D and 3D graphics environments.
+
+Until first approval, a [language-agnostic API](https://github.com/scheibel/openll-api) is externally maintained.
+
+OpenLL was initially published on the [22nd International Conference on Information Visualisation](http://www.graphicslink.co.uk/) (iV 2018).
+
+* Daniel Limberger, Anne Gropler, Stefan Buschmann, Jürgen Döllner, and Benjamin Wasty: "OpenLL: an API for Dynamic 2D and 3D Labeling". Proceedings of the International Conference on Information Visualization 2018.
 
 
-# Overview
+## Overview
 
-1. [Terminology](#terminology)
-2. [Reference Implementations](#reference-implementations)
-3. [Tool Support](#tool-support)
+1. [Reference Implementations](#reference-implementations)
+2. [Tool Support](#tool-support)
+3. [Terminology](#terminology)
+4. [Usage](#usage)
+5. [Contributing](#contributing)
+
+
+## Reference Implementations
+
+Reference implementations of OpenLL are currently implemented in C++ using OpenGL and TypeScript using WebGL.
+The corresponding projects are [openll-cpp](https://github.com/cginternals/openll-cpp) for C++ and [webgl-operate](https://github.com/cginternals/webgl-operate) for TypeScript and web browsers. Further, [gloperate](https://github.com/cginternals/gloperate) provides an integration into a rendering system.
+
+
+## Tool Support
+
+To create font assets from font files required by OpenLL, we suggest to use the command line tool [llassetgen](https://github.com/cginternals/openll-asset-generator).
+
 
 
 ## Terminology
@@ -92,11 +112,23 @@ For efficient label rendering *OpenLL* uses texture atlases of distance maps of 
 </dl>
 
 
-## Reference Implementations
+## Usage
 
-openLL is currently implemented in C++ using OpenGL and TypeScript using WebGL.
-The corresponding projects are [openll-cpp](https://github.com/cginternals/openll-cpp) for C++ and [webgl-operate](https://github.com/cginternals/webgl-operate) for TypeScript and web browsers. Further, [gloperate](https://github.com/cginternals/gloperate) provides an integration into a rendering system.
+If you want to use OpenLL within your project, feel free to [contact us](contact@cginternals.com).
+For a quick-start, refer to our examples using OpenLL:
 
-## Tool Support
+* [C++](https://github.com/cginternals/openll-cpp/tree/master/source/examples/openll-example)
+* [TypeScript]()
+* [Multi-configuration Labeling](https://github.com/cginternals/openll/tree/master/ll-opengl/source/examples/labeling-at-point)
+* [Importance-based Labeling](https://github.com/cginternals/openll/tree/master/ll-opengl/source/examples/pointbasedlayouting)
 
-To create font assets from font files required by openll, we suggest to use the command line tool [llassetgen](https://github.com/cginternals/openll-asset-generator).
+
+## Contributing
+
+OpenLL is a community-driven API and we rely on community effort and feedback to provide a versatile and usable API. The following tasks are highly appreciated:
+
+* [Submit issue](https://github.com/cginternals/openll/issues/new) concerning the API
+* [Submit issue](https://github.com/cginternals/openll-cpp/issues/new) concerning the C++ reference implementation
+* [Submit issue](https://github.com/cginternals/webgl-operate/issues/new) concerning the Typescript reference implementation
+* [Submit API extension](https://github.com/scheibel/openll-api/issues/new) to the actual API
+* Provide additional documentation, tutorials, using projects
